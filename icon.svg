@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a1828"/>
+      <stop offset="100%" stop-color="#050d1a"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="80" fill="url(#bg)"/>
+  <!-- Water -->
+  <path d="M80 360 Q160 390 256 360 T432 360 L432 390 Q336 420 256 390 T80 390 Z" fill="#1a3258" opacity="0.6"/>
+  <path d="M80 380 Q160 410 256 380 T432 380 L432 410 Q336 440 256 410 T80 410 Z" fill="#1a3258"/>
+  <!-- Ship Hull -->
+  <path d="M140 220 L372 220 L392 340 L120 340 Z" fill="#4a5a6e"/>
+  <path d="M140 220 L372 220 L372 240 L140 240 Z" fill="#6b7d8f"/>
+  <!-- Ship Bridge -->
+  <rect x="220" y="140" width="72" height="80" rx="4" fill="#8a9bad"/>
+  <rect x="236" y="160" width="40" height="20" fill="#0a1828"/>
+  <!-- Crosshair -->
+  <circle cx="256" cy="180" r="40" fill="none" stroke="#ffb627" stroke-width="8"/>
+  <line x1="256" y1="120" x2="256" y2="220" stroke="#ffb627" stroke-width="8"/>
+  <line x1="196" y1="180" x2="316" y2="180" stroke="#ffb627" stroke-width="8"/>
+  <!-- Gun -->
+  <rect x="250" y="100" width="12" height="30" fill="#ffb627"/>
+</svg>

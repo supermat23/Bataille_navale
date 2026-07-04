@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Bataille Navale — Opération Tempête</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#050d1a">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #050d1a; --bg-2: #0a1828; --surface: #0e1f38; --surface-2: #142c4a; --surface-3: #1c3a5e; --water: #1a3258; --water-2: #0f2240; --water-3: #081832; --ship: #4a5a6e; --ship-2: #6b7d8f; --ship-3: #8a9bad; --accent: #ffb627; --accent-2: #ff8a00; --accent-glow: rgba(255, 182, 39, 0.5); --hit: #ff3d2e; --hit-2: #ff6b3a; --hit-glow: rgba(255, 61, 46, 0.6); --miss: #4a7fa7; --miss-2: #2a5a7f; --success: #4ade80; --text: #e6eef7; --text-dim: #8aa3c0; --text-mute: #5a7090; --border: rgba(255, 182, 39, 0.15); --border-strong: rgba(255, 182, 39, 0.4); --r-common: #38bdf8; --r-rare: #ffb627; --r-epic: #ff3d2e; --r-legend: #c084fc; }
+  body.theme-p1 { --accent: #38bdf8; --accent-2: #0ea5e9; --accent-glow: rgba(56, 189, 248, 0.5); --border: rgba(56, 189, 248, 0.15); --border-strong: rgba(56, 189, 248, 0.4); }
+  body.theme-p2 { --accent: #f471b5; --accent-2: #db2777; --accent-glow: rgba(244, 113, 181, 0.5); --border: rgba(244, 113, 181, 0.15); --border-strong: rgba(244, 113, 181, 0.4); }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: 'Rajdhani', sans-serif; min-height: 100vh; overflow-x: hidden; transition: background 0.5s ease; }
+  body { background: radial-gradient(ellipse at top, var(--accent-glow), transparent 50%), radial-gradient(ellipse at bottom right, rgba(255, 61, 46, 0.05), transparent 50%), linear-gradient(180deg, var(--bg-2) 0%, var(--bg) 100%); background-attachment: fixed; }
+  .font-display { font-family: 'Black Ops One', cursive; letter-spacing: 0.02em; }
+  .waves-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.5; }
+  .wave { position: absolute; left: -50%; right: -50%; height: 250px; background: radial-gradient(ellipse at center, transparent 0%, transparent 55%, rgba(26, 50, 88, 0.25) 65%, transparent 80%); animation: wave-move 25s linear infinite; }
+  .wave:nth-child(1) { top: 15%; animation-duration: 30s; } .wave:nth-child(2) { top: 45%; animation-duration: 40s; animation-direction: reverse; opacity: 0.6; } .wave:nth-child(3) { top: 75%; animation-duration: 35s; opacity: 0.8; }
+  @keyframes wave-move { 0% { transform: translateX(-15%) translateY(0); } 50% { transform: translateX(5%) translateY(-15px); } 100% { transform: translateX(-15%) translateY(0); } }
+  .bubble { position: fixed; bottom: -20px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), rgba(74,127,167,0.1)); pointer-events: none; z-index: 1; animation: bubble-rise linear infinite; }
+  @keyframes bubble-rise { 0% { transform: translateY(0) translateX(0); opacity: 0; } 10% { opacity: 0.6; } 90% { opacity: 0.4; } 100% { transform: translateY(-110vh) translateX(40px); opacity: 0; } }
+  .screen { position: relative; z-index: 10; }
+  .grid-board { display: grid; grid-template-columns: 20px repeat(10, 1fr); grid-template-rows: 20px repeat(10, 1fr); gap: 2px; background: var(--surface-2); padding: 5px; border-radius: 8px; border: 1px solid var(--border-strong); box-shadow: 0 0 0 1px rgba(0,0,0,0.4) inset, 0 20px 60px rgba(0,0,0,0.5), 0 0 40px var(--accent-glow); aspect-ratio: 1; width: 100%; max-width: min(95vw, 560px); margin: 0 auto; }
+  .grid-label { display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; user-select: none; }
+  .cell { background: var(--water); position: relative; cursor: pointer; transition: background 0.15s ease, transform 0.1s ease; border-radius: 2px; overflow: hidden; min-height: 0; min-width: 0; }
+  .cell::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 50%, rgba(0,0,0,0.15) 100%); pointer-events: none; }
+  .cell:hover:not(.cell-hit):not(.cell-miss):not(.cell-disabled) { background: var(--water-2); transform: scale(0.97); }
+  .cell-ship { background: linear-gradient(135deg, var(--ship-2) 0%, var(--ship) 50%, var(--ship-2) 100%); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.15); }
+  .cell-ship::after { content: ''; position: absolute; inset: 2px; background: repeating-linear-gradient(90deg, transparent 0, transparent 6px, rgba(0,0,0,0.15) 6px, rgba(0,0,0,0.15) 7px); border-radius: 1px; pointer-events: none; }
+  .cell-hit { background: radial-gradient(circle at center, var(--hit-2) 0%, var(--hit) 40%, #8a1a14 100%); cursor: default; animation: hit-flash 0.5s ease-out; }
+  .cell-hit::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.5) 0%, transparent 30%), repeating-conic-gradient(from 0deg, rgba(255,255,255,0.15) 0deg 10deg, transparent 10deg 20deg); animation: hit-spin 4s linear infinite; }
+  @keyframes hit-flash { 0% { transform: scale(1.3); box-shadow: 0 0 30px var(--hit-glow); } 50% { transform: scale(0.9); } 100% { transform: scale(1); box-shadow: 0 0 8px var(--hit-glow); } }
+  @keyframes hit-spin { to { transform: rotate(360deg); } }
+  .cell-miss { background: var(--water-3); cursor: default; }
+  .cell-miss::after { content: ''; position: absolute; top: 50%; left: 50%; width: 6px; height: 6px; background: var(--miss); border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 6px var(--miss-2); animation: miss-ripple 0.6s ease-out; }
+  @keyframes miss-ripple { 0% { transform: translate(-50%, -50%) scale(3); opacity: 0; } 50% { opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+  .cell-preview { background: var(--accent); opacity: 0.4; box-shadow: inset 0 0 0 1px var(--accent-2); }
+  .cell-preview-invalid { background: var(--hit); opacity: 0.4; }
+  .cell-weapon-preview { background: var(--accent); opacity: 0.5; box-shadow: inset 0 0 0 2px var(--accent-2); animation: weapon-pulse 0.8s ease-in-out infinite; }
+  @keyframes weapon-pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.7; } }
+  .cell-sonar-revealed { background: rgba(255, 182, 39, 0.15); box-shadow: inset 0 0 0 1px rgba(255, 182, 39, 0.4); }
+  .cell-ship-sunk { background: linear-gradient(135deg, #5a1a14 0%, #3a0a08 100%); animation: sunk-fade 1s ease-out; }
+  @keyframes sunk-fade { 0% { background: var(--hit); } 100% { background: linear-gradient(135deg, #5a1a14 0%, #3a0a08 100%); } }
+  .ship-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s ease; user-select: none; }
+  .ship-card:hover { border-color: var(--border-strong); background: var(--surface-3); }
+  .ship-card.active { border-color: var(--accent); background: rgba(255, 255, 255, 0.1); box-shadow: 0 0 20px var(--accent-glow); }
+  .ship-card.placed { opacity: 0.4; cursor: default; }
+  .ship-preview { display: flex; gap: 2px; }
+  .ship-preview-segment { width: 14px; height: 14px; background: linear-gradient(135deg, var(--ship-2), var(--ship)); border-radius: 2px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2); }
+  .btn { padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent; background: var(--surface-2); color: var(--text); display: inline-flex; align-items: center; gap: 8px; font-family: 'Rajdhani', sans-serif; }
+  .btn:hover { background: var(--surface-3); transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-primary { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%); color: #1a0f00; border-color: var(--accent); box-shadow: 0 4px 20px var(--accent-glow); }
+  .btn-primary:hover { box-shadow: 0 6px 30px var(--accent-glow); transform: translateY(-2px); }
+  .btn-secondary { background: transparent; border-color: var(--border-strong); color: var(--accent); }
+  .btn-secondary:hover { background: rgba(255, 255, 255, 0.05); border-color: var(--accent); }
+  .btn-danger { background: transparent; border-color: rgba(255, 61, 46, 0.4); color: var(--hit); }
+  .btn-danger:hover { background: rgba(255, 61, 46, 0.1); border-color: var(--hit); }
+  .difficulty-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; }
+  .difficulty-card:hover { border-color: var(--border-strong); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+  .difficulty-card.selected { border-color: var(--accent); background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), transparent); box-shadow: 0 0 30px var(--accent-glow); }
+  .difficulty-rank { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+  .weapon-toggle { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s ease; text-align: center; position: relative; }
+  .weapon-toggle:hover { border-color: var(--border-strong); background: var(--surface-2); }
+  .weapon-toggle.enabled { border-color: var(--accent); background: rgba(255, 255, 255, 0.05); }
+  .weapon-toggle.disabled { opacity: 0.5; }
+  .weapons-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+  .weapon-btn { background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: 4px 2px; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; position: relative; }
+  .weapon-btn:hover:not(.weapon-disabled) { border-color: var(--border-strong); background: var(--surface-3); transform: translateY(-2px); }
+  .weapon-btn.active { border-color: var(--accent); background: rgba(255, 255, 255, 0.1); box-shadow: 0 0 15px var(--accent-glow); }
+  .weapon-btn.weapon-disabled { opacity: 0.4; cursor: not-allowed; }
+  .weapon-icon { width: 24px; height: 24px; color: var(--accent); }
+  .pa-cost { position: absolute; top: 2px; right: 2px; background: var(--accent); color: #1a0f00; font-size: 9px; font-weight: 700; padding: 1px 4px; border-radius: 4px; min-width: 16px; text-align: center; line-height: 1.2; }
+  .pa-cost.free { background: var(--success); color: #052; }
+  .pa-badge { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, var(--accent-glow), transparent); border: 1px solid var(--border-strong); padding: 8px 14px; border-radius: 20px; font-weight: 600; }
+  .log-entry { padding: 8px 12px; border-left: 3px solid; border-radius: 0 4px 4px 0; font-size: 13px; animation: log-slide 0.3s ease-out; margin-bottom: 4px; }
+  .log-entry.log-player { border-left-color: var(--accent); background: linear-gradient(90deg, var(--accent-glow), transparent); }
+  .log-entry.log-bot { border-left-color: #38bdf8; background: linear-gradient(90deg, rgba(56, 189, 248, 0.08), rgba(56, 189, 248, 0.02)); }
+  .log-entry.log-hit { border-left-color: var(--hit); }
+  .log-entry.log-miss { border-left-color: var(--miss); opacity: 0.7; }
+  .log-entry.log-sunk { border-left-color: #c084fc; background: linear-gradient(90deg, rgba(192, 132, 252, 0.18), rgba(192, 132, 252, 0.05)); box-shadow: 0 0 15px rgba(192, 132, 252, 0.15); }
+  @keyframes log-slide { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  .toast { background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 8px; padding: 12px 18px; margin-bottom: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); animation: toast-in 0.3s ease-out; backdrop-filter: blur(10px); min-width: 240px; max-width: 340px; }
+  .toast.toast-success { border-color: var(--success); } .toast.toast-danger { border-color: var(--hit); } .toast.toast-info { border-color: var(--accent); }
+  .toast.toast-achievement { border-color: var(--accent); background: linear-gradient(135deg, var(--accent-glow), var(--surface-2)); box-shadow: 0 8px 30px var(--accent-glow); }
+  @keyframes toast-in { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  @keyframes toast-out { to { transform: translateX(120%); opacity: 0; } }
+  .stat-block { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; text-align: center; }
+  @keyframes victory-glow { 0%, 100% { text-shadow: 0 0 20px var(--accent), 0 0 40px var(--accent-2); } 50% { text-shadow: 0 0 30px var(--accent), 0 0 60px var(--accent-2), 0 0 80px var(--accent); } }
+  @keyframes defeat-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
+  .victory-text { animation: victory-glow 2s ease-in-out infinite; } .defeat-text { animation: defeat-shake 0.5s ease-in-out 3; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; } ::-webkit-scrollbar-track { background: var(--surface); } ::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 4px; }
+  .cell-flash { animation: cell-flash-anim 0.4s ease-out; }
+  @keyframes cell-flash-anim { 0% { box-shadow: 0 0 0 0 var(--accent); } 50% { box-shadow: 0 0 20px 4px var(--accent-glow); } 100% { box-shadow: 0 0 0 0 transparent; } }
+  .title-pulse { animation: title-pulse 4s ease-in-out infinite; }
+  @keyframes title-pulse { 0%, 100% { filter: drop-shadow(0 0 20px rgba(255, 182, 39, 0.3)); } 50% { filter: drop-shadow(0 0 30px rgba(255, 182, 39, 0.6)); } }
+  .tab-btn { padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; transition: all 0.2s ease; background: transparent; color: var(--text-dim); border: 1px solid transparent; font-family: 'Rajdhani', sans-serif; }
+  .tab-btn.active { color: var(--accent); border-color: var(--border-strong); background: rgba(255, 255, 255, 0.05); }
+  .tab-btn:hover { color: var(--text); }
+  .ability-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease; position: relative; overflow: hidden; }
+  .ability-card.available { cursor: pointer; } .ability-card.available:hover { border-color: var(--border-strong); background: var(--surface-3); }
+  .ability-card.active { border-color: var(--accent); background: rgba(255, 255, 255, 0.1); box-shadow: 0 0 15px var(--accent-glow); }
+  .ability-card.sunk { opacity: 0.3; border-color: rgba(255, 61, 46, 0.3); }
+  .ability-card.cooldown { opacity: 0.7; }
+  .ability-icon { width: 32px; height: 32px; border-radius: 6px; background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .achievement-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; gap: 10px; align-items: flex-start; transition: all 0.2s ease; position: relative; }
+  .achievement-card.unlocked { background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), var(--surface)); }
+  .achievement-card.locked { opacity: 0.5; }
+  .achievement-icon { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; position: relative; }
+  .achievement-icon.rarity-common { background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); }
+  .achievement-icon.rarity-rare { background: rgba(255, 182, 39, 0.15); border: 1px solid rgba(255, 182, 39, 0.4); }
+  .achievement-icon.rarity-epic { background: rgba(255, 61, 46, 0.15); border: 1px solid rgba(255, 61, 46, 0.4); }
+  .achievement-icon.rarity-legend { background: rgba(192, 132, 252, 0.15); border: 1px solid rgba(192, 132, 252, 0.5); box-shadow: 0 0 15px rgba(192, 132, 252, 0.2); }
+  .rarity-badge { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+  .rarity-badge.rarity-common { background: rgba(56, 189, 248, 0.2); color: var(--r-common); }
+  .rarity-badge.rarity-rare { background: rgba(255, 182, 39, 0.2); color: var(--r-rare); }
+  .rarity-badge.rarity-epic { background: rgba(255, 61, 46, 0.2); color: var(--r-epic); }
+  .rarity-badge.rarity-legend { background: rgba(192, 132, 252, 0.2); color: var(--r-legend); }
+  .score-row { display: grid; grid-template-columns: 30px 1fr 60px 50px 50px; gap: 6px; padding: 10px; align-items: center; border-bottom: 1px solid var(--border); font-size: 12px; }
+  @media (min-width: 640px) { .score-row { grid-template-columns: 40px 1fr 80px 60px 60px; gap: 8px; padding: 10px 14px; font-size: 13px; } }
+  .score-row:hover { background: rgba(255, 255, 255, 0.03); }
+  .score-row.header { font-weight: 700; text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em; color: var(--text-dim); border-bottom: 2px solid var(--border-strong); }
+  .diff-badge { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+  .orientation-fab { position: fixed; bottom: 20px; right: 20px; z-index: 40; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #1a0f00; border: none; cursor: pointer; display: none; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; box-shadow: 0 4px 20px var(--accent-glow); transition: transform 0.2s ease; }
+  .orientation-fab:hover { transform: scale(1.1); }
+  .orientation-fab.visible { display: flex; }
+  .shield-indicator { position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; box-shadow: 0 0 10px rgba(74, 222, 128, 0.5); animation: shield-pulse 1.5s ease-in-out infinite; z-index: 2; }
+  @keyframes shield-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+  .name-input { background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 6px; padding: 10px 14px; color: var(--text); font-family: 'Rajdhani', sans-serif; font-size: 16px; width: 100%; outline: none; transition: all 0.2s ease; }
+  .name-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+  #pass-screen-2p { position: fixed; inset: 0; z-index: 200; background: #050d1a; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 1rem; }
+  .pass-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%); background-size: 100% 4px; animation: scanline 2s linear infinite; pointer-events: none; }
+  @keyframes scanline { 0% { background-position: 0 0; } 100% { background-position: 0 100vh; } }
+  .online-spinner { border: 4px solid rgba(255, 255, 255, 0.1); border-top: 4px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  @media (max-width: 768px) { .grid-board { grid-template-columns: 18px repeat(10, 1fr); grid-template-rows: 18px repeat(10, 1fr); gap: 1px; padding: 3px; } .grid-label { font-size: 9px; } }
+</style>
+</head>
+<body class="theme-p1">
+<div class="waves-bg"><div class="wave"></div><div class="wave"></div><div class="wave"></div></div>
+<canvas id="particles-canvas" class="fixed inset-0 pointer-events-none" style="z-index: 100;"></canvas>
+<div id="toast-container" class="fixed top-4 right-4 z-50"></div>
+<button id="orientation-fab" class="orientation-fab" title="Pivoter l'orientation">↔</button>
+<div id="pass-screen-2p"><div class="pass-overlay"></div><div class="relative z-10 text-center p-4"><div class="text-6xl mb-4" id="pass-icon">📡</div><h2 class="font-display text-2xl md:text-3xl mb-2" id="pass-title">TRANSMISSION SÉCURISÉE</h2><p class="text-slate-400 mb-6 text-sm md:text-base" id="pass-msg">Passez l'appareil à l'adversaire</p><div id="pass-action-card" class="bg-slate-800/80 border border-slate-700 rounded-lg p-4 mb-6 max-w-xs mx-auto hidden"><div class="text-xs text-slate-400 uppercase tracking-widest mb-1">Dernier tir entrant</div><div class="text-lg font-bold text-white" id="pass-action-text">B4 - TOUCHÉ</div></div><button id="pass-reveal-btn" class="btn btn-primary text-lg py-4 px-8">Décrypter la grille</button></div></div>
+
+<div id="menu-screen" class="screen min-h-screen flex flex-col items-center justify-center p-4 md:p-8"><div class="max-w-5xl w-full"><div class="text-center mb-8"><div class="inline-block mb-2 px-4 py-1 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-400 text-xs font-bold tracking-widest uppercase"><span class="inline-block w-2 h-2 rounded-full bg-amber-400 mr-2 animate-pulse"></span>Système naval — En ligne</div><h1 class="font-display text-4xl md:text-7xl title-pulse mb-3" style="color: var(--text);">BATAILLE <span style="color: var(--accent);">NAVALE</span></h1><p class="text-lg md:text-xl text-slate-400 font-light tracking-wider uppercase">Opération Tempête</p></div><div class="flex gap-2 justify-center mb-6 flex-wrap"><button class="tab-btn active" data-tab="play">Jouer</button><button class="tab-btn" data-tab="scores">Scores</button><button class="tab-btn" data-tab="achievements">Succès</button></div><div id="tab-play" class="tab-content"><div class="mb-6 flex justify-center gap-2 flex-wrap"><button class="btn btn-primary mode-btn active" data-mode="1p">Solo</button><button class="btn btn-secondary mode-btn" data-mode="2p">2 Joueurs (Local)</button><button class="btn btn-secondary mode-btn" data-mode="online">En Ligne (2 Appareils)</button></div><div id="1p-setup"><div class="mb-6"><h2 class="text-center text-sm font-bold tracking-widest uppercase text-slate-400 mb-3">Nom du commandant</h2><div class="max-w-xs mx-auto"><input type="text" id="player-name-input" class="name-input text-center" placeholder="Votre nom..." maxlength="20" value=""></div></div><div class="mb-6"><h2 class="text-center text-sm font-bold tracking-widest uppercase text-slate-400 mb-4">Choisissez votre adversaire</h2><div class="grid grid-cols-2 lg:grid-cols-4 gap-3" id="difficulty-grid"></div></div></div><div id="2p-setup" class="hidden mb-6"><div class="grid grid-cols-2 gap-4 max-w-md mx-auto"><div><label class="block text-xs text-cyan-400 font-bold uppercase mb-2">Joueur 1</label><input type="text" id="p1-name-input" class="name-input text-center" placeholder="Nom..." maxlength="20" value="Amiral Cyan"></div><div><label class="block text-xs text-pink-400 font-bold uppercase mb-2">Joueur 2</label><input type="text" id="p2-name-input" class="name-input text-center" placeholder="Nom..." maxlength="20" value="Capitaine Magenta"></div></div></div><div id="online-setup" class="hidden mb-6"><div id="online-menu" class="max-w-md mx-auto text-center"><p class="text-slate-400 mb-4 text-sm">Affrontez un ami à distance via une connexion directe entre vos deux appareils.</p><div class="flex gap-3 justify-center"><button id="online-host-btn" class="btn btn-primary">Héberger une partie</button><button id="online-join-btn" class="btn btn-secondary">Rejoindre une partie</button></div></div><div id="online-host-view" class="hidden max-w-md mx-auto text-center bg-slate-900/40 border border-amber-500/15 rounded-xl p-6 backdrop-blur-sm"><h3 class="font-display text-xl text-amber-400 mb-4">En attente de l'adversaire...</h3><div class="online-spinner mb-4"></div><p class="text-slate-400 text-sm mb-2">Code de partie :</p><div class="font-display text-4xl text-white tracking-widest mb-4" id="online-code-display">----</div><p class="text-slate-500 text-xs">Communiquez ce code à votre adversaire.</p><button id="online-cancel-host-btn" class="btn btn-danger text-xs mt-4">Annuler</button></div><div id="online-join-view" class="hidden max-w-md mx-auto text-center bg-slate-900/40 border border-amber-500/15 rounded-xl p-6 backdrop-blur-sm"><h3 class="font-display text-xl text-amber-400 mb-4">Rejoindre une partie</h3><p class="text-slate-400 text-sm mb-2">Entrez le code de partie :</p><input type="text" id="online-code-input" class="name-input text-center text-2xl tracking-widest font-bold uppercase" placeholder="XXXX" maxlength="4"><button id="online-connect-btn" class="btn btn-primary w-full mt-4">Se connecter</button><div id="online-connecting" class="hidden"><div class="online-spinner mt-4"></div><p class="text-slate-400 text-sm mt-2">Connexion en cours...</p></div><button id="online-cancel-join-btn" class="btn btn-danger text-xs mt-4">Annuler</button></div></div><div class="mb-6"><h2 class="text-center text-sm font-bold tracking-widest uppercase text-slate-400 mb-3">Arsenal — armes activées</h2><div class="grid grid-cols-3 md:grid-cols-5 gap-2" id="weapon-toggle-grid"></div></div><div class="mb-6"><div class="flex items-center justify-between mb-3 max-w-3xl mx-auto"><h2 class="text-sm font-bold tracking-widest uppercase text-slate-400">Capacités des navires</h2><label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="abilities-toggle" checked class="w-4 h-4 accent-amber-500"><span class="text-sm text-slate-300">Activées</span></label></div><div class="grid grid-cols-5 gap-2 max-w-3xl mx-auto" id="ability-info-grid"></div></div><div class="text-center" id="start-game-btn-container"><button id="start-btn" class="btn btn-primary text-lg py-4 px-8"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 3l14 9-14 9V3z"/></svg>Lancer la mission</button></div></div><div id="tab-scores" class="tab-content hidden"><div class="bg-slate-900/40 border border-amber-500/15 rounded-xl p-4 md:p-6 backdrop-blur-sm"><div class="flex items-center justify-between mb-4"><h2 class="font-display text-2xl text-amber-400">Tableau des scores</h2><button id="clear-scores-btn" class="btn btn-danger text-xs">Effacer</button></div><div id="scores-list"></div></div></div><div id="tab-achievements" class="tab-content hidden"><div class="bg-slate-900/40 border border-amber-500/15 rounded-xl p-4 md:p-6 backdrop-blur-sm"><div class="flex items-center justify-between mb-4 flex-wrap gap-2"><h2 class="font-display text-2xl text-amber-400">Succès</h2><div class="text-sm text-slate-400"><span id="ach-progress" class="text-amber-400 font-bold">0</span> / <span id="ach-total">118</span> débloqués</div></div><div class="w-full h-2 bg-slate-800 rounded-full mb-4 overflow-hidden"><div id="ach-bar" class="h-full bg-gradient-to-r from-cyan-500 via-amber-500 to-purple-500 transition-all duration-500" style="width: 0%"></div></div><div class="flex gap-2 mb-4 flex-wrap"><button class="ach-filter tab-btn active" data-filter="all">Tous</button><button class="ach-filter tab-btn" data-filter="common">Communs</button><button class="ach-filter tab-btn" data-filter="rare">Rares</button><button class="ach-filter tab-btn" data-filter="epic">Épiques</button><button class="ach-filter tab-btn" data-filter="legend">Légendaires</button></div><div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="achievements-grid"></div></div></div></div></div>
+
+<div id="placement-screen" class="screen min-h-screen p-4 md:p-8 hidden"><div class="max-w-6xl mx-auto"><div class="flex flex-wrap items-center justify-between gap-4 mb-6"><div><h2 class="font-display text-2xl md:text-3xl text-white">Déploiement de la flotte</h2><p class="text-slate-400 text-sm">Cliquez un navire puis sur la grille. <span class="text-amber-400 font-bold">R</span> ou bouton pour pivoter.</p></div><div class="flex gap-2 flex-wrap"><button id="rotate-btn" class="btn btn-secondary text-xs md:text-sm"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 4v5h5"/></svg>Pivoter</button><button id="random-place-btn" class="btn btn-secondary text-xs md:text-sm">Aléatoire</button><button id="clear-btn" class="btn btn-danger text-xs md:text-sm">Effacer</button></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400 mb-3">Navires à déployer</h3><div id="ships-list" class="space-y-2"></div><button id="confirm-placement-btn" class="btn btn-primary w-full mt-6 py-4 justify-center" disabled><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Confirmer le déploiement</button></div><div class="flex flex-col items-center"><div class="text-sm font-bold tracking-widest uppercase text-amber-400 mb-3 self-start">Votre grille</div><div id="placement-grid" class="grid-board"></div></div></div></div></div>
+
+<div id="combat-screen" class="screen min-h-screen p-2 md:p-8 hidden"><div class="max-w-7xl mx-auto"><div class="flex flex-wrap items-center justify-between gap-3 mb-4"><div><h2 class="font-display text-xl md:text-3xl text-white">Engagement</h2><p class="text-slate-400 text-xs md:text-sm" id="combat-subtitle">À vous de jouer, commandant.</p></div><div class="flex items-center gap-2 flex-wrap"><div class="pa-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="color: var(--accent);"><path d="M13 2L3 14h7v8l10-12h-7V2z"/></svg><span class="text-sm">PA :</span><span class="text-lg font-bold text-amber-400" id="player-pa">3</span></div><button id="orientation-combat-btn" class="btn btn-secondary text-xs" title="Changer l'orientation des tirs spéciaux"><span id="orient-display">↔ H</span></button><button id="surrender-btn" class="btn btn-danger text-xs">Abandonner</button></div></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-4"><div class="lg:col-span-8"><div class="flex flex-col items-center"><div class="flex items-center justify-between w-full max-w-xl mb-2"><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400">Grille ennemie</h3><span class="text-xs text-slate-400" id="enemy-ships-info">5 navires</span></div><div id="enemy-grid" class="grid-board"></div></div><div class="mt-4"><div class="flex items-center justify-between mb-2"><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400">Arsenal</h3></div><div id="weapons-list" class="weapons-grid"></div></div></div><div class="lg:col-span-4 space-y-4"><div class="flex flex-col items-center"><div class="flex items-center justify-between w-full mb-2"><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400">Votre flotte</h3><span class="text-xs text-slate-400" id="player-ships-info">5 navires</span></div><div id="player-grid" class="grid-board" style="max-width: 100%;"></div></div><div><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400 mb-2">Capacités</h3><div id="abilities-list" class="space-y-2"></div></div><div class="grid grid-cols-3 gap-2"><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Tirs</div><div class="text-xl font-bold text-white" id="stat-shots">0</div></div><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Touchés</div><div class="text-xl font-bold" style="color: var(--hit);" id="stat-hits">0</div></div><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Précis.</div><div class="text-xl font-bold text-amber-400" id="stat-acc">—</div></div></div><div><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400 mb-2">Journal</h3><div id="log-container" class="space-y-1 max-h-48 overflow-y-auto pr-1"></div></div></div></div></div></div>
+
+<div id="combat-screen-2p" class="screen min-h-screen p-2 md:p-8 hidden"><div class="max-w-xl mx-auto"><div class="flex items-center justify-between gap-3 mb-4"><div><h2 class="font-display text-xl md:text-2xl" id="p2p-title" style="color: var(--accent);">Joueur 1</h2><p class="text-slate-400 text-xs md:text-sm" id="p2p-subtitle">Grille de tir</p></div><div class="flex items-center gap-2 flex-wrap"><div class="pa-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="color: var(--accent);"><path d="M13 2L3 14h7v8l10-12h-7V2z"/></svg><span class="text-sm">PA :</span><span class="text-lg font-bold" id="p2p-pa" style="color: var(--accent);">3</span></div><button id="p2p-peek-btn" class="btn btn-secondary text-xs">Vision Flotte</button></div></div><div id="p2p-grid-container" class="mb-4"></div><div class="grid grid-cols-2 gap-4 mt-4"><div><h3 class="text-sm font-bold tracking-widest uppercase mb-2" style="color: var(--accent);">Arsenal</h3><div id="p2p-weapons-list" class="weapons-grid"></div></div><div><h3 class="text-sm font-bold tracking-widest uppercase mb-2" style="color: var(--accent);">Capacités</h3><div id="p2p-abilities-list" class="space-y-1.5"></div></div></div><div class="mt-4"><h3 class="text-sm font-bold tracking-widest uppercase mb-2" style="color: var(--accent);">Journal</h3><div id="p2p-log-container" class="space-y-1 max-h-32 overflow-y-auto pr-1"></div></div><div class="text-center mt-6"><button id="p2p-surrender-btn" class="btn btn-danger text-xs">Abandonner</button></div></div></div>
+
+<div id="end-screen" class="screen min-h-screen flex items-center justify-center p-4 hidden"><div class="max-w-3xl w-full text-center"><div id="end-icon" class="mx-auto mb-6 w-24 h-24 flex items-center justify-center"></div><h2 id="end-title" class="font-display text-4xl md:text-6xl mb-4"></h2><p id="end-subtitle" class="text-lg text-slate-400 mb-4"></p><div id="end-score-display" class="mb-6 hidden"><div class="text-sm text-slate-400 uppercase tracking-widest">Score</div><div class="font-display text-5xl text-amber-400" id="end-score">0</div></div><div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6" id="end-stats-grid"><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Tirs</div><div class="text-2xl font-bold text-white" id="end-shots">0</div></div><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Touchés</div><div class="text-2xl font-bold" style="color: var(--hit);" id="end-hits">0</div></div><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Précision</div><div class="text-2xl font-bold text-amber-400" id="end-acc">0%</div></div><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Coulés</div><div class="text-2xl font-bold" style="color: var(--success);" id="end-sunk">0</div></div></div><div id="end-achievements" class="mb-6"></div><div class="flex flex-wrap gap-3 justify-center"><button id="replay-btn" class="btn btn-primary"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 4v5h5"/></svg>Rejouer</button><button id="menu-btn" class="btn btn-secondary"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>Menu</button></div></div></div>
+
+<script>
+const GRID_SIZE = 10;
+const SHIPS = [{ id: 'carrier', name: 'Porte-avions', size: 5, symbol: 'P' }, { id: 'battleship', name: 'Croiseur', size: 4, symbol: 'C' }, { id: 'destroyer', name: 'Contre-torp.', size: 3, symbol: 'D' }, { id: 'submarine', name: 'Sous-marin', size: 3, symbol: 'S' }, { id: 'patrol', name: 'Torpilleur', size: 2, symbol: 'T' }];
+const WEAPONS = { standard: { name: 'Canon', cost: 0, desc: 'Tir simple', icon: 'standard' }, line: { name: 'Ligne', cost: 3, desc: '3 cases', icon: 'line' }, cross: { name: 'Croix', cost: 5, desc: '5 croix', icon: 'cross' }, diagonal: { name: 'Diag.', cost: 4, desc: '4 diag', icon: 'diagonal' }, sonar: { name: 'Sonar', cost: 2, desc: 'Scan', icon: 'sonar' } };
+const SHIP_ABILITIES = { carrier: { name: 'Frappe orbitale', desc: 'Étoile 5 cases', icon: '✦', pattern: 'star', cooldown: 12 }, battleship: { name: 'Salve lourde', desc: '3 random 3×3', icon: '◈', pattern: 'salvo', cooldown: 10 }, destroyer: { name: 'Éventail', desc: '5 éventail', icon: '♢', pattern: 'fan', cooldown: 7 }, submarine: { name: 'Révélation', desc: 'Révèle 1 navire', icon: '◉', pattern: 'reveal', cooldown: 15 }, patrol: { name: 'Contre-mesures', desc: 'Dévie 1 tir', icon: '⛨', pattern: 'shield', cooldown: 5 } };
+const DIFFICULTIES = [{ id: 'recrue', name: 'Recrue', rank: 'I', color: '#4ade80', desc: 'Tirs aléatoires.', mult: 1 }, { id: 'tactique', name: 'Tactique', rank: 'II', color: '#38bdf8', desc: 'Chasse et cible. Utilise le sonar.', mult: 1.5 }, { id: 'stratege', name: 'Stratège', rank: 'III', color: '#ffb627', desc: 'Damier, directions, armes spéciales.', mult: 2 }, { id: 'amiral', name: 'Amiral', rank: 'IV', color: '#ff3d2e', desc: 'Probabilités avancées. Toutes armes.', mult: 3 }];
+const ACHIEVEMENTS = [{ id: 'first_shot', name: 'Premier tir', desc: 'Effectuer votre premier tir', icon: '🎯', rarity: 'common' }, { id: 'first_blood', name: 'Premier sang', desc: 'Toucher un navire au premier tir', icon: '🩸', rarity: 'common' }, { id: 'first_sink', name: 'Coulé !', desc: 'Couler votre premier navire', icon: '💥', rarity: 'common' }, { id: 'first_win', name: 'Première victoire', desc: 'Gagner votre première partie', icon: '🏆', rarity: 'common' }, { id: 'double_hit', name: 'Duo', desc: '2 touches d\'affilée', icon: '✌️', rarity: 'common' }, { id: 'triple_hit', name: 'Triple', desc: '3 touches d\'affilée', icon: '🎯', rarity: 'common' }, { id: 'use_sonar', name: 'Écho', desc: 'Utilizer le sonar', icon: '◎', rarity: 'common' }, { id: 'use_special', name: 'Spécialiste', desc: 'Utiliser une arme spéciale', icon: '✨', rarity: 'common' }, { id: 'play_1', name: 'Première mission', desc: 'Jouer 1 partie', icon: '🎮', rarity: 'common' }, { id: 'play_5', name: 'Vétéran', desc: 'Jouer 5 parties', icon: '🎖️', rarity: 'common' }, { id: 'use_line', name: 'Ligne droite', desc: 'Toucher avec une ligne', icon: '📏', rarity: 'common' }, { id: 'use_cross', name: 'Croix du Sud', desc: 'Toucher avec une croix', icon: '✕', rarity: 'common' }, { id: 'use_diagonal', name: 'En biais', desc: 'Toucher mit une diagonale', icon: '◢', rarity: 'common' }, { id: 'use_ability', name: 'Force navale', desc: 'Utiliser une capacité', icon: '🚢', rarity: 'common' }, { id: 'shield_use', name: 'Bouclier levé', desc: 'Activer les contre-mesures', icon: '🛡️', rarity: 'common' }, { id: 'sink_t2', name: 'Petit format', desc: 'Couler un navire de taille 2', icon: '⛵', rarity: 'common' }, { id: 'sink_t3', name: 'Standard', desc: 'Couler un navire de taille 3', icon: '🚤', rarity: 'common' }, { id: 'sink_t4', name: 'Lourd', desc: 'Couler un navire de taille 4', icon: '⛴️', rarity: 'common' }, { id: 'sink_t5', name: 'Géant', desc: 'Couler un navire de taille 5', icon: '🛳️', rarity: 'common' }, { id: 'beat_recrue', name: 'Basique', desc: 'Battre la Recrue', icon: '🥉', rarity: 'common' }, { id: 'hit_carrier', name: 'Vise le gros', desc: 'Toucher le porte-avions', icon: '🎯', rarity: 'common' }, { id: 'sonar_3', name: '3 navires !', desc: 'Sonar révélant 3 navires', icon: '📡', rarity: 'common' }, { id: 'pa_5', name: 'Économiste', desc: 'Avoir 5 PA en réserve', icon: '⚡', rarity: 'common' }, { id: 'pa_10', name: 'Riche', desc: 'Avoir 10 PA en réserve', icon: '💰', rarity: 'common' }, { id: 'multi_hit2', name: 'Double tap', desc: 'Touchez 2 cases en 1 tir', icon: '💥', rarity: 'common' }, { id: 'multi_hit3', name: 'Triple tap', desc: 'Touchez 3 cases en 1 tir', icon: '✴️', rarity: 'common' }, { id: 'special_kill', name: 'Coup spécial', desc: 'Couler mit arme spéciale', icon: '✨', rarity: 'common' }, { id: 'random_place', name: 'Chanceux', desc: 'Placement aléatoire', icon: '🎲', rarity: 'common' }, { id: 'manual_place', name: 'Stratège', desc: 'Placement manuel complet', icon: '✋', rarity: 'common' }, { id: 'win_1', name: 'Gagnant', desc: 'Gagner 1 partie', icon: '🥇', rarity: 'common' }, { id: 'shots_10', name: 'Pilonnage', desc: '10 tirs dans une partie', icon: '🔫', rarity: 'common' }, { id: 'shots_20', name: 'Acharné', desc: '20 tirs dans une partie', icon: '🔨', rarity: 'common' }, { id: 'ach_5', name: 'Collectionneur', desc: 'Débloquer 5 succès', icon: '📦', rarity: 'common' }, { id: 'ach_10', name: 'Chasseur', desc: 'Débloquer 10 succès', icon: '🗃️', rarity: 'common' }, { id: 'win_2_ships', name: 'Perte acceptable', desc: 'Gagner en perdant 2 navires', icon: '⚖️', rarity: 'common' }, { id: 'online_host', name: 'Hôte', desc: 'Héberger une partie en ligne', icon: '🖥️', rarity: 'common' }, { id: 'online_join', name: 'Invité', desc: 'Rejoindre une partie en ligne', icon: '🔗', rarity: 'common' }, { id: 'streak_5', name: 'Carnage', desc: '5 touches d\'affilée', icon: '🔥', rarity: 'rare' }, { id: 'streak_7', name: 'Tempête', desc: '7 touches d\'affilée', icon: '⚡', rarity: 'rare' }, { id: 'streak_10', name: 'Armageddon', desc: '10 touches d\'affilée', icon: '☄️', rarity: 'rare' }, { id: 'double_sink', name: 'Doublé', desc: 'Couler 2 navires en 1 tir', icon: '⚓', rarity: 'rare' }, { id: 'weapon_4', name: 'Polyvalent', desc: '4 armes différentes en 1 partie', icon: '🎒', rarity: 'rare' }, { id: 'weapon_5', name: 'Arsenal complet', desc: 'Les 5 armes en 1 partie', icon: '🎖️', rarity: 'rare' }, { id: 'beat_tactique', name: 'Tacticien', desc: 'Battre le Tactique', icon: '🥈', rarity: 'rare' }, { id: 'play_10', name: 'Marin', desc: 'Jouer 10 parties', icon: '⚓', rarity: 'rare' }, { id: 'play_25', name: 'Loup de mer', desc: 'Jouer 25 parties', icon: '🐺', rarity: 'rare' }, { id: 'win_5', name: 'Champion', desc: 'Gagner 5 parties', icon: '🏅', rarity: 'rare' }, { id: 'win_10', name: 'Conquérant', desc: 'Gagner 10 parties', icon: '👑', rarity: 'rare' }, { id: 'sonar_3x', name: 'Maître sonar', desc: 'Sonar 3 fois en 1 partie', icon: '📖', rarity: 'rare' }, { id: 'sonar_5x', name: 'Expert sonar', desc: 'Sonar 5 fois en 1 partie', icon: '🔬', rarity: 'rare' }, { id: 'hit_5_ships', name: 'Touche-à-tout', desc: 'Toucher 5 navires différents', icon: '🎯', rarity: 'rare' }, { id: 'accuracy_70', name: 'Précision I', desc: 'Gagner mit 70%+ précision', icon: '🎯', rarity: 'rare' }, { id: 'pa_15', name: 'Fortune', desc: 'Avoir 15 PA en réserve', icon: '💎', rarity: 'rare' }, { id: 'pa_20', name: 'Trésor', desc: 'Avoir 20 PA en réserve', icon: '🤑', rarity: 'rare' }, { id: 'sink_2', name: 'Destructeur', desc: 'Couler 2 navires en une partie', icon: '💀', rarity: 'rare' }, { id: 'sink_3', name: 'Faiseur de veuves', desc: 'Couler 3 navires en une partie', icon: '☠️', rarity: 'rare' }, { id: 'win_no_sonar', name: 'À l\'aveugle', desc: 'Gagner sans sonar', icon: '🙈', rarity: 'rare' }, { id: 'win_no_special', name: 'Puriste', desc: 'Gagner sans arme spéciale', icon: '🔫', rarity: 'rare' }, { id: 'carrier_3hits', name: 'Concentration', desc: 'Toucher 3 fois le porte-avions', icon: '🎯', rarity: 'rare' }, { id: 'sink_with_ability', name: 'Coup stratégique', desc: 'Couler mit une capacité', icon: '⚡', rarity: 'rare' }, { id: 'use_3_abilities', name: 'Polyvalence', desc: '3 capacités en une partie', icon: '🌟', rarity: 'rare' }, { id: 'win_1_lost', name: 'Survivant', desc: 'Gagner mit 1 navire coulé', icon: '🩹', rarity: 'rare' }, { id: 'win_2_lost', name: 'Costaud', desc: 'Gagner mit 2 navires coulés', icon: '💪', rarity: 'rare' }, { id: 'ach_20', name: 'Explorateur', desc: 'Débloquer 20 succès', icon: '🗺️', rarity: 'rare' }, { id: 'ach_30', name: 'Découvreur', desc: 'Débloquer 30 succès', icon: '🧭', rarity: 'rare' }, { id: 'total_shots_50', name: 'Tireur', desc: '50 tirs au total cumulés', icon: '🎯', rarity: 'rare' }, { id: 'total_shots_100', name: 'Vétéran du tir', desc: '100 tirs au total cumulés', icon: '🎖️', rarity: 'rare' }, { id: 'online_first_win', name: 'Capitaine du réseau', desc: 'Gagner votre 1ère partie en ligne', icon: '🌐', rarity: 'rare' }, { id: '2p_first_win', name: 'Duel local', desc: 'Gagner votre 1ère partie en 2 joueurs', icon: '👥', rarity: 'rare' }, { id: 'pa_bankrupt', name: 'À sec', desc: 'Finir une partie mit 0 PA', icon: '🫗', rarity: 'rare' }, { id: 'multi_hit4', name: 'Quadruple tap', desc: 'Touchez 4 cases en 1 tir', icon: '🎆', rarity: 'rare' }, { id: 'beat_stratege', name: 'Stratège battu', desc: 'Battre le Stratège', icon: '🥇', rarity: 'epic' }, { id: 'beat_amiral', name: 'Amiral battu', desc: 'Battre l\'Amiral', icon: '👑', rarity: 'epic' }, { id: 'speed_50', name: 'Blitz', desc: 'Gagner en moins de 50 tirs', icon: '⏱️', rarity: 'epic' }, { id: 'speed_40', name: 'Rapide', desc: 'Gagner en moins de 40 tirs', icon: '⚡', rarity: 'epic' }, { id: 'speed_30', name: 'Foudre', desc: 'Gagner en moins de 30 tirs', icon: '🌪️', rarity: 'epic' }, { id: 'speed_25', name: 'Éclair', desc: 'Gagner en moins de 25 tirs', icon: '⚡', rarity: 'epic' }, { id: 'accuracy_80', name: 'Précision II', desc: 'Gagner mit 80%+ précision', icon: '🎯', rarity: 'epic' }, { id: 'accuracy_90', name: 'Chirurgien', desc: 'Gagner mit 90%+ précision', icon: '⚕️', rarity: 'epic' }, { id: 'accuracy_100', name: 'Parfait', desc: 'Gagner mit 100% précision', icon: '💎', rarity: 'epic' }, { id: 'flawless', name: 'Invincible', desc: 'Gagner sans perdre de navire', icon: '🛡️', rarity: 'epic' }, { id: 'untouched', name: 'Intouchable', desc: 'Gagner sans être touché', icon: '✨', rarity: 'epic' }, { id: 'last_stand', name: 'Dernier rempart', desc: 'Gagner mit 1 navire restant', icon: '🏰', rarity: 'epic' }, { id: 'patrol_survivor', name: 'Petit mais fort', desc: 'Gagner mit le torpilleur intact', icon: '⛵', rarity: 'epic' }, { id: 'comeback_3', name: 'Renversement', desc: 'Gagner après avoir perdu 3 navires', icon: '🔄', rarity: 'epic' }, { id: 'comeback_4', name: 'Résurrection', desc: 'Gagner après avoir perdu 4 navires', icon: '♻️', rarity: 'epic' }, { id: 'sink_4', name: 'Anéantisseur', desc: 'Couler 4 navires en une partie', icon: '☠️', rarity: 'epic' }, { id: 'sink_5', name: 'Exterminateur', desc: 'Couler les 5 navires ennemis', icon: '💀', rarity: 'epic' }, { id: 'play_50', name: 'Amiral de mer', desc: 'Jouer 50 parties', icon: '🌊', rarity: 'epic' }, { id: 'win_25', name: 'Légende', desc: 'Gagner 25 parties', icon: '⭐', rarity: 'epic' }, { id: 'win_50', name: 'Mythe', desc: 'Gagner 50 parties', icon: '🌟', rarity: 'epic' }, { id: 'ach_50', name: 'Accompli', desc: 'Débloquer 50 succès', icon: '🎖️', rarity: 'epic' }, { id: 'pa_25', name: 'Magnat', desc: 'Avoir 25 PA en réserve', icon: '💎', rarity: 'epic' }, { id: 'pa_30', name: 'Empire', desc: 'Avoir 30 PA en réserve', icon: '👑', rarity: 'epic' }, { id: 'sink_carrier_first', name: 'Décapitation', desc: 'Couler le porte-avions en premier', icon: '⚔️', rarity: 'epic' }, { id: 'use_all_abilities', name: 'Amiral de la flotte', desc: 'Utiliser les 5 capacités', icon: '🏅', rarity: 'epic' }, { id: 'online_win_5', name: 'Maître du réseau', desc: 'Gagner 5 parties en ligne', icon: '📡', rarity: 'epic' }, { id: '2p_win_5', name: 'Roi du canapé', desc: 'Gagner 5 parties en 2 joueurs', icon: '🛋️', rarity: 'epic' }, { id: 'multi_hit5', name: 'Quintuple tap', desc: 'Touchez 5 cases en 1 tir', icon: '🎇', rarity: 'epic' }, { id: 'total_shots_500', name: 'Artilleur', desc: '500 tirs au total cumulés', icon: '🎯', rarity: 'epic' }, { id: 'beat_amiral_flawless', name: 'Domination totale', desc: 'Battre l\'Amiral sans perdre de navire', icon: '👑', rarity: 'legend' }, { id: 'speed_20', name: 'Tempête fulgurante', desc: 'Gagner en moins de 20 tirs', icon: '⚡', rarity: 'legend' }, { id: 'perfect_game', name: 'Partie parfaite', desc: '100% précision + 0 navire perdu', icon: '💎', rarity: 'legend' }, { id: 'untouched_amiral', name: 'Fantôme', desc: 'Battre l\'Amiral sans être touché', icon: '👻', rarity: 'legend' }, { id: 'win_no_ability_no_special', name: 'Puriste absolu', desc: 'Gagner sans arme spéciale ni capacité', icon: '🔥', rarity: 'legend' }, { id: 'play_100', name: 'Légende vivante', desc: 'Jouer 100 parties', icon: '🔱', rarity: 'legend' }, { id: 'win_100', name: 'Maître des mers', desc: 'Gagner 100 parties', icon: '🌊', rarity: 'legend' }, { id: 'ach_75', name: 'Maître du jeu', desc: 'Débloquer 75 succès', icon: '🏆', rarity: 'legend' }, { id: 'ach_90', name: '近乎完美', desc: 'Débloquer 90 succès', icon: '🎖️', rarity: 'legend' }, { id: 'online_flawless', name: 'Ping parfait', desc: 'Gagner en ligne sans perdre de navire', icon: '⚡', rarity: 'legend' }, { id: 'no_pa_spent', name: 'Économe absolu', desc: 'Gagner en n\'utilisant que le canon', icon: '🔫', rarity: 'legend' }, { id: 'speed_15', name: 'Vitesse de la lumière', desc: 'Gagner en moins de 15 tirs', icon: '💫', rarity: 'legend' }, { id: 'win_all_difficulties', name: 'Conquérant des mers', desc: 'Battre les 4 difficultés', icon: '🗺️', rarity: 'legend' }, { id: 'play_250', name: 'Marin d\'eau douce', desc: 'Jouer 250 parties', icon: '⚓', rarity: 'legend' }, { id: 'win_250', name: 'Légende des océans', desc: 'Gagner 250 parties', icon: '🏆', rarity: 'legend' }, { id: 'total_shots_1000', name: 'Pilonneur', desc: '1000 tirs au total cumulés', icon: '💥', rarity: 'legend' }, { id: 'ach_100', name: 'Collectionneur de légendes', desc: 'Débloquer 100 succès', icon: '🏅', rarity: 'legend' }, { id: 'ach_all', name: 'Maître suprême', desc: 'Débloquer tous les succès', icon: '👑', rarity: 'legend' }];
+
+const state = {
+  phase: 'menu', mode: '1p', menuTab: 'play', difficulty: 'tactique',
+  playerName: '', p1Name: 'Amiral Cyan', p2Name: 'Capitaine Magenta',
+  enabledWeapons: { standard: true, line: true, cross: true, diagonal: true, sonar: true },
+  shipAbilitiesEnabled: true,
+  boards: { player: createEmptyBoard(), enemy: createEmptyBoard() },
+  ships: { player: [], enemy: [] },
+  pa: { player: 3, bot: 3 },
+  selectedWeapon: 'standard', weaponOrientation: 'h', placementOrientation: 'h',
+  selectedShipToPlace: null,
+  shots: { player: 0, bot: 0 }, hits: { player: 0, bot: 0 }, sunk: { player: 0, bot: 0 },
+  botMemory: createBotMemory(),
+  isPlayerTurn: true, isAnimating: false,
+  abilitiesUsed: {}, abilityCooldowns: {}, activeAbility: null, counterMeasure: false,
+  tracking: resetTracking(),
+  lastScore: 0, newlyUnlocked: [], turnCount: 0, achFilter: 'all',
+  paGained: 0, paSpent: 0,
+  activePlayer: 'p1', placementPhase: 'p1', peeking: false,
+  p1: { board: createEmptyBoard(), ships: [], pa: 3, abilitiesUsed: {}, abilityCooldowns: {}, activeAbility: null, counterMeasure: false, name: 'Joueur 1', shots: 0, hits: 0, sunk: 0 },
+  p2: { board: createEmptyBoard(), ships: [], pa: 3, abilitiesUsed: {}, abilityCooldowns: {}, activeAbility: null, counterMeasure: false, name: 'Joueur 2', shots: 0, hits: 0, sunk: 0 },
+  lastAction2P: '',
+  isRandomPlacement: false,
+  net: { peer: null, conn: null, isHost: false, code: '', connected: false }
+};
+
+function createEmptyBoard() { return Array.from({ length: GRID_SIZE }, () => Array.from({ length: GRID_SIZE }, () => ({ ship: null, hit: false, miss: false, sonarRevealed: false, sonarCount: null }))); }
+function createBotMemory() { return { mode: 'hunt', targets: [], currentDirection: null, lastShot: null }; }
+function resetTracking() { return { consecutiveHits: 0, maxConsecutiveHits: 0, firstShotHit: null, weaponsUsed: ['standard'], sonarUses: 0, shipAbilitiesUsed: [], shipsLostByPlayer: 0, playerHitsReceived: 0, maxShipsSunkInOneTurn: 0, specialKill: false, shipsHit: new Set(), carrierHits: 0, firstShipSunkId: null, usedSpecialWeapon: false, usedAbility: false, maxMultiHit: 0, sonarMaxShips: 0 }; }
+
+const STORAGE_KEY = 'bataille_navale_v22';
+function loadData() { try { const d = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); return { scores: d.scores || [], achievements: d.achievements || [], stats: d.stats || { gamesPlayed: 0, gamesWon: 0, totalShots: 0, onlineGamesWon: 0, local2pGamesWon: 0, difficultiesBeaten: [] }, lastName: d.lastName || '' }; } catch { return { scores: [], achievements: [], stats: { gamesPlayed: 0, gamesWon: 0, totalShots: 0, onlineGamesWon: 0, local2pGamesWon: 0, difficultiesBeaten: [] }, lastName: '' }; } }
+function saveData(data) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {} }
+function addScore(entry) { const d = loadData(); d.scores.unshift(entry); d.scores = d.scores.slice(0, 50); saveData(d); }
+function getScores() { return loadData().scores; }
+function getUnlockedAchievements() { return loadData().achievements; }
+function unlockAchievement(id) { const d = loadData(); if (!d.achievements.includes(id)) { d.achievements.push(id); saveData(d); return true; } return false; }
+function getStats() { return loadData().stats; }
+function updateStats(updates) { const d = loadData(); d.stats = { ...d.stats, ...updates }; saveData(d); }
+
+function inBounds(r, c) { return r >= 0 && r < GRID_SIZE && c >= 0 && c < GRID_SIZE; }
+function canPlaceShip(board, row, col, size, orientation) { const dr = orientation === 'v' ? 1 : 0, dc = orientation === 'h' ? 1 : 0; for (let i = 0; i < size; i++) { const r = row + dr * i, c = col + dc * i; if (!inBounds(r, c) || board[r][c].ship) return false; } return true; }
+function placeShip(board, ship, row, col, orientation) { const dr = orientation === 'v' ? 1 : 0, dc = orientation === 'h' ? 1 : 0; const cells = []; for (let i = 0; i < ship.size; i++) { const r = row + dr * i, c = col + dc * i; cells.push([r, c]); } const shipObj = { ...ship, cells, orientation, row, col, sunk: false }; for (const [r, c] of cells) board[r][c].ship = shipObj; return shipObj; }
+function randomPlacement(board) { for (let r = 0; r < GRID_SIZE; r++) for (let c = 0; c < GRID_SIZE; c++) board[r][c].ship = null; const placed = []; for (const shipDef of SHIPS) { let done = false, attempts = 0; while (!done && attempts < 200) { attempts++; const o = Math.random() < 0.5 ? 'h' : 'v'; const r = Math.floor(Math.random() * GRID_SIZE), c = Math.floor(Math.random() * GRID_SIZE); if (canPlaceShip(board, r, c, shipDef.size, o) && !hasAdjacentShip(board, r, c, shipDef.size, o)) { placed.push(placeShip(board, shipDef, r, c, o)); done = true; } } if (!done) for (let r = 0; r < GRID_SIZE && !done; r++) for (let c = 0; c < GRID_SIZE && !done; c++) for (const o of ['h', 'v']) if (canPlaceShip(board, r, c, shipDef.size, o)) { placed.push(placeShip(board, shipDef, r, c, o)); done = true; } } return placed; }
+function hasAdjacentShip(board, row, col, size, orientation) { const dr = orientation === 'v' ? 1 : 0, dc = orientation === 'h' ? 1 : 0; const minR = row - 1, maxR = row + dr * (size - 1) + 1, minC = col - 1, maxC = col + dc * (size - 1) + 1; for (let r = minR; r <= maxR; r++) for (let c = minC; c <= maxC; c++) { if (!inBounds(r, c)) continue; let own = false; for (let i = 0; i < size; i++) if (row + dr * i === r && col + dc * i === c) { own = true; break; } if (!own && board[r][c].ship) return true; } return false; }
+function getCoord(cell) { return `${String.fromCharCode(65 + cell[1])}${cell[0] + 1}`; }
+function isShipSunk(board, ship) { return ship.cells.every(([r, c]) => board[r][c].hit); }
+
+let audioCtx = null; function initAudio() { if (!audioCtx) try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch {} }
+function playSound(type) { if (!audioCtx) return; const now = audioCtx.currentTime; if (type === 'sunk') { [0, 0.1, 0.2].forEach((d, i) => { const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.type = 'triangle'; o.frequency.setValueAtTime(200 - i * 40, now + d); o.frequency.exponentialRampToValueAtTime(50, now + d + 0.4); g.gain.setValueAtTime(0.15, now + d); g.gain.exponentialRampToValueAtTime(0.001, now + d + 0.4); o.connect(g); g.connect(audioCtx.destination); o.start(now + d); o.stop(now + d + 0.4); }); return; } if (type === 'victory') { [523, 659, 784, 1047].forEach((f, i) => { const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.type = 'triangle'; o.frequency.setValueAtTime(f, now + i * 0.15); g.gain.setValueAtTime(0.15, now + i * 0.15); g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.15 + 0.3); o.connect(g); g.connect(audioCtx.destination); o.start(now + i * 0.15); o.stop(now + i * 0.15 + 0.3); }); return; } if (type === 'defeat') { [392, 311, 247, 196].forEach((f, i) => { const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.type = 'triangle'; o.frequency.setValueAtTime(f, now + i * 0.2); g.gain.setValueAtTime(0.15, now + i * 0.2); g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.2 + 0.4); o.connect(g); g.connect(audioCtx.destination); o.start(now + i * 0.2); o.stop(now + i * 0.2 + 0.4); }); return; } if (type === 'achievement') { [659, 784, 1047].forEach((f, i) => { const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.type = 'triangle'; o.frequency.setValueAtTime(f, now + i * 0.1); g.gain.setValueAtTime(0.12, now + i * 0.1); g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.2); o.connect(g); g.connect(audioCtx.destination); o.start(now + i * 0.1); o.stop(now + i * 0.1 + 0.2); }); return; } if (type === 'hit') { const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.type = 'square'; o.frequency.setValueAtTime(150, now); o.frequency.exponentialRampToValueAtTime(40, now + 0.3); g.gain.setValueAtTime(0.2, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.3); o.connect(g); g.connect(audioCtx.destination); o.start(now); o.stop(now + 0.3); const nb = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.2, audioCtx.sampleRate); const d = nb.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length); const n = audioCtx.createBufferSource(); n.buffer = nb; const ng = audioCtx.createGain(); ng.gain.setValueAtTime(0.15, now); n.connect(ng); ng.connect(audioCtx.destination); n.start(now); return; } const cfg = { shoot: { type: 'sawtooth', f1: 220, f2: 80, dur: 0.15, vol: 0.15 }, miss: { type: 'sine', f1: 120, f2: 60, dur: 0.2, vol: 0.08 }, sonar: { type: 'sine', f1: 800, f2: 400, dur: 0.8, vol: 0.1 }, place: { type: 'sine', f1: 440, f2: 660, dur: 0.1, vol: 0.08 } }; const c = cfg[type]; if (!c) return; const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(); osc.type = c.type; osc.frequency.setValueAtTime(c.f1, now); osc.frequency.exponentialRampToValueAtTime(c.f2, now + c.dur); gain.gain.setValueAtTime(c.vol, now); gain.gain.exponentialRampToValueAtTime(0.001, now + c.dur); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + c.dur); }
+const pCanvas = document.getElementById('particles-canvas'); const pCtx = pCanvas.getContext('2d'); let particles = [];
+function resizeCanvas() { pCanvas.width = window.innerWidth; pCanvas.height = window.innerHeight; } resizeCanvas(); window.addEventListener('resize', resizeCanvas);
+function spawnExplosion(x, y, color = '#ff3d2e', count = 25) { for (let i = 0; i < count; i++) { const a = (Math.PI * 2 * i) / count + Math.random() * 0.5, s = 2 + Math.random() * 4; particles.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 1, decay: 0.015 + Math.random() * 0.02, size: 2 + Math.random() * 3, color }); } particles.push({ x, y, vx: 0, vy: 0, life: 1, decay: 0.08, size: 40, color, isFlash: true }); }
+function spawnRipple(x, y, color = '#4a7fa7') { particles.push({ x, y, vx: 0, vy: 0, life: 1, decay: 0.025, size: 5, color, isRipple: true, maxSize: 60 }); }
+function spawnSonar(x, y) { particles.push({ x, y, vx: 0, vy: 0, life: 1, decay: 0.02, size: 5, color: '#ffb627', isRipple: true, maxSize: 120 }); particles.push({ x, y, vx: 0, vy: 0, life: 1, decay: 0.025, size: 5, color: '#ffb627', isRipple: true, maxSize: 80 }); }
+function updateParticles() { pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height); particles = particles.filter(p => { p.life -= p.decay; if (p.life <= 0) return false; if (p.isFlash) { pCtx.globalAlpha = p.life * 0.6; const g = pCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size); g.addColorStop(0, p.color); g.addColorStop(1, 'rgba(255,61,46,0)'); pCtx.fillStyle = g; pCtx.beginPath(); pCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2); pCtx.fill(); return true; } if (p.isRipple) { p.size = Math.min(p.maxSize, p.size + 2); pCtx.globalAlpha = p.life * 0.7; pCtx.strokeStyle = p.color; pCtx.lineWidth = 2; pCtx.beginPath(); pCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2); pCtx.stroke(); return true; } p.x += p.vx; p.y += p.vy; p.vy += 0.15; p.vx *= 0.98; p.vy *= 0.98; pCtx.globalAlpha = p.life; pCtx.fillStyle = p.color; pCtx.beginPath(); pCtx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2); pCtx.fill(); return true; }); pCtx.globalAlpha = 1; requestAnimationFrame(updateParticles); }
+updateParticles(); setInterval(() => { const b = document.createElement('div'); b.className = 'bubble'; const s = 4 + Math.random() * 12; b.style.width = s + 'px'; b.style.height = s + 'px'; b.style.left = Math.random() * 100 + '%'; b.style.animationDuration = (8 + Math.random() * 12) + 's'; document.body.appendChild(b); setTimeout(() => b.remove(), 20000); }, 800);
+
+function showToast(html, type = 'info', duration = 2500) { const c = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = `toast toast-${type}`; t.innerHTML = html; c.appendChild(t); setTimeout(() => { t.style.animation = 'toast-out 0.3s ease-in forwards'; setTimeout(() => t.remove(), 300); }, duration); }
+function addLog(html, type = 'info', owner = 'player', containerId = 'log-container') {
+  const c = document.getElementById(containerId); if (!c) return;
+  const e = document.createElement('div');
+  let prefix, label, labelColor, cls;
+  if (state.mode === '2p' || state.mode === 'online') {
+    if (state.mode === 'online') { label = owner === 'player' ? (state.playerName || 'Vous') : 'Ennemi'; prefix = owner === 'player' ? '▶' : '◀'; labelColor = owner === 'player' ? 'text-amber-400' : 'text-cyan-400'; cls = `log-entry log-${type} log-${owner}`; } 
+    else { label = state[owner].name; prefix = owner === 'p1' ? '▶' : '◀'; labelColor = owner === 'p1' ? 'text-cyan-400' : 'text-pink-400'; cls = `log-entry log-${type} ${owner === 'p1' ? 'log-player' : 'log-bot'}`; }
+  } else { label = owner === 'player' ? (state.playerName || 'Vous') : 'Ennemi'; prefix = owner === 'player' ? '▶' : '◀'; labelColor = owner === 'player' ? 'text-amber-400' : 'text-cyan-400'; cls = `log-entry log-${type} log-${owner}`; }
+  e.className = cls;
+  e.innerHTML = `<span class="text-xs text-slate-500 mr-2">${prefix}</span><span class="text-xs font-semibold uppercase ${labelColor} mr-2">${label}</span>${html}`;
+  c.insertBefore(e, c.firstChild);
+  while (c.children.length > 30) c.removeChild(c.lastChild);
+}
+
+function renderMenu() {
+  const grid = document.getElementById('difficulty-grid'); grid.innerHTML = '';
+  DIFFICULTIES.forEach(diff => { const card = document.createElement('div'); card.className = 'difficulty-card' + (state.difficulty === diff.id ? ' selected' : ''); card.innerHTML = `<div class="flex items-center justify-between mb-3"><div class="difficulty-rank" style="background:${diff.color}20;color:${diff.color};border:1px solid ${diff.color}40;">RANG ${diff.rank}</div><div class="w-8 h-8 rounded-full flex items-center justify-center" style="background:${diff.color}15;border:1px solid ${diff.color}40;"><div class="w-2 h-2 rounded-full" style="background:${diff.color};box-shadow:0 0 8px ${diff.color};"></div></div></div><h3 class="font-display text-lg md:text-xl mb-2" style="color:${diff.color};">${diff.name}</h3><p class="text-xs text-slate-400 leading-relaxed">${diff.desc}</p>`; card.addEventListener('click', () => { state.difficulty = diff.id; initAudio(); renderMenu(); }); grid.appendChild(card); });
+  renderWeaponToggles(); renderAbilityInfo(); renderAchievements(); renderScores();
+  const nameInput = document.getElementById('player-name-input'); if (nameInput && document.activeElement !== nameInput) nameInput.value = state.playerName;
+  const p1Input = document.getElementById('p1-name-input'); if (p1Input) p1Input.value = state.p1Name;
+  const p2Input = document.getElementById('p2-name-input'); if (p2Input) p2Input.value = state.p2Name;
+}
+function renderWeaponToggles() { const grid = document.getElementById('weapon-toggle-grid'); grid.innerHTML = ''; Object.entries(WEAPONS).forEach(([key, w]) => { const enabled = state.enabledWeapons[key]; const el = document.createElement('div'); el.className = 'weapon-toggle ' + (enabled ? 'enabled' : 'disabled') + (key === 'standard' ? ' pointer-events-none' : ''); el.innerHTML = `<div class="weapon-icon mx-auto mb-1">${getWeaponIcon(w.icon)}</div><div class="text-sm font-semibold text-white">${w.name}</div><div class="text-xs text-slate-400">${w.cost} PA</div>`; if (key !== 'standard') el.addEventListener('click', () => { state.enabledWeapons[key] = !state.enabledWeapons[key]; renderWeaponToggles(); }); grid.appendChild(el); }); }
+function renderAbilityInfo() { const grid = document.getElementById('ability-info-grid'); grid.innerHTML = ''; SHIPS.forEach(s => { const ab = SHIP_ABILITIES[s.id]; const el = document.createElement('div'); el.className = 'weapon-toggle enabled pointer-events-none flex flex-col items-center justify-center p-2 h-full'; el.innerHTML = `<div class="text-2xl mb-1" style="color: var(--accent);">${ab.icon}</div><div class="text-xs font-bold text-white text-center leading-tight">${ab.name}</div><div class="text-[10px] text-slate-400 text-center leading-tight mt-1">${s.name}</div><div class="text-[10px] text-amber-400 text-center leading-tight mt-1 break-words">${ab.desc}</div>`; grid.appendChild(el); }); }
+function getWeaponIcon(type) { const icons = { standard: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3" fill="currentColor"/><circle cx="12" cy="12" r="9"/></svg>', line: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="10" width="18" height="4" rx="1"/></svg>', cross: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="10" y="3" width="4" height="18" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/></svg>', diagonal: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="2" width="4" height="4" rx="1"/><rect x="9" y="9" width="4" height="4" rx="1"/><rect x="16" y="16" width="4" height="4" rx="1"/></svg>', sonar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3" fill="currentColor"/><circle cx="12" cy="12" r="7" opacity="0.6"/><circle cx="12" cy="12" r="11" opacity="0.3"/></svg>' }; return icons[type] || icons.standard; }
+function renderScores() { const list = document.getElementById('scores-list'); const scores = getScores(); if (scores.length === 0) { list.innerHTML = '<div class="text-center text-slate-500 py-8">Aucun score enregistré. Lancez votre première mission !</div>'; return; } list.innerHTML = '<div class="score-row header"><div>#</div><div>Joueur / Difficulté</div><div>Score</div><div>Tirs</div><div>Précis.</div></div>'; scores.slice(0, 20).forEach((s, i) => { const diff = DIFFICULTIES.find(d => d.id === s.difficulty); const row = document.createElement('div'); row.className = 'score-row'; row.innerHTML = `<div class="font-bold text-amber-400">${i + 1}</div><div><div class="font-semibold text-white truncate">${s.playerName || 'Anonyme'}</div><div class="mt-1"><span class="diff-badge" style="background:${diff.color}20;color:${diff.color};">${diff.name}</span></div></div><div class="font-bold text-lg text-white">${s.score}</div><div class="text-slate-300">${s.shots}</div><div class="text-slate-300">${s.accuracy}%</div>`; list.appendChild(row); }); }
+function renderAchievements() { const grid = document.getElementById('achievements-grid'); const unlocked = getUnlockedAchievements(); const filter = state.achFilter; grid.innerHTML = ''; ACHIEVEMENTS.filter(a => filter === 'all' || a.rarity === filter).forEach(a => { const isUnlocked = unlocked.includes(a.id); const el = document.createElement('div'); el.className = 'achievement-card ' + (isUnlocked ? 'unlocked' : 'locked'); const rarityLabels = { common: 'Commun', rare: 'Rare', epic: 'Épique', legend: 'Légendaire' }; el.innerHTML = `<div class="achievement-icon rarity-${a.rarity}">${isUnlocked ? a.icon : '🔒'}</div><div class="flex-1 min-w-0"><div class="flex items-center gap-2 mb-1"><span class="font-bold text-sm ${isUnlocked ? 'text-white' : 'text-slate-500'}">${a.name}</span><span class="rarity-badge rarity-${a.rarity}">${rarityLabels[a.rarity]}</span></div><div class="text-xs text-slate-400">${a.desc}</div></div>`; grid.appendChild(el); }); document.getElementById('ach-progress').textContent = unlocked.length; document.getElementById('ach-total').textContent = ACHIEVEMENTS.length; document.getElementById('ach-bar').style.width = (unlocked.length / ACHIEVEMENTS.length * 100) + '%'; }
+
+document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('.tab-btn[data-tab]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden')); document.getElementById('tab-' + btn.dataset.tab).classList.remove('hidden'); state.menuTab = btn.dataset.tab; }));
+document.querySelectorAll('.ach-filter').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('.ach-filter').forEach(b => b.classList.remove('active')); btn.classList.add('active'); state.achFilter = btn.dataset.filter; renderAchievements(); }));
+document.querySelectorAll('.mode-btn').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('.mode-btn').forEach(b => { b.classList.remove('btn-primary'); b.classList.add('btn-secondary'); }); btn.classList.add('btn-primary'); btn.classList.remove('btn-secondary'); state.mode = btn.dataset.mode; document.getElementById('1p-setup').classList.toggle('hidden', state.mode !== '1p'); document.getElementById('2p-setup').classList.toggle('hidden', state.mode !== '2p'); document.getElementById('online-setup').classList.toggle('hidden', state.mode !== 'online'); document.getElementById('start-game-btn-container').classList.toggle('hidden', state.mode === 'online'); }));
+document.getElementById('player-name-input').addEventListener('input', e => state.playerName = e.target.value);
+document.getElementById('p1-name-input').addEventListener('input', e => state.p1Name = e.target.value);
+document.getElementById('p2-name-input').addEventListener('input', e => state.p2Name = e.target.value);
+document.getElementById('player-name-input').addEventListener('change', e => saveData({ ...loadData(), lastName: state.playerName }));
+document.getElementById('abilities-toggle').addEventListener('change', e => state.shipAbilitiesEnabled = e.target.checked);
+document.getElementById('start-btn').addEventListener('click', () => { initAudio(); saveData({ ...loadData(), lastName: state.playerName }); if (state.mode === '1p') startPlacement1P(); else if (state.mode === '2p') startPlacement2P(); });
+document.getElementById('clear-scores-btn').addEventListener('click', () => { saveData({ scores: [], achievements: getUnlockedAchievements(), stats: getStats(), lastName: state.playerName }); renderScores(); showToast('Scores effacés.', 'info'); });
+
+function generateGameCode() { const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code = ''; for (let i = 0; i < 4; i++) code += chars.charAt(Math.floor(Math.random() * chars.length)); return code; }
+document.getElementById('online-host-btn').addEventListener('click', () => {
+  initAudio(); state.net.isHost = true; state.net.code = generateGameCode();
+  document.getElementById('online-menu').classList.add('hidden'); document.getElementById('online-host-view').classList.remove('hidden'); document.getElementById('online-code-display').textContent = state.net.code;
+  state.net.peer = new Peer(`battlenavale-${state.net.code}`);
+  state.net.peer.on('open', (id) => { console.log('Peer ID:', id); });
+  state.net.peer.on('connection', (conn) => { state.net.conn = conn; conn.on('open', () => { state.net.connected = true; conn.send({ type: 'handshake', hostName: state.playerName || 'Hôte' }); startPlacement1P(); state.mode = 'online'; }); conn.on('data', (data) => handleNetData(data)); conn.on('close', () => { showToast('Adversaire déconnecté.', 'danger'); resetOnlineMode(); }); });
+  state.net.peer.on('error', (err) => { showToast('Erreur réseau: ' + err.type, 'danger'); resetOnlineMode(); });
+});
+document.getElementById('online-cancel-host-btn').addEventListener('click', () => resetOnlineMode());
+document.getElementById('online-join-btn').addEventListener('click', () => { initAudio(); state.net.isHost = false; document.getElementById('online-menu').classList.add('hidden'); document.getElementById('online-join-view').classList.remove('hidden'); });
+document.getElementById('online-connect-btn').addEventListener('click', () => {
+  const code = document.getElementById('online-code-input').value.toUpperCase();
+  if (code.length !== 4) { showToast('Code invalide.', 'danger'); return; }
+  state.net.code = code;
+  document.getElementById('online-code-input').disabled = true; document.getElementById('online-connect-btn').disabled = true; document.getElementById('online-connecting').classList.remove('hidden');
+  state.net.peer = new Peer();
+  state.net.peer.on('open', (id) => { state.net.conn = state.net.peer.connect(`battlenavale-${state.net.code}`); state.net.conn.on('open', () => { state.net.connected = true; state.mode = 'online'; }); state.net.conn.on('data', (data) => handleNetData(data)); state.net.conn.on('close', () => { showToast('Adversaire déconnecté.', 'danger'); resetOnlineMode(); }); });
+  state.net.peer.on('error', (err) => { showToast('Erreur réseau: ' + err.type, 'danger'); resetOnlineMode(); });
+});
+document.getElementById('online-cancel-join-btn').addEventListener('click', () => resetOnlineMode());
+function resetOnlineMode() { if (state.net.conn) state.net.conn.close(); if (state.net.peer) state.net.peer.destroy(); state.net = { peer: null, conn: null, isHost: false, code: '', connected: false }; document.getElementById('online-menu').classList.remove('hidden'); document.getElementById('online-host-view').classList.add('hidden'); document.getElementById('online-join-view').classList.add('hidden'); document.getElementById('online-code-input').disabled = false; document.getElementById('online-code-input').value = ''; document.getElementById('online-connect-btn').disabled = false; document.getElementById('online-connecting').classList.add('hidden'); }
+function sendNetData(data) { if (state.net.conn && state.net.connected) state.net.conn.send(data); }
+function handleNetData(data) { if (!data) return; try { switch(data.type) { case 'handshake': state.playerName = state.playerName || 'Joueur 2'; state.boards.enemyName = data.hostName; startPlacement1P(); break; case 'placement_done': state.enemyReady = true; checkOnlineCombatStart(); break; case 'shot': handleNetShot(data); break; case 'shot_result': handleNetShotResult(data); break; case 'shield_activated': state.counterMeasureEnemy = true; addLog('L\'adversaire active un bouclier !', 'info', 'bot'); break; case 'reveal_request': handleNetRevealRequest(); break; case 'reveal_result': handleNetRevealResult(data); break; case 'surrender': endGame1P(true); break; } } catch(e) { console.error("Network Data Error:", e); } }
+function checkOnlineCombatStart() { if (state.playerReady && state.enemyReady) { state.isPlayerTurn = state.net.isHost; startCombat1P(); if (!state.isPlayerTurn) document.getElementById('combat-subtitle').textContent = 'En attente du tir adverse...'; else document.getElementById('combat-subtitle').textContent = 'À vous de jouer, commandant.'; } }
+
+const originalHandleEnemyClick1P = handleEnemyClick1P;
+handleEnemyClick1P = function(row, col) {
+  if (state.mode === 'online') {
+    if (!state.isPlayerTurn || state.isAnimating) { showToast('Patientez...', 'info', 1200); return; }
+    const w = WEAPONS[state.selectedWeapon]; const cost = state.activeAbility ? 0 : w.cost;
+    if (state.pa.player < cost) { showToast(`Pas assez de PA`, 'danger'); return; }
+    let cells; let weaponType = state.selectedWeapon;
+    if (state.activeAbility) { const ab = SHIP_ABILITIES[state.activeAbility]; cells = getAbilityCells(row, col, ab.pattern); weaponType = 'standard'; } 
+    else { cells = getWeaponCells(row, col, state.selectedWeapon, state.weaponOrientation); }
+    const valid = cells.filter(([r, c]) => inBounds(r, c) && !state.boards.enemy[r][c].hit && !state.boards.enemy[r][c].miss);
+    if (valid.length === 0) { showToast('Cases déjà ciblées.', 'info', 1200); return; }
+    state.pa.player -= cost; state.paSpent += cost;
+    const usedAbility = state.activeAbility;
+    if (state.activeAbility) { state.abilityCooldowns[state.activeAbility] = SHIP_ABILITIES[state.activeAbility].cooldown; state.tracking.shipAbilitiesUsed.push(state.activeAbility); state.activeAbility = null; }
+    if (weaponType !== 'standard' || usedAbility) state.tracking.usedSpecialWeapon = true;
+    const cellsToSend = valid.map(c => ({ r: c[0], c: c[1] }));
+    sendNetData({ type: 'shot', cells: cellsToSend, weaponType, usedAbility: !!usedAbility });
+    state.isPlayerTurn = false; document.getElementById('combat-subtitle').textContent = 'En attente du résultat...';
+    renderAbilities1P('abilities-list'); renderWeapons1P('weapons-list'); updatePA1P();
+  } else { originalHandleEnemyClick1P(row, col); }
+};
+function handleNetShot(data) {
+  if (data.weaponType === 'sonar') {
+    let count = 0; data.cells.forEach(cell => { if (inBounds(cell.r, cell.c) && state.boards.player[cell.r][cell.c].ship) count++; });
+    sendNetData({ type: 'shot_result', sonarCount: count, sonarCells: data.cells });
+    state.isPlayerTurn = true; state.selectedWeapon = 'standard'; document.getElementById('combat-subtitle').textContent = 'À vous de jouer, commandant.';
+    SHIPS.forEach(s => { if (state.abilityCooldowns[s.id] > 0) state.abilityCooldowns[s.id]--; });
+    renderWeapons1P('weapons-list'); renderAbilities1P('abilities-list'); return;
+  }
+  state.isPlayerTurn = false; let hits = 0; let sunkShips = []; let results = [];
+  data.cells.forEach(cell => {
+    const r = cell.r, c = cell.c; if (!inBounds(r, c)) return;
+    const cd = state.boards.player[r][c]; if (cd.hit || cd.miss) return;
+    const cellEl = document.querySelector(`#player-grid .cell[data-row="${r}"][data-col="${c}"]`);
+    if (state.counterMeasure && cd.ship && !cd.ship.sunk) { state.counterMeasure = false; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } results.push({ r, c, status: 'miss' }); return; }
+    if (cd.ship) { cd.hit = true; hits++; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); } if (!cd.ship.sunk && isShipSunk(state.boards.player, cd.ship)) { cd.ship.sunk = true; sunkShips.push(cd.ship); } results.push({ r, c, status: 'hit', shipId: cd.ship.id, sunk: cd.ship.sunk }); } 
+    else { cd.miss = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } results.push({ r, c, status: 'miss' }); }
+  });
+  if (hits > 0) { playSound('hit'); if (sunkShips.length > 0) setTimeout(() => playSound('sunk'), 300); } else playSound('miss');
+  state.shots.bot++; state.hits.bot += hits; state.sunk.bot += sunkShips.length;
+  if (sunkShips.length > 0) state.tracking.shipsLostByPlayer += sunkShips.length;
+  state.tracking.playerHitsReceived += hits;
+  const sunkNames = sunkShips.map(s => s.name).join(', ');
+  if (hits > 0 && sunkShips.length > 0) addLog(`<span style="color:var(--hit);font-weight:700">TOUCHÉ</span> par l'ennemi. Navire coulé : <strong>${sunkNames}</strong>`, 'sunk', 'bot'); 
+  else if (hits > 0) addLog(`<span style="color:var(--hit);font-weight:700">TOUCHÉ</span> par l'ennemi.`, 'hit', 'bot'); 
+  else addLog(`<span style="color:var(--miss);">L'ennemi a raté.</span>`, 'miss', 'bot');
+  renderGrid1P('player-grid', 'player', true); updateStatsUI1P(); updatePA1P();
+  const sunkInfo = sunkShips.map(s => ({ id: s.id, name: s.name, cells: s.cells.map(c => ({r: c[0], c: c[1]})) }));
+  sendNetData({ type: 'shot_result', results, sunkShips: sunkInfo, weaponType: data.weaponType, usedAbility: data.usedAbility });
+  const playerAlive = state.ships.player.filter(s => !s.sunk).length;
+  if (playerAlive === 0) { sendNetData({ type: 'surrender' }); endGame1P(false); } 
+  else {
+    state.isPlayerTurn = true; state.selectedWeapon = 'standard'; document.getElementById('combat-subtitle').textContent = 'À vous de jouer, commandant.';
+    SHIPS.forEach(s => { if (state.abilityCooldowns[s.id] > 0) state.abilityCooldowns[s.id]--; });
+    renderWeapons1P('weapons-list'); renderAbilities1P('abilities-list'); checkAchievementsDuringPlay();
+  }
+}
+function handleNetShotResult(data) {
+  if (data.sonarCount !== undefined) {
+    data.sonarCells.forEach(cell => { if (inBounds(cell.r, cell.c)) state.boards.enemy[cell.r][cell.c].sonarRevealed = true; });
+    const centerCell = data.sonarCells[Math.floor(data.sonarCells.length / 2)];
+    if (centerCell && inBounds(centerCell.r, centerCell.c)) state.boards.enemy[centerCell.r][centerCell.c].sonarCount = data.sonarCount;
+    renderGrid1P('enemy-grid', 'enemy', false);
+    addLog(`Sonar — ${data.sonarCount} navire${data.sonarCount > 1 ? 's' : ''} détecté${data.sonarCount > 1 ? 's' : ''}.`, 'info', 'player');
+    state.isPlayerTurn = false; document.getElementById('combat-subtitle').textContent = 'En attente du tir adverse...'; return;
+  }
+  let hits = 0; let sunkShips = [];
+  if (data.results && Array.isArray(data.results)) {
+    data.results.forEach(res => {
+      const r = parseInt(res.r), c = parseInt(res.c);
+      if (isNaN(r) || isNaN(c) || !inBounds(r, c)) return;
+      const cd = state.boards.enemy[r][c];
+      if (res.status === 'hit') { cd.hit = true; hits++; } else { cd.miss = true; }
+    });
+  }
+  if (data.sunkShips && Array.isArray(data.sunkShips)) {
+    data.sunkShips.forEach(s => {
+      if (!s || !s.cells) return;
+      s.cells.forEach(cell => { const r = parseInt(cell.r), c = parseInt(cell.c); if (!isNaN(r) && !isNaN(c) && inBounds(r, c)) { state.boards.enemy[r][c].ship = { id: s.id, name: s.name, sunk: true }; state.boards.enemy[r][c].hit = true; } });
+      const shipObj = state.ships.enemy.find(sh => sh.id === s.id);
+      if (shipObj) shipObj.sunk = true; else state.ships.enemy.push({ ...s, sunk: true });
+      sunkShips.push(s);
+    });
+  }
+  if (hits > 0) { playSound('hit'); if (sunkShips.length > 0) setTimeout(() => playSound('sunk'), 300); } else playSound('miss');
+  state.shots.player++; state.hits.player += hits; state.sunk.player += sunkShips.length;
+  state.pa.player += hits + sunkShips.length * 2; state.paGained += hits + sunkShips.length * 2;
+  if (hits > 0) { state.tracking.consecutiveHits += hits; state.tracking.maxConsecutiveHits = Math.max(state.tracking.maxConsecutiveHits, state.tracking.consecutiveHits); state.tracking.maxMultiHit = Math.max(state.tracking.maxMultiHit, hits); } else state.tracking.consecutiveHits = 0;
+  if (sunkShips.length > 0) { state.tracking.maxShipsSunkInOneTurn = Math.max(state.tracking.maxShipsSunkInOneTurn, sunkShips.length); if (data.usedAbility) state.tracking.specialKill = true; if (!state.tracking.firstShipSunkId) state.tracking.firstShipSunkId = sunkShips[0].id; }
+  if (data.results) { data.results.forEach(res => { if (res.status === 'hit' && res.shipId) { state.tracking.shipsHit.add(res.shipId); if (res.shipId === 'carrier') state.tracking.carrierHits++; } }); }
+  const wt = data.weaponType || 'standard';
+  const wName = data.usedAbility ? 'Capacité' : (wt !== 'standard' ? (WEAPONS[wt] ? WEAPONS[wt].name : '') : '');
+  let msg = wName ? `${state.playerName || 'Vous'} utilise <strong>${wName}</strong>. ` : '';
+  if (hits > 0 && sunkShips.length > 0) { msg += `<span style="color:#c084fc;font-weight:700">⚡ COULÉ ⚡</span> <strong>${sunkShips.map(s => s.name).join(', ')}</strong>`; addLog(msg, 'sunk', 'player'); showToast(`Navire coulé !<br>${sunkShips.map(s => s.name).join(', ')}`, 'success'); } 
+  else if (hits > 0) { msg += `<span style="color:var(--hit);font-weight:700">TOUCHÉ</span>`; addLog(msg, 'hit', 'player'); } 
+  else { msg += `<span style="color:var(--miss);">Raté</span>`; addLog(msg, 'miss', 'player'); }
+  renderGrid1P('enemy-grid', 'enemy', false);
+  updateStatsUI1P(); updatePA1P(); renderWeapons1P('weapons-list'); renderAbilities1P('abilities-list');
+  const stats = getStats(); updateStats({ totalShots: stats.totalShots + 1 });
+  checkAchievementsDuringPlay();
+  const enemyAlive = state.ships.enemy.filter(s => !s.sunk).length;
+  if (enemyAlive === 0) { endGame1P(true); } else { state.isPlayerTurn = false; document.getElementById('combat-subtitle').textContent = 'En attente du tir adverse...'; }
+}
+
+const originalActivateAbility1P = activateAbility1P;
+activateAbility1P = function(shipId) {
+  if (state.mode === 'online') {
+    const ab = SHIP_ABILITIES[shipId]; 
+    if (ab.pattern === 'shield') { state.counterMeasure = true; state.abilityCooldowns[shipId] = ab.cooldown; state.tracking.shipAbilitiesUsed.push(shipId); sendNetData({ type: 'shield_activated' }); showToast('<strong>Contre-mesures</strong> activées !', 'success'); playSound('sonar'); } 
+    else if (ab.pattern === 'reveal') { state.abilityCooldowns[shipId] = ab.cooldown; state.tracking.shipAbilitiesUsed.push(shipId); sendNetData({ type: 'reveal_request' }); showToast('Demande de révélation envoyée...', 'info'); } 
+    else { state.activeAbility = shipId; showToast(`<strong>${ab.name}</strong> activé !`, 'success'); } 
+    checkAchievementsDuringPlay(); renderAbilities1P('abilities-list'); renderWeapons1P('weapons-list'); 
+  } else { originalActivateAbility1P(shipId); }
+};
+function handleNetRevealRequest() {
+  const unrevealed = [];
+  for (let r = 0; r < GRID_SIZE; r++) for (let c = 0; c < GRID_SIZE; c++) { const cd = state.boards.player[r][c]; if (cd.ship && !cd.hit && !cd.sonarRevealed) unrevealed.push({r, c}); } 
+  let result = null; if (unrevealed.length > 0) { result = unrevealed[Math.floor(Math.random() * unrevealed.length)]; } 
+  sendNetData({ type: 'reveal_result', coords: result });
+}
+function handleNetRevealResult(data) {
+  if (data.coords) { const r = data.coords.r, c = data.coords.c; state.boards.enemy[r][c].sonarRevealed = true; state.boards.enemy[r][c].sonarCount = 1; renderGrid1P('enemy-grid', 'enemy', false); const cellEl = document.querySelector(`#enemy-grid .cell[data-row="${r}"][data-col="${c}"]`); if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnSonar(rect.left + rect.width / 2, rect.top + rect.height / 2); } showToast('<strong>Révélation</strong> ! Navire ennemi localisé.', 'success'); } 
+  else { showToast('<strong>Révélation</strong> échouée.', 'danger'); }
+}
+
+function startPlacement1P() {
+  state.phase = 'placement'; document.body.className = '';
+  state.boards.player = createEmptyBoard(); state.boards.enemy = createEmptyBoard(); 
+  state.ships.player = []; state.ships.enemy = [];
+  state.selectedShipToPlace = null; state.placementOrientation = 'h';
+  state.isRandomPlacement = false; // Reset flag
+  if (state.mode === '1p') state.ships.enemy = randomPlacement(state.boards.enemy);
+  if (state.mode === 'online') state.ships.enemy = SHIPS.map(s => ({ ...s, sunk: false, cells: [] }));
+  state.playerReady = false; state.enemyReady = false;
+  showScreen('placement-screen'); renderPlacementScreen();
+}
+function startPlacement2P() {
+  state.phase = 'placement'; state.placementPhase = 'p1'; state.activePlayer = 'p1';
+  state.p1.name = state.p1Name || 'Joueur 1'; state.p2.name = state.p2Name || 'Joueur 2';
+  state.p1.board = createEmptyBoard(); state.p1.ships = []; state.p2.board = createEmptyBoard(); state.p2.ships = [];
+  state.selectedShipToPlace = null; state.placementOrientation = 'h'; state.activeAbility = null;
+  state.isRandomPlacement = false;
+  document.body.className = 'theme-p1'; showPassScreen('placement');
+}
+function renderPlacementScreen() {
+  const target = state.mode === '1p' || state.mode === 'online' ? 'player' : state.placementPhase;
+  const boardData = state.mode === '1p' || state.mode === 'online' ? state.boards.player : state[target].board;
+  const shipsData = state.mode === '1p' || state.mode === 'online' ? state.ships.player : state[target].ships;
+  const list = document.getElementById('ships-list'); list.innerHTML = '';
+  SHIPS.forEach(shipDef => {
+    const placed = shipsData.find(s => s.id === shipDef.id);
+    const card = document.createElement('div');
+    card.className = 'ship-card' + (state.selectedShipToPlace === shipDef.id ? ' active' : '') + (placed ? ' placed' : '');
+    const segs = Array.from({ length: shipDef.size }, () => '<div class="ship-preview-segment"></div>').join('');
+    card.innerHTML = `<div class="ship-preview">${segs}</div><div class="flex-1"><div class="font-semibold text-white text-sm">${shipDef.name}</div><div class="text-xs text-slate-400">${shipDef.size} cases</div></div><div class="text-xs font-bold ${placed ? 'text-green-400' : 'text-amber-400'}">${placed ? '✓' : ''}</div>`;
+    if (!placed) card.addEventListener('click', () => { state.selectedShipToPlace = shipDef.id; renderPlacementScreen(); });
+    list.appendChild(card);
+  });
+  const btn = document.getElementById('confirm-placement-btn');
+  if (state.mode === '2p') {
+    if (state.placementPhase === 'p1') { btn.textContent = 'Confirmer et passer à ' + state.p2.name; btn.disabled = state.p1.ships.length !== SHIPS.length; }
+    else { btn.textContent = 'Lancer la bataille'; btn.disabled = state.p2.ships.length !== SHIPS.length; }
+  } else if (state.mode === 'online') {
+    btn.textContent = state.playerReady ? 'En attente de l\'adversaire...' : 'Confirmer le déploiement';
+    btn.disabled = state.ships.player.length !== SHIPS.length || state.playerReady;
+  } else { btn.textContent = 'Confirmer le déploiement'; btn.disabled = state.ships.player.length !== SHIPS.length; }
+  renderPlacementGrid();
+}
+function renderPlacementGrid() {
+  const target = state.mode === '1p' || state.mode === 'online' ? 'player' : state.placementPhase;
+  const boardData = state.mode === '1p' || state.mode === 'online' ? state.boards.player : state[target].board;
+  const grid = document.getElementById('placement-grid'); grid.innerHTML = '';
+  grid.appendChild(document.createElement('div'));
+  for (let c = 0; c < GRID_SIZE; c++) { const l = document.createElement('div'); l.className = 'grid-label'; l.textContent = String.fromCharCode(65 + c); grid.appendChild(l); }
+  for (let r = 0; r < GRID_SIZE; r++) {
+    const rl = document.createElement('div'); rl.className = 'grid-label'; rl.textContent = (r + 1).toString(); grid.appendChild(rl);
+    for (let c = 0; c < GRID_SIZE; c++) {
+      const cell = document.createElement('div'); cell.className = 'cell'; cell.dataset.row = r; cell.dataset.col = c;
+      if (boardData[r][c].ship) cell.classList.add('cell-ship');
+      cell.addEventListener('click', () => handlePlacementClick(r, c));
+      cell.addEventListener('mouseenter', () => showPlacementPreview(r, c));
+      cell.addEventListener('mouseleave', () => clearPlacementPreview());
+      cell.addEventListener('contextmenu', e => { e.preventDefault(); state.placementOrientation = state.placementOrientation === 'h' ? 'v' : 'h'; showPlacementPreview(r, c); });
+      grid.appendChild(cell);
+    }
+  }
+}
+function showPlacementPreview(row, col) {
+  clearPlacementPreview(); if (!state.selectedShipToPlace) return;
+  const target = state.mode === '1p' || state.mode === 'online' ? 'player' : state.placementPhase;
+  const boardData = state.mode === '1p' || state.mode === 'online' ? state.boards.player : state[target].board;
+  const shipDef = SHIPS.find(s => s.id === state.selectedShipToPlace); if (!shipDef) return;
+  const o = state.placementOrientation; const valid = canPlaceShip(boardData, row, col, shipDef.size, o);
+  const dr = o === 'v' ? 1 : 0, dc = o === 'h' ? 1 : 0;
+  for (let i = 0; i < shipDef.size; i++) { const r = row + dr * i, c = col + dc * i; if (inBounds(r, c)) { const el = document.querySelector(`#placement-grid .cell[data-row="${r}"][data-col="${c}"]`); if (el && !boardData[r][c].ship) el.classList.add(valid ? 'cell-preview' : 'cell-preview-invalid'); } }
+}
+function clearPlacementPreview() { document.querySelectorAll('#placement-grid .cell-preview, #placement-grid .cell-preview-invalid').forEach(el => el.classList.remove('cell-preview', 'cell-preview-invalid')); }
+function handlePlacementClick(row, col) {
+  if (!state.selectedShipToPlace) { showToast('Sélectionnez d\'abord un navire.', 'info'); return; }
+  const target = state.mode === '1p' || state.mode === 'online' ? 'player' : state.placementPhase;
+  const boardData = state.mode === '1p' || state.mode === 'online' ? state.boards.player : state[target].board;
+  const shipsData = state.mode === '1p' || state.mode === 'online' ? state.ships.player : state[target].ships;
+  const shipDef = SHIPS.find(s => s.id === state.selectedShipToPlace);
+  if (!shipDef || !canPlaceShip(boardData, row, col, shipDef.size, state.placementOrientation)) { showToast('Placement invalide.', 'danger'); return; }
+  shipsData.push(placeShip(boardData, shipDef, row, col, state.placementOrientation));
+  state.selectedShipToPlace = null; state.isRandomPlacement = false; playSound('place'); renderPlacementScreen();
+}
+document.getElementById('rotate-btn').addEventListener('click', () => state.placementOrientation = state.placementOrientation === 'h' ? 'v' : 'h');
+document.addEventListener('keydown', e => { if (state.phase === 'placement' && (e.key === 'r' || e.key === 'R')) state.placementOrientation = state.placementOrientation === 'h' ? 'v' : 'h'; if (state.phase === 'combat' && (e.key === 'r' || e.key === 'R')) { state.weaponOrientation = state.weaponOrientation === 'h' ? 'v' : 'h'; updateOrientationDisplay(); } });
+document.getElementById('random-place-btn').addEventListener('click', () => { 
+  const target = state.mode === '1p' || state.mode === 'online' ? 'player' : state.placementPhase; 
+  if (state.mode === '1p' || state.mode === 'online') { state.boards.player = createEmptyBoard(); state.ships.player = randomPlacement(state.boards.player); } 
+  else { state[target].board = createEmptyBoard(); state[target].ships = randomPlacement(state[target].board); } 
+  state.selectedShipToPlace = null; state.isRandomPlacement = true; playSound('place'); renderPlacementScreen(); 
+});
+document.getElementById('clear-btn').addEventListener('click', () => { 
+  const target = state.mode === '1p' || state.mode === 'online' ? 'player' : state.placementPhase; 
+  if (state.mode === '1p' || state.mode === 'online') { state.boards.player = createEmptyBoard(); state.ships.player = []; } 
+  else { state[target].board = createEmptyBoard(); state[target].ships = []; } 
+  state.selectedShipToPlace = null; state.isRandomPlacement = false; renderPlacementScreen(); 
+});
+document.getElementById('confirm-placement-btn').addEventListener('click', () => { 
+  if (state.mode === '1p' && state.ships.player.length === SHIPS.length) startCombat1P(); 
+  else if (state.mode === 'online' && state.ships.player.length === SHIPS.length && !state.playerReady) { state.playerReady = true; sendNetData({ type: 'placement_done' }); renderPlacementScreen(); checkOnlineCombatStart(); }
+  else if (state.mode === '2p') { 
+    if (state.placementPhase === 'p1' && state.p1.ships.length === SHIPS.length) { state.selectedShipToPlace = null; state.placementPhase = 'p2'; state.activePlayer = 'p2'; showPassScreen('placement'); } 
+    else if (state.placementPhase === 'p2' && state.p2.ships.length === SHIPS.length) { initCombat2P(); state.activePlayer = 'p1'; showPassScreen('combat'); } 
+  } 
+});
+
+function showPassScreen(type) {
+  const next = state.activePlayer; const nextName = state[next].name; const themeClass = next === 'p1' ? 'theme-p1' : 'theme-p2';
+  document.body.className = themeClass;
+  let title = "TRANSMISSION SÉCURISÉE"; let msg = `Passez l'appareil à <span style="color: var(--accent); font-weight: bold;">${nextName}</span>`;
+  if (type === 'placement') { title = "DÉPLOIEMENT DE LA FLOTTE"; msg = `Passez l'appareil à <span style="color: var(--accent); font-weight: bold;">${nextName}</span><br><span class="text-xs">Placez vos ${SHIPS.length} navires sur la grille.</span>`; }
+  document.getElementById('pass-title').textContent = title; document.getElementById('pass-msg').innerHTML = msg;
+  const actionCard = document.getElementById('pass-action-card');
+  if (state.lastAction2P && type === 'combat') { actionCard.classList.remove('hidden'); document.getElementById('pass-action-text').innerHTML = state.lastAction2P; } else { actionCard.classList.add('hidden'); }
+  document.getElementById('pass-screen-2p').style.display = 'flex';
+  document.getElementById('placement-screen').classList.add('hidden'); document.getElementById('combat-screen-2p').classList.add('hidden');
+}
+document.getElementById('pass-reveal-btn').addEventListener('click', () => {
+  document.getElementById('pass-screen-2p').style.display = 'none';
+  if (state.phase === 'placement') { showScreen('placement-screen'); renderPlacementScreen(); } 
+  else { state.peeking = false; state.isPlayerTurn = true; state.selectedWeapon = 'standard'; showScreen('combat-screen-2p'); renderCombat2P(); }
+});
+
+function startCombat1P() {
+  state.phase = 'combat'; state.pa = { player: 3, bot: 3 }; state.paGained = 0; state.paSpent = 0;
+  state.selectedWeapon = 'standard'; state.isPlayerTurn = state.mode === 'online' ? state.net.isHost : true; state.botMemory = createBotMemory();
+  state.shots = { player: 0, bot: 0 }; state.hits = { player: 0, bot: 0 }; state.sunk = { player: 0, bot: 0 };
+  state.abilitiesUsed = {}; state.abilityCooldowns = {}; state.activeAbility = null; state.counterMeasure = false;
+  state.tracking = resetTracking(); state.newlyUnlocked = []; state.turnCount = 0;
+  SHIPS.forEach(s => state.abilityCooldowns[s.id] = SHIP_ABILITIES[s.id].cooldown); 
+  const logC = document.getElementById('log-container'); if (logC) logC.innerHTML = '';
+  if (state.mode === '1p') { const stats = getStats(); updateStats({ gamesPlayed: stats.gamesPlayed + 1 }); }
+  showScreen('combat-screen'); renderCombat1P(); addLog('Engagement initié. À vous de jouer.', 'info', 'player');
+  if (state.mode === '1p') checkAchievementsDuringPlay();
+}
+function renderCombat1P() { renderGrid1P('enemy-grid', 'enemy', false); renderGrid1P('player-grid', 'player', true); renderWeapons1P('weapons-list'); renderAbilities1P('abilities-list'); updateStatsUI1P(); updatePA1P(); updateOrientationDisplay(); document.getElementById('enemy-ships-info').textContent = `${state.ships.enemy.filter(s => !s.sunk).length} navires`; document.getElementById('player-ships-info').textContent = `${state.ships.player.filter(s => !s.sunk).length} navires`; }
+function renderGrid1P(gridId, target, isPlayerGrid) { 
+  const grid = document.getElementById(gridId); if (!grid) return; 
+  grid.innerHTML = ''; grid.appendChild(document.createElement('div')); 
+  for (let c = 0; c < GRID_SIZE; c++) { const l = document.createElement('div'); l.className = 'grid-label'; l.textContent = String.fromCharCode(65 + c); grid.appendChild(l); } 
+  for (let r = 0; r < GRID_SIZE; r++) { 
+    const rl = document.createElement('div'); rl.className = 'grid-label'; rl.textContent = (r + 1).toString(); grid.appendChild(rl); 
+    for (let c = 0; c < GRID_SIZE; c++) { 
+      const cell = document.createElement('div'); cell.className = 'cell' + (isPlayerGrid ? ' cell-disabled' : ''); cell.dataset.row = r; cell.dataset.col = c; 
+      const cd = state.boards[target][r][c]; 
+      if (cd.ship && (isPlayerGrid || cd.hit)) { cell.classList.add('cell-ship'); if (cd.ship.sunk) cell.classList.add('cell-ship-sunk'); } 
+      if (cd.hit) cell.classList.add('cell-hit'); else if (cd.miss) cell.classList.add('cell-miss'); 
+      else if (cd.sonarRevealed) { cell.classList.add('cell-sonar-revealed'); if (cd.sonarCount !== null && cd.sonarCount > 0) cell.innerHTML = `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent);font-size:14px;">${cd.sonarCount}</div>`; } 
+      if (state.counterMeasure && cd.ship && !cd.ship.sunk && cd.ship.id === 'patrol' && isPlayerGrid) { const shield = document.createElement('div'); shield.className = 'shield-indicator'; shield.innerHTML = '🛡'; cell.appendChild(shield); } 
+      if (!isPlayerGrid) { cell.addEventListener('click', () => handleEnemyClick1P(r, c)); cell.addEventListener('mouseenter', () => showWeaponPreview1P(r, c, 'enemy-grid')); cell.addEventListener('mouseleave', () => clearWeaponPreview('enemy-grid')); cell.addEventListener('contextmenu', e => { e.preventDefault(); state.weaponOrientation = state.weaponOrientation === 'h' ? 'v' : 'h'; updateOrientationDisplay(); showWeaponPreview1P(r, c, 'enemy-grid'); }); } 
+      grid.appendChild(cell); 
+    } 
+  } 
+}
+function clearWeaponPreview(gridId) { document.querySelectorAll(`#${gridId} .cell-weapon-preview`).forEach(el => el.classList.remove('cell-weapon-preview')); }
+function showWeaponPreview1P(row, col, gridId) { 
+  clearWeaponPreview(gridId); if (!state.isPlayerTurn || state.isAnimating) return; 
+  const w = WEAPONS[state.selectedWeapon]; const cost = state.activeAbility ? 0 : w.cost; 
+  if (state.pa.player < cost) return; 
+  let cells; if (state.activeAbility) { const ab = SHIP_ABILITIES[state.activeAbility]; cells = getAbilityCells(row, col, ab.pattern); } 
+  else { cells = getWeaponCells(row, col, state.selectedWeapon, state.weaponOrientation); } 
+  cells.forEach(([r, c]) => { if (inBounds(r, c)) { const el = document.querySelector(`#${gridId} .cell[data-row="${r}"][data-col="${c}"]`); if (el && !state.boards.enemy[r][c].hit && !state.boards.enemy[r][c].miss) el.classList.add('cell-weapon-preview'); } }); 
+}
+function renderWeapons1P(containerId) { const container = document.getElementById(containerId); if (!container) return; container.innerHTML = ''; Object.entries(WEAPONS).forEach(([key, w]) => { if (!state.enabledWeapons[key] && !state.activeAbility) return; if (!state.enabledWeapons[key] && state.activeAbility !== key) return; const isFree = state.activeAbility === key; const cost = isFree ? 0 : w.cost; const canAfford = state.pa.player >= cost; const btn = document.createElement('div'); btn.className = 'weapon-btn' + (state.selectedWeapon === key ? ' active' : '') + (!canAfford ? ' weapon-disabled' : ''); btn.innerHTML = `<div class="pa-cost ${isFree ? 'free' : ''}">${isFree ? '0' : cost}</div><div class="weapon-icon">${getWeaponIcon(w.icon)}</div><div class="text-xs font-semibold text-white">${w.name}</div>`; if (canAfford) btn.addEventListener('click', () => { state.selectedWeapon = key; renderWeapons1P(containerId); }); container.appendChild(btn); }); }
+function renderAbilities1P(containerId) { const container = document.getElementById(containerId); if (!container) return; container.innerHTML = ''; if (!state.shipAbilitiesEnabled) { container.innerHTML = '<div class="text-xs text-slate-500 text-center py-2">Capacités désactivées</div>'; return; } SHIPS.forEach(s => { 
+    const ab = SHIP_ABILITIES[s.id]; const ship = state.ships.player.find(ps => ps.id === s.id); const isSunk = ship && ship.sunk; 
+    const cooldown = state.abilityCooldowns[s.id] || 0; const isReady = cooldown === 0 && !isSunk && state.isPlayerTurn; 
+    let cls = 'ability-card'; 
+    if (state.activeAbility === s.id || (state.counterMeasure && s.id === 'patrol')) cls += ' active'; 
+    else if (isSunk) cls += ' sunk'; else if (!isReady) cls += ' cooldown'; else cls += ' available'; 
+    const statusText = isSunk ? '<span style="color:var(--hit)">Coulé</span>' : (state.activeAbility === s.id || (state.counterMeasure && s.id === 'patrol')) ? '<span style="color:var(--accent)">Actif</span>' : isReady ? '<span style="color:var(--success)">Prêt</span>' : `<span style="color:var(--text-dim)">${cooldown}t</span>`; 
+    const el = document.createElement('div'); el.className = cls; 
+    el.innerHTML = `<div class="ability-icon" style="color:${isReady ? 'var(--accent)' : 'var(--text-dim)'}">${ab.icon}</div><div class="flex-1 min-w-0"><div class="flex justify-between items-center"><span class="text-xs font-bold text-white truncate">${ab.name}</span><span class="text-xs flex-shrink-0 ml-2">${statusText}</span></div><div class="text-xs text-slate-400 truncate">${ab.desc}</div></div>`; 
+    if (isReady) el.addEventListener('click', () => activateAbility1P(s.id)); container.appendChild(el); 
+  }); 
+}
+function activateAbility1P(shipId) { 
+  const ab = SHIP_ABILITIES[shipId]; 
+  if (ab.pattern === 'shield') { state.counterMeasure = true; state.abilityCooldowns[shipId] = ab.cooldown; state.tracking.shipAbilitiesUsed.push(shipId); showToast('<strong>Contre-mesures</strong> activées !', 'success'); playSound('sonar'); } 
+  else if (ab.pattern === 'reveal') { 
+    const unrevealed = []; for (let r = 0; r < GRID_SIZE; r++) for (let c = 0; c < GRID_SIZE; c++) { const cd = state.boards.enemy[r][c]; if (cd.ship && !cd.hit && !cd.sonarRevealed) unrevealed.push([r, c]); } 
+    if (unrevealed.length > 0) { const [r, c] = unrevealed[Math.floor(Math.random() * unrevealed.length)]; state.boards.enemy[r][c].sonarRevealed = true; state.boards.enemy[r][c].sonarCount = 1; renderGrid1P('enemy-grid', 'enemy', false); const cellEl = document.querySelector(`#enemy-grid .cell[data-row="${r}"][data-col="${c}"]`); if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnSonar(rect.left + rect.width / 2, rect.top + rect.height / 2); } } 
+    state.abilityCooldowns[shipId] = ab.cooldown; state.tracking.shipAbilitiesUsed.push(shipId); showToast('<strong>Révélation</strong> !', 'success'); playSound('sonar'); 
+  } else { state.activeAbility = shipId; showToast(`<strong>${ab.name}</strong> activé !`, 'success'); } 
+  checkAchievementsDuringPlay(); renderAbilities1P('abilities-list'); renderWeapons1P('weapons-list'); 
+}
+function updateStatsUI1P() { document.getElementById('stat-shots').textContent = state.shots.player; document.getElementById('stat-hits').textContent = state.hits.player; const acc = state.shots.player > 0 ? Math.round((state.hits.player / state.shots.player) * 100) : 0; document.getElementById('stat-acc').textContent = state.shots.player > 0 ? acc + '%' : '—'; }
+function updatePA1P() { document.getElementById('player-pa').textContent = state.pa.player; }
+function updateOrientationDisplay() { const el = document.getElementById('orient-display'); if (el) el.textContent = state.weaponOrientation === 'h' ? '↔ H' : '↕ V'; const fab = document.getElementById('orientation-fab'); if (fab && state.phase === 'combat' && (state.selectedWeapon === 'line' || state.selectedWeapon === 'diagonal')) fab.classList.add('visible'); else if (fab) fab.classList.remove('visible'); }
+document.getElementById('orientation-fab').addEventListener('click', () => { state.weaponOrientation = state.weaponOrientation === 'h' ? 'v' : 'h'; updateOrientationDisplay(); });
+document.getElementById('orientation-combat-btn').addEventListener('click', () => { state.weaponOrientation = state.weaponOrientation === 'h' ? 'v' : 'h'; updateOrientationDisplay(); });
+document.getElementById('surrender-btn').addEventListener('click', () => { if (state.mode === 'online') sendNetData({ type: 'surrender' }); showToast('<strong>Abandon</strong>', 'danger', 2000); setTimeout(() => endGame1P(false), 800); });
+
+function handleEnemyClick1P(row, col) {
+  if (!state.isPlayerTurn || state.isAnimating) { showToast('Patientez...', 'info', 1200); return; }
+  const w = WEAPONS[state.selectedWeapon]; const cost = state.activeAbility ? 0 : w.cost;
+  if (state.pa.player < cost) { showToast(`Pas assez de PA`, 'danger'); return; }
+  let cells; let weaponType = state.selectedWeapon;
+  if (state.activeAbility) { const ab = SHIP_ABILITIES[state.activeAbility]; cells = getAbilityCells(row, col, ab.pattern); weaponType = 'standard'; } 
+  else { cells = getWeaponCells(row, col, state.selectedWeapon, state.weaponOrientation); }
+  const valid = cells.filter(([r, c]) => inBounds(r, c) && !state.boards.enemy[r][c].hit && !state.boards.enemy[r][c].miss);
+  if (valid.length === 0) { showToast('Cases déjà ciblées.', 'info', 1200); return; }
+  state.pa.player -= cost; state.paSpent += cost;
+  const wasFirstShot = state.shots.player === 0; const usedAbility = state.activeAbility;
+  if (state.activeAbility) { state.abilityCooldowns[state.activeAbility] = SHIP_ABILITIES[state.activeAbility].cooldown; state.tracking.shipAbilitiesUsed.push(state.activeAbility); state.activeAbility = null; }
+  if (weaponType !== 'standard' || usedAbility) state.tracking.usedSpecialWeapon = true;
+  executeWeapon1P(state.boards.enemy, cells, 'player', weaponType, usedAbility ? 'ability' : (weaponType !== 'standard' ? 'special' : 'standard'));
+  if (wasFirstShot) { state.tracking.firstShotHit = state.boards.enemy[row][col].hit; }
+  if (!state.tracking.weaponsUsed.includes(weaponType)) state.tracking.weaponsUsed.push(weaponType);
+  if (weaponType === 'sonar') state.tracking.sonarUses++;
+  const stats = getStats(); updateStats({ totalShots: stats.totalShots + 1 });
+  checkAchievementsDuringPlay();
+  state.isPlayerTurn = false; state.isAnimating = true; state.turnCount++;
+  renderAbilities1P('abilities-list'); renderWeapons1P('weapons-list'); updatePA1P();
+  if (checkVictory1P()) { state.isAnimating = false; return; }
+  document.getElementById('combat-subtitle').textContent = 'L\'ennemi prépare son tir...';
+  setTimeout(() => botTurn(), 800);
+}
+function executeWeapon1P(board, cells, owner, weaponType, source = 'standard') {
+  if (weaponType === 'sonar' && source !== 'ability') {
+    let count = 0; cells.forEach(([r, c]) => { if (inBounds(r, c)) { board[r][c].sonarRevealed = true; if (board[r][c].ship) count++; } });
+    if (cells.length > 0) { const [cr, cc] = cells[Math.floor(cells.length / 2)]; if (inBounds(cr, cc)) board[cr][cc].sonarCount = count; }
+    if (owner === 'player') state.tracking.sonarMaxShips = Math.max(state.tracking.sonarMaxShips, count);
+    playSound('sonar'); const center = document.querySelector(`#enemy-grid .cell[data-row="${cells[4] ? cells[4][0] : cells[0][0]}"][data-col="${cells[4] ? cells[4][1] : cells[0][1]}"]`);
+    if (center) { const rect = center.getBoundingClientRect(); spawnSonar(rect.left + rect.width / 2, rect.top + rect.height / 2); }
+    addLog(`Sonar — ${count} navire${count > 1 ? 's' : ''} détecté${count > 1 ? 's' : ''}.`, 'info', owner); renderGrid1P('enemy-grid', 'enemy', false); return;
+  }
+  let hits = 0; let sunkShips = [];
+  cells.forEach(([r, c]) => {
+    if (!inBounds(r, c)) return; const cd = board[r][c]; if (cd.hit || cd.miss) return;
+    const cellEl = document.querySelector(owner === 'player' ? `#enemy-grid .cell[data-row="${r}"][data-col="${c}"]` : `#player-grid .cell[data-row="${r}"][data-col="${c}"]`);
+    if (owner === 'bot' && state.counterMeasure && cd.ship && !cd.ship.sunk) { state.counterMeasure = false; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } showToast('Tir dévié !', 'success'); addLog('Tir dévié par contre-mesures.', 'miss', 'bot'); return; }
+    if (cd.ship) { cd.hit = true; hits++; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); } if (!cd.ship.sunk && isShipSunk(board, cd.ship)) { cd.ship.sunk = true; sunkShips.push(cd.ship); } } 
+    else { cd.miss = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } }
+  });
+  if (hits > 0) { playSound('hit'); if (sunkShips.length > 0) setTimeout(() => playSound('sunk'), 300); } else playSound('miss');
+  state.shots[owner]++;
+  if (owner === 'player') {
+    if (hits > 0) { state.tracking.consecutiveHits += hits; state.tracking.maxConsecutiveHits = Math.max(state.tracking.maxConsecutiveHits, state.tracking.consecutiveHits); state.tracking.maxMultiHit = Math.max(state.tracking.maxMultiHit, hits); } else state.tracking.consecutiveHits = 0;
+    state.hits.player += hits; state.sunk.player += sunkShips.length; state.pa.player += hits + sunkShips.length * 2; state.paGained += hits + sunkShips.length * 2;
+    if (sunkShips.length > 0) { state.tracking.maxShipsSunkInOneTurn = Math.max(state.tracking.maxShipsSunkInOneTurn, sunkShips.length); if (source === 'special' || source === 'ability') state.tracking.specialKill = true; if (!state.tracking.firstShipSunkId) state.tracking.firstShipSunkId = sunkShips[0].id; }
+    cells.forEach(([r, c]) => { if (inBounds(r, c) && board[r][c].ship) { state.tracking.shipsHit.add(board[r][c].ship.id); if (board[r][c].ship.id === 'carrier') state.tracking.carrierHits++; } });
+  } else { state.hits.bot += hits; state.sunk.bot += sunkShips.length; if (sunkShips.length > 0) state.tracking.shipsLostByPlayer += sunkShips.length; state.tracking.playerHitsReceived += hits; }
+  const wName = source === 'ability' ? 'Capacité' : (weaponType !== 'standard' ? WEAPONS[weaponType].name : '');
+  let msg = wName ? `${state.playerName || 'Vous'} utilise <strong>${wName}</strong>. ` : '';
+  if (hits > 0 && sunkShips.length > 0) { msg += `<span style="color:#c084fc;font-weight:700">⚡ COULÉ ⚡</span> <strong>${sunkShips.map(s => s.name).join(', ')}</strong>`; addLog(msg, 'sunk', owner); if (owner === 'player') showToast(`Navire coulé !<br>${sunkShips.map(s => s.name).join(', ')}`, 'success'); } 
+  else if (hits > 0) { msg += `<span style="color:var(--hit);font-weight:700">TOUCHÉ</span>`; addLog(msg, 'hit', owner); } 
+  else { msg += `<span style="color:var(--miss);">Raté</span>`; addLog(msg, 'miss', owner); }
+  if (owner === 'player') renderGrid1P('enemy-grid', 'enemy', false); else renderGrid1P('player-grid', 'player', true);
+  updateStatsUI1P(); updatePA1P(); renderWeapons1P('weapons-list'); renderAbilities1P('abilities-list');
+}
+function checkVictory1P() { const enemyAlive = state.ships.enemy.filter(s => !s.sunk).length; const playerAlive = state.ships.player.filter(s => !s.sunk).length; if (enemyAlive === 0) { endGame1P(true); return true; } if (playerAlive === 0) { endGame1P(false); return true; } return false; }
+function endGame1P(playerWon) { 
+  state.phase = 'end'; showScreen('end-screen'); 
+  setTimeout(() => { 
+    try {
+      playSound(playerWon ? 'victory' : 'defeat'); checkAchievementsDuringPlay(); 
+      if (state.mode === '1p') { 
+        const stats = getStats(); if (playerWon) { updateStats({ gamesWon: stats.gamesWon + 1 }); let diffs = stats.difficultiesBeaten || []; if (!diffs.includes(state.difficulty)) diffs.push(state.difficulty); updateStats({ difficultiesBeaten: diffs }); } 
+        checkEndAchievements(playerWon); 
+        const finalUnlocked = getUnlockedAchievements(); if (finalUnlocked.length >= ACHIEVEMENTS.length - 1 && !finalUnlocked.includes('ach_all')) { if (unlockAchievement('ach_all')) state.newlyUnlocked.push('ach_all'); } 
+        const score = calculateScore(playerWon); state.lastScore = score; 
+        if (playerWon) addScore({ score, difficulty: state.difficulty, date: new Date().toISOString(), shots: state.shots.player, hits: state.hits.player, accuracy: state.shots.player > 0 ? Math.round((state.hits.player / state.shots.player) * 100) : 0, sunk: state.sunk.player, playerName: state.playerName || 'Anonyme' }); 
+      } 
+      if (state.mode === 'online' && playerWon) { const stats = getStats(); updateStats({ onlineGamesWon: (stats.onlineGamesWon || 0) + 1 }); checkEndAchievements(playerWon); } 
+      const icon = document.getElementById('end-icon'); const title = document.getElementById('end-title'); const subtitle = document.getElementById('end-subtitle'); const scoreDisplay = document.getElementById('end-score-display'); const statsGrid = document.getElementById('end-stats-grid'); statsGrid.classList.remove('hidden'); 
+      if (playerWon) { 
+        icon.innerHTML = `<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ffb627" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#ffb627" fill-opacity="0.2"/></svg>`; 
+        title.textContent = 'VICTOIRE'; title.className = 'font-display text-4xl md:text-6xl mb-4 victory-text'; title.style.color = 'var(--accent)'; subtitle.textContent = `Flotte ennemie anéantie.`; 
+        if (state.mode === '1p') { scoreDisplay.classList.remove('hidden'); document.getElementById('end-score').textContent = state.lastScore; } else { scoreDisplay.classList.add('hidden'); } 
+      } else { 
+        icon.innerHTML = `<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ff3d2e" stroke-width="2"><path d="M12 2L2 22h20L12 2z" fill="#ff3d2e" fill-opacity="0.2"/><path d="M12 9v4M12 17h.01" stroke="#ff3d2e" stroke-width="2.5"/></svg>`; 
+        title.textContent = 'DÉFAITE'; title.className = 'font-display text-4xl md:text-6xl mb-4 defeat-text'; title.style.color = 'var(--hit)'; subtitle.textContent = 'Votre flotte a été détruite.'; scoreDisplay.classList.add('hidden'); 
+      } 
+      document.getElementById('end-shots').textContent = state.shots.player; document.getElementById('end-hits').textContent = state.hits.player; 
+      const acc = state.shots.player > 0 ? Math.round((state.hits.player / state.shots.player) * 100) : 0; document.getElementById('end-acc').textContent = acc + '%'; document.getElementById('end-sunk').textContent = state.sunk.player; 
+      const achEl = document.getElementById('end-achievements'); 
+      if (state.newlyUnlocked.length > 0) { achEl.innerHTML = `<div class="text-sm text-amber-400 font-bold uppercase tracking-widest mb-3">Nouveaux succès (${state.newlyUnlocked.length})</div><div class="grid grid-cols-1 md:grid-cols-2 gap-2">${state.newlyUnlocked.map(id => { const a = ACHIEVEMENTS.find(x => x.id === id); if (!a) return ''; return `<div class="achievement-card unlocked"><div class="achievement-icon rarity-${a.rarity}">${a.icon}</div><div class="flex-1 min-w-0"><div class="font-bold text-sm text-white truncate">${a.name}</div><div class="text-xs text-slate-400 truncate">${a.desc}</div></div></div>`; }).join('')}</div>`; } 
+      else { achEl.innerHTML = ''; } 
+    } catch (e) { console.error("Erreur lors de l'affichage de l'écran de fin:", e); }
+    if (state.mode === 'online') resetOnlineMode(); 
+  }, 800); 
+}
+function calculateScore(playerWon) { if (!playerWon) return 0; const diff = DIFFICULTIES.find(d => d.id === state.difficulty) || { mult: 1 }; const acc = state.shots.player > 0 ? state.hits.player / state.shots.player : 0; const shipsLost = state.tracking.shipsLostByPlayer; const shipsRemaining = 5 - shipsLost; let score = 1000; score += state.hits.player * 50; score += state.sunk.player * 200; score += shipsRemaining * 150; score += state.pa.player * 25; score += Math.round(acc * 500); score -= state.shots.player * 10; if (shipsRemaining === 5) score = Math.round(score * 1.2); return Math.max(0, Math.round(score * diff.mult)); }
+
+function botTurn() { const diff = state.difficulty; let action; if (diff === 'recrue') action = botRecrue(); else if (diff === 'tactique') action = botTactique(); else if (diff === 'stratege') action = botStratege(); else action = botAmiral(); if (!action) action = botRecrue(); const cells = getWeaponCells(action.target[0], action.target[1], action.type, action.orientation || 'h'); state.selectedWeapon = action.type; state.isAnimating = true; const targetCell = document.querySelector(`#player-grid .cell[data-row="${action.target[0]}"][data-col="${action.target[1]}"]`); if (targetCell) { targetCell.classList.add('cell-flash'); setTimeout(() => targetCell.classList.remove('cell-flash'), 400); } setTimeout(() => { executeWeapon1P(state.boards.player, cells, 'bot', action.type); state.pa.bot -= WEAPONS[action.type].cost; updateBotMemory(action.target[0], action.target[1]); setTimeout(() => { state.isAnimating = false; if (checkVictory1P()) return; state.isPlayerTurn = true; state.selectedWeapon = 'standard'; SHIPS.forEach(s => { if (state.abilityCooldowns[s.id] > 0) state.abilityCooldowns[s.id]--; }); document.getElementById('combat-subtitle').textContent = 'À vous de jouer, commandant.'; renderWeapons1P('weapons-list'); renderAbilities1P('abilities-list'); checkAchievementsDuringPlay(); }, 800); }, 400); }
+function getValidShots(board) { const v = []; for (let r = 0; r < GRID_SIZE; r++) for (let c = 0; c < GRID_SIZE; c++) if (!board[r][c].hit && !board[r][c].miss) v.push([r, c]); return v; }
+function botRecrue() { const v = getValidShots(state.boards.player); return { type: 'standard', target: v[Math.floor(Math.random() * v.length)] }; }
+function botTactique() { const m = state.botMemory, board = state.boards.player; if (m.targets.length > 0) { const t = m.targets[0]; if (m.currentDirection) { const [dr, dc] = m.currentDirection; for (const [r, c] of [[t[0] + dr, t[1] + dc], [t[0] - dr, t[1] - dc]]) if (inBounds(r, c) && !board[r][c].hit && !board[r][c].miss) return { type: 'standard', target: [r, c] }; m.currentDirection = null; } for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) { const r = t[0] + dr, c = t[1] + dc; if (inBounds(r, c) && !board[r][c].hit && !board[r][c].miss) return { type: 'standard', target: [r, c] }; } m.targets.shift(); m.currentDirection = null; } let valid = getValidShots(board).filter(([r, c]) => (r + c) % 2 === 0); if (valid.length === 0) valid = getValidShots(board); return { type: 'standard', target: valid[Math.floor(Math.random() * valid.length)] }; }
+function botStratege() { const m = state.botMemory, board = state.boards.player; if (m.targets.length > 0) { if (m.targets.length >= 2) { const t1 = m.targets[0], t2 = m.targets[1]; const dr = Math.sign(t2[0] - t1[0]), dc = Math.sign(t2[1] - t1[1]); m.currentDirection = [dr, dc]; const tries = []; let r = t2[0] + dr, c = t2[1] + dc; while (inBounds(r, c) && board[r][c].hit) { r += dr; c += dc; } if (inBounds(r, c) && !board[r][c].hit && !board[r][c].miss) tries.push([r, c]); r = t1[0] - dr; c = t1[1] - dc; while (inBounds(r, c) && board[r][c].hit) { r -= dr; c -= dc; } if (inBounds(r, c) && !board[r][c].hit && !board[r][c].miss) tries.push([r, c]); if (tries.length > 0) return { type: 'standard', target: tries[0] }; } const t = m.targets[0]; for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) { const r = t[0] + dr, c = t[1] + dc; if (inBounds(r, c) && !board[r][c].hit && !board[r][c].miss) return { type: 'standard', target: [r, c] }; } m.targets.shift(); } if (state.pa.bot >= 2 && Math.random() < 0.12) { const v = getValidShots(board); if (v.length > 15) return { type: 'sonar', target: v[Math.floor(Math.random() * v.length)] }; } let valid = getValidShots(board).filter(([r, c]) => (r + c) % 2 === 0); if (valid.length === 0) valid = getValidShots(board); return { type: 'standard', target: valid[Math.floor(Math.random() * valid.length)] }; }
+function botAmiral() { const m = state.botMemory, board = state.boards.player; function probs() { const p = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(0)); const remaining = SHIPS.filter(s => { const ps = state.ships.player.find(x => x.id === s.id); return !ps || !ps.sunk; }); for (const sd of remaining) for (const o of ['h', 'v']) { const dr = o === 'v' ? 1 : 0, dc = o === 'h' ? 1 : 0; for (let r = 0; r < GRID_SIZE; r++) for (let c = 0; c < GRID_SIZE; c++) { let ok = true; for (let i = 0; i < sd.size; i++) { const nr = r + dr * i, nc = c + dc * i; if (!inBounds(nr, nc) || board[nr][nc].miss) { ok = false; break; } if (board[nr][nc].hit && board[nr][nc].ship && board[nr][nc].ship.id !== sd.id) { ok = false; break; } } if (ok) for (let i = 0; i < sd.size; i++) { const nr = r + dr * i, nc = c + dc * i; if (!board[nr][nc].hit && !board[nr][nc].miss) p[nr][nc]++; } } } m.targets.forEach(([tr, tc]) => { for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) for (let d = 1; d <= 3; d++) { const r = tr + dr * d, c = tc + dc * d; if (inBounds(r, c) && !board[r][c].hit && !board[r][c].miss) p[r][c] += 10 / d; } }); return p; } if (m.targets.length > 0) { if (m.targets.length >= 2 && state.pa.bot >= 3) { const t1 = m.targets[0], t2 = m.targets[1]; const dr = Math.sign(t2[0] - t1[0]); return { type: 'line', target: t1, orientation: dr !== 0 ? 'v' : 'h' }; } if (state.pa.bot >= 5 && m.targets.length === 1) return { type: 'cross', target: m.targets[0] }; const t = m.targets[0]; for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) { const r = t[0] + dr, c = t[1] + dc; if (inBounds(r, c) && !board[r][c].hit && !board[r][c].miss) return { type: 'standard', target: [r, c] }; } m.targets.shift(); } const p = probs(); let max = 0, best = []; for (let r = 0; r < GRID_SIZE; r++) for (let c = 0; c < GRID_SIZE; c++) if (!board[r][c].hit && !board[r][c].miss) { if (p[r][c] > max) { max = p[r][c]; best = [[r, c]]; } else if (p[r][c] === max && max > 0) best.push([r, c]); } if (best.length === 0) { const v = getValidShots(board); return { type: 'standard', target: v[Math.floor(Math.random() * v.length)] }; } return { type: 'standard', target: best[Math.floor(Math.random() * best.length)] }; }
+function updateBotMemory(r, c) { const m = state.botMemory; m.lastShot = [r, c]; const cd = state.boards.player[r][c]; if (cd.hit && cd.ship) { if (!cd.ship.sunk) { if (!m.targets.some(t => t[0] === r && t[1] === c)) m.targets.push([r, c]); } else { m.targets = []; m.currentDirection = null; } } }
+
+function initCombat2P() { state.phase = 'combat'; state.activeAbility = null; state.selectedWeapon = 'standard'; state.weaponOrientation = 'h'; state.p1.pa = 3; state.p2.pa = 3; state.p1.abilitiesUsed = {}; state.p2.abilitiesUsed = {}; state.p1.abilityCooldowns = {}; state.p2.abilityCooldowns = {}; state.p1.activeAbility = null; state.p2.activeAbility = null; state.p1.counterMeasure = false; state.p2.counterMeasure = false; state.p1.shots = 0; state.p1.hits = 0; state.p1.sunk = 0; state.p2.shots = 0; state.p2.hits = 0; state.p2.sunk = 0; SHIPS.forEach(s => { state.p1.abilityCooldowns[s.id] = SHIP_ABILITIES[s.id].cooldown; state.p2.abilityCooldowns[s.id] = SHIP_ABILITIES[s.id].cooldown; }); state.lastAction2P = ''; state.peeking = false; state.isPlayerTurn = true; const logC = document.getElementById('p2p-log-container'); if (logC) logC.innerHTML = ''; }
+function renderCombat2P() { const ap = state.activePlayer; const opp = ap === 'p1' ? 'p2' : 'p1'; document.body.className = ap === 'p1' ? 'theme-p1' : 'theme-p2'; document.getElementById('p2p-title').textContent = state[ap].name; document.getElementById('p2p-subtitle').textContent = state.peeking ? 'Votre flotte (Vue tactique)' : `Grille de ${state[opp].name}`; document.getElementById('p2p-pa').textContent = state[ap].pa; document.getElementById('p2p-peek-btn').textContent = state.peeking ? 'Grille de tir' : 'Vision Flotte'; document.getElementById('p2p-peek-btn').onclick = () => { state.peeking = !state.peeking; renderCombat2P(); }; const container = document.getElementById('p2p-grid-container'); container.innerHTML = ''; if (state.peeking) { const div = document.createElement('div'); div.className = 'grid-board'; div.id = 'p2p-self-grid'; container.appendChild(div); renderGrid2P('p2p-self-grid', state[ap].board, true); } else { const div = document.createElement('div'); div.className = 'grid-board'; div.id = 'p2p-enemy-grid'; container.appendChild(div); renderGrid2P('p2p-enemy-grid', state[opp].board, false); } renderWeapons2P('p2p-weapons-list'); renderAbilities2P('p2p-abilities-list'); }
+function renderGrid2P(gridId, boardData, isPlayerGrid) { const ap = state.activePlayer; const grid = document.getElementById(gridId); if (!grid) return; grid.innerHTML = ''; grid.appendChild(document.createElement('div')); for (let c = 0; c < GRID_SIZE; c++) { const l = document.createElement('div'); l.className = 'grid-label'; l.textContent = String.fromCharCode(65 + c); grid.appendChild(l); } for (let r = 0; r < GRID_SIZE; r++) { const rl = document.createElement('div'); rl.className = 'grid-label'; rl.textContent = (r + 1).toString(); grid.appendChild(rl); for (let c = 0; c < GRID_SIZE; c++) { const cell = document.createElement('div'); cell.className = 'cell' + (isPlayerGrid ? ' cell-disabled' : ''); cell.dataset.row = r; cell.dataset.col = c; const cd = boardData[r][c]; if (cd.ship && (isPlayerGrid || cd.hit)) { cell.classList.add('cell-ship'); if (cd.ship.sunk) cell.classList.add('cell-ship-sunk'); } if (cd.hit) cell.classList.add('cell-hit'); else if (cd.miss) cell.classList.add('cell-miss'); else if (cd.sonarRevealed) { cell.classList.add('cell-sonar-revealed'); if (cd.sonarCount !== null && cd.sonarCount > 0) cell.innerHTML = `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent);font-size:14px;">${cd.sonarCount}</div>`; } if (state[ap].counterMeasure && cd.ship && !cd.ship.sunk && cd.ship.id === 'patrol' && isPlayerGrid) { const shield = document.createElement('div'); shield.className = 'shield-indicator'; shield.innerHTML = '🛡'; cell.appendChild(shield); } if (!isPlayerGrid) { cell.addEventListener('click', () => handleEnemyClick2P(r, c)); cell.addEventListener('mouseenter', () => showWeaponPreview2P(r, c, 'p2p-enemy-grid')); cell.addEventListener('mouseleave', () => clearWeaponPreview('p2p-enemy-grid')); cell.addEventListener('contextmenu', e => { e.preventDefault(); state.weaponOrientation = state.weaponOrientation === 'h' ? 'v' : 'h'; showWeaponPreview2P(r, c, 'p2p-enemy-grid'); }); } grid.appendChild(cell); } } }
+function showWeaponPreview2P(row, col, gridId) { clearWeaponPreview(gridId); if (state.peeking || !state.isPlayerTurn) return; const ap = state.activePlayer; const opp = ap === 'p1' ? 'p2' : 'p1'; const enemyBoard = state[opp].board; const w = WEAPONS[state.selectedWeapon]; const cost = state.activeAbility ? 0 : w.cost; if (state[ap].pa < cost) return; let cells; if (state.activeAbility) { const ab = SHIP_ABILITIES[state.activeAbility]; cells = getAbilityCells(row, col, ab.pattern); } else { cells = getWeaponCells(row, col, state.selectedWeapon, state.weaponOrientation); } cells.forEach(([r, c]) => { if (inBounds(r, c)) { const el = document.querySelector(`#${gridId} .cell[data-row="${r}"][data-col="${c}"]`); if (el && !enemyBoard[r][c].hit && !enemyBoard[r][c].miss) el.classList.add('cell-weapon-preview'); } }); }
+function renderWeapons2P(containerId) { const container = document.getElementById(containerId); if (!container) return; const ap = state.activePlayer; container.innerHTML = ''; Object.entries(WEAPONS).forEach(([key, w]) => { if (!state.enabledWeapons[key] && !state[ap].activeAbility) return; if (!state.enabledWeapons[key] && state[ap].activeAbility !== key) return; const isFree = state[ap].activeAbility === key; const cost = isFree ? 0 : w.cost; const canAfford = state[ap].pa >= cost; const btn = document.createElement('div'); btn.className = 'weapon-btn' + (state.selectedWeapon === key ? ' active' : '') + (!canAfford ? ' weapon-disabled' : ''); btn.innerHTML = `<div class="pa-cost ${isFree ? 'free' : ''}">${isFree ? '0' : cost}</div><div class="weapon-icon">${getWeaponIcon(w.icon)}</div><div class="text-xs font-semibold text-white">${w.name}</div>`; if (canAfford) btn.addEventListener('click', () => { state.selectedWeapon = key; renderWeapons2P(containerId); }); container.appendChild(btn); }); }
+function renderAbilities2P(containerId) { const container = document.getElementById(containerId); if (!container) return; container.innerHTML = ''; if (!state.shipAbilitiesEnabled) { container.innerHTML = '<div class="text-xs text-slate-500 text-center py-2">Capacités désactivées</div>'; return; } const ap = state.activePlayer; SHIPS.forEach(s => { const ab = SHIP_ABILITIES[s.id]; const ship = state[ap].ships.find(ps => ps.id === s.id); const isSunk = ship && ship.sunk; const cooldown = state[ap].abilityCooldowns[s.id] || 0; const isReady = cooldown === 0 && !isSunk && state.isPlayerTurn && !state.peeking; let cls = 'ability-card'; if (state[ap].activeAbility === s.id || (state[ap].counterMeasure && s.id === 'patrol')) cls += ' active'; else if (isSunk) cls += ' sunk'; else if (!isReady) cls += ' cooldown'; else cls += ' available'; const statusText = isSunk ? '<span style="color:var(--hit)">Coulé</span>' : (state[ap].activeAbility === s.id || (state[ap].counterMeasure && s.id === 'patrol')) ? '<span style="color:var(--accent)">Actif</span>' : isReady ? '<span style="color:var(--success)">Prêt</span>' : `<span style="color:var(--text-dim)">${cooldown}t</span>`; const el = document.createElement('div'); el.className = cls; el.innerHTML = `<div class="ability-icon" style="color:${isReady ? 'var(--accent)' : 'var(--text-dim)'}">${ab.icon}</div><div class="flex-1 min-w-0"><div class="flex justify-between items-center"><span class="text-xs font-bold text-white truncate">${ab.name}</span><span class="text-xs flex-shrink-0 ml-2">${statusText}</span></div><div class="text-xs text-slate-400 truncate">${ab.desc}</div></div>`; if (isReady) el.addEventListener('click', () => activateAbility2P(s.id)); container.appendChild(el); }); }
+function activateAbility2P(shipId) { const ap = state.activePlayer; const opp = ap === 'p1' ? 'p2' : 'p1'; const enemyBoard = state[opp].board; const ab = SHIP_ABILITIES[shipId]; if (ab.pattern === 'shield') { state[ap].counterMeasure = true; state[ap].abilityCooldowns[shipId] = ab.cooldown; showToast('<strong>Contre-mesures</strong> activées !', 'success'); playSound('sonar'); } else if (ab.pattern === 'reveal') { const unrevealed = []; for (let r = 0; r < GRID_SIZE; r++) for (let c = 0; c < GRID_SIZE; c++) { const cd = enemyBoard[r][c]; if (cd.ship && !cd.hit && !cd.sonarRevealed) unrevealed.push([r, c]); } if (unrevealed.length > 0) { const [r, c] = unrevealed[Math.floor(Math.random() * unrevealed.length)]; enemyBoard[r][c].sonarRevealed = true; enemyBoard[r][c].sonarCount = 1; renderCombat2P(); const cellEl = document.querySelector(`#p2p-enemy-grid .cell[data-row="${r}"][data-col="${c}"]`); if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnSonar(rect.left + rect.width / 2, rect.top + rect.height / 2); } } state[ap].abilityCooldowns[shipId] = ab.cooldown; showToast('<strong>Révélation</strong> !', 'success'); playSound('sonar'); } else { state[ap].activeAbility = shipId; showToast(`<strong>${ab.name}</strong> activé !`, 'success'); } renderAbilities2P('p2p-abilities-list'); renderWeapons2P('p2p-weapons-list'); }
+function getAbilityCells(row, col, pattern) { const cells = []; if (pattern === 'star') { cells.push([row, col], [row-1, col-1], [row-1, col+1], [row+1, col-1], [row+1, col+1]); } else if (pattern === 'salvo') { const candidates = []; for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) candidates.push([row+dr, col+dc]); for (let i = candidates.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [candidates[i], candidates[j]] = [candidates[j], candidates[i]]; } cells.push(...candidates.slice(0, 3)); } else if (pattern === 'fan') { cells.push([row, col], [row, col-1], [row, col+1], [row, col-2], [row, col+2]); } return cells; }
+function getWeaponCells(row, col, weapon, orientation) { const cells = []; if (weapon === 'standard') cells.push([row, col]); else if (weapon === 'line') { if (orientation === 'h') for (let dc = -1; dc <= 1; dc++) cells.push([row, col + dc]); else for (let dr = -1; dr <= 1; dr++) cells.push([row + dr, col]); } else if (weapon === 'cross') { cells.push([row, col], [row - 1, col], [row + 1, col], [row, col - 1], [row, col + 1]); } else if (weapon === 'diagonal') { if (orientation === 'h') for (let i = 0; i < 4; i++) cells.push([row - 1 + i, col - 1 + i]); else for (let i = 0; i < 4; i++) cells.push([row - 1 + i, col + 1 - i]); } else if (weapon === 'sonar') { for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) cells.push([row + dr, col + dc]); } return cells; }
+
+function handleEnemyClick2P(row, col) { if (state.peeking || !state.isPlayerTurn) return; const ap = state.activePlayer; const opp = ap === 'p1' ? 'p2' : 'p1'; const enemyBoard = state[opp].board; const w = WEAPONS[state.selectedWeapon]; const cost = state[ap].activeAbility ? 0 : w.cost; if (state[ap].pa < cost) { showToast(`Pas assez de PA`, 'danger'); return; } let cells; let weaponType = state.selectedWeapon; let actionSummary = ''; if (state[ap].activeAbility) { const ab = SHIP_ABILITIES[state[ap].activeAbility]; cells = getAbilityCells(row, col, ab.pattern); weaponType = 'standard'; actionSummary = `${ab.name} en ${getCoord([row,col])} : `; state[ap].abilityCooldowns[state[ap].activeAbility] = SHIP_ABILITIES[state[ap].activeAbility].cooldown; state[ap].activeAbility = null; } else { cells = getWeaponCells(row, col, state.selectedWeapon, state.weaponOrientation); actionSummary = `${w.name} en ${getCoord([row,col])} : `; } const valid = cells.filter(([r, c]) => inBounds(r, c) && !enemyBoard[r][c].hit && !enemyBoard[r][c].miss); if (valid.length === 0) { showToast('Cases déjà ciblées.', 'info', 1200); return; } state[ap].pa -= cost; executeWeapon2P(cells, weaponType, actionSummary); }
+function executeWeapon2P(cells, weaponType, actionSummary) { const ap = state.activePlayer; const opp = ap === 'p1' ? 'p2' : 'p1'; const enemyBoard = state[opp].board; let hits = 0; let sunkShips = []; let sonarCount = 0; if (weaponType === 'sonar') { cells.forEach(([r, c]) => { if (inBounds(r, c)) { enemyBoard[r][c].sonarRevealed = true; if (enemyBoard[r][c].ship) sonarCount++; } }); if (cells.length > 0) { const [cr, cc] = cells[Math.floor(cells.length / 2)]; if (inBounds(cr, cc)) enemyBoard[cr][cc].sonarCount = sonarCount; } playSound('sonar'); const center = document.querySelector(`#p2p-enemy-grid .cell[data-row="${cells[4] ? cells[4][0] : cells[0][0]}"][data-col="${cells[4] ? cells[4][1] : cells[0][1]}"]`); if (center) { const rect = center.getBoundingClientRect(); spawnSonar(rect.left + rect.width / 2, rect.top + rect.height / 2); } state.lastAction2P = `${actionSummary} ${sonarCount} navire(s) détecté(s)`; addLog(state.lastAction2P, 'info', ap, 'p2p-log-container'); } else { cells.forEach(([r, c]) => { if (!inBounds(r, c)) return; const cd = enemyBoard[r][c]; if (cd.hit || cd.miss) return; const cellEl = document.querySelector(`#p2p-enemy-grid .cell[data-row="${r}"][data-col="${c}"]`); if (state[opp].counterMeasure && cd.ship && !cd.ship.sunk) { state[opp].counterMeasure = false; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } showToast('Tir dévié par contre-mesures !', 'success'); return; } if (cd.ship) { cd.hit = true; hits++; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); } if (!cd.ship.sunk && isShipSunk(enemyBoard, cd.ship)) { cd.ship.sunk = true; sunkShips.push(cd.ship); } } else { cd.miss = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } } }); if (hits > 0) { playSound('hit'); if (sunkShips.length > 0) setTimeout(() => playSound('sunk'), 300); } else playSound('miss'); state[ap].shots++; state[ap].hits += hits; state[ap].sunk += sunkShips.length; state[ap].pa += hits + sunkShips.length * 2; if (hits > 0 && sunkShips.length > 0) { state.lastAction2P = `${actionSummary} COULÉ ! (${sunkShips.map(s=>s.name).join(', ')})`; addLog(state.lastAction2P, 'sunk', ap, 'p2p-log-container'); } else if (hits > 0) { state.lastAction2P = `${actionSummary} TOUCHÉ`; addLog(state.lastAction2P, 'hit', ap, 'p2p-log-container'); } else { state.lastAction2P = `${actionSummary} RATÉ`; addLog(state.lastAction2P, 'miss', ap, 'p2p-log-container'); } } SHIPS.forEach(s => { if (state[ap].abilityCooldowns[s.id] > 0) { state[ap].abilityCooldowns[s.id]--; } }); renderCombat2P(); if (checkVictory2P()) return; state.isPlayerTurn = false; setTimeout(() => { state.activePlayer = state.activePlayer === 'p1' ? 'p2' : 'p1'; state.isPlayerTurn = true; state.selectedWeapon = 'standard'; showPassScreen('combat'); }, 1500); }
+function checkVictory2P() { const ap = state.activePlayer; const opp = ap === 'p1' ? 'p2' : 'p1'; const enemyAlive = state[opp].ships.filter(s => !s.sunk).length; if (enemyAlive === 0) { endGame2P(ap); return true; } return false; }
+function endGame2P(winner) { state.phase = 'end'; if (winner === 'p1') { const stats = getStats(); updateStats({ local2pGamesWon: (stats.local2pGamesWon || 0) + 1 }); } setTimeout(() => { playSound('victory'); const icon = document.getElementById('end-icon'); const title = document.getElementById('end-title'); const subtitle = document.getElementById('end-subtitle'); const scoreDisplay = document.getElementById('end-score-display'); const statsGrid = document.getElementById('end-stats-grid'); icon.innerHTML = `<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ffb627" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#ffb627" fill-opacity="0.2"/></svg>`; title.textContent = 'VICTOIRE'; title.className = 'font-display text-4xl md:text-6xl mb-4 victory-text'; title.style.color = 'var(--accent)'; subtitle.innerHTML = `<strong>${state[winner].name}</strong> domine les mers !`; scoreDisplay.classList.add('hidden'); statsGrid.classList.add('hidden'); document.getElementById('end-achievements').innerHTML = ''; showScreen('end-screen'); }, 1500); }
+document.getElementById('p2p-surrender-btn').addEventListener('click', () => { const winner = state.activePlayer === 'p1' ? 'p2' : 'p1'; showToast('Abandon !', 'danger', 2000); setTimeout(() => endGame2P(winner), 800); });
+
+function checkAchievementsDuringPlay() { 
+  const t = state.tracking; const stats = getStats(); const unlocked = getUnlockedAchievements(); 
+  const sunkShipsSizes = state.ships.enemy.filter(s => s.sunk).map(s => s.size); 
+  const checks = [ 
+    ['first_shot', state.shots.player >= 1], ['first_blood', t.firstShotHit === true], ['double_hit', t.maxConsecutiveHits >= 2], ['triple_hit', t.maxConsecutiveHits >= 3], ['use_sonar', t.sonarUses >= 1], ['use_special', t.usedSpecialWeapon || t.usedAbility], ['use_line', t.weaponsUsed.includes('line')], ['use_cross', t.weaponsUsed.includes('cross')], ['use_diagonal', t.weaponsUsed.includes('diagonal')], ['use_ability', t.shipAbilitiesUsed.length >= 1], ['shield_use', t.shipAbilitiesUsed.includes('patrol')], ['sink_t2', sunkShipsSizes.includes(2)], ['sink_t3', sunkShipsSizes.includes(3)], ['sink_t4', sunkShipsSizes.includes(4)], ['sink_t5', sunkShipsSizes.includes(5)], ['hit_carrier', t.shipsHit.has('carrier')], ['sonar_3', t.sonarMaxShips === 3], ['pa_5', state.pa.player >= 5], ['pa_10', state.pa.player >= 10], ['multi_hit2', t.maxMultiHit >= 2], ['multi_hit3', t.maxMultiHit >= 3], ['special_kill', t.specialKill], ['random_place', state.isRandomPlacement], ['manual_place', state.ships.player.length === 5 && !state.isRandomPlacement], ['shots_10', state.shots.player >= 10], ['shots_20', state.shots.player >= 20], ['ach_5', unlocked.length >= 5], ['ach_10', unlocked.length >= 10], ['play_1', stats.gamesPlayed >= 1], ['play_5', stats.gamesPlayed >= 5], ['streak_5', t.maxConsecutiveHits >= 5], ['streak_7', t.maxConsecutiveHits >= 7], ['streak_10', t.maxConsecutiveHits >= 10], ['weapon_4', t.weaponsUsed.length >= 4], ['weapon_5', t.weaponsUsed.length >= 5], ['play_10', stats.gamesPlayed >= 10], ['sonar_3x', t.sonarUses >= 3], ['sonar_5x', t.sonarUses >= 5], ['hit_5_ships', t.shipsHit.size >= 5], ['pa_15', state.pa.player >= 15], ['pa_20', state.pa.player >= 20], ['carrier_3hits', t.carrierHits >= 3], ['sink_with_ability', t.specialKill && t.usedAbility], ['use_3_abilities', t.shipAbilitiesUsed.length >= 3], ['use_all_abilities', t.shipAbilitiesUsed.length >= 5], ['ach_20', unlocked.length >= 20], ['ach_30', unlocked.length >= 30], ['total_shots_50', stats.totalShots >= 50], ['total_shots_100', stats.totalShots >= 100], ['online_host', state.mode === 'online' && state.net.isHost], ['online_join', state.mode === 'online' && !state.net.isHost], ['multi_hit4', t.maxMultiHit >= 4], ['total_shots_500', stats.totalShots >= 500] 
+  ]; 
+  checks.forEach(([id, cond]) => { 
+    if (cond && !unlocked.includes(id) && !state.newlyUnlocked.includes(id)) { 
+      if (unlockAchievement(id)) { 
+        state.newlyUnlocked.push(id); const a = ACHIEVEMENTS.find(x => x.id === id); 
+        if (a) { 
+          const rarityColors = { common: '#38bdf8', rare: '#ffb627', epic: '#ff3d2e', legend: '#c084fc' }; 
+          const rarityLabels = { common: 'Commun', rare: 'Rare', epic: 'Épique', legend: 'Légendaire' }; 
+          showToast(`<div class="flex items-center gap-3"><div class="text-3xl">${a.icon}</div><div><div class="text-xs font-bold uppercase" style="color:${rarityColors[a.rarity]}">Succès ${rarityLabels[a.rarity]} !</div><div class="font-bold text-white">${a.name}</div><div class="text-xs text-slate-400">${a.desc}</div></div></div>`, 'achievement', 6000); 
+          playSound('achievement'); 
+        } 
+      } 
+    } 
+  }); 
+}
+function checkEndAchievements(playerWon) { 
+  const t = state.tracking; const stats = getStats(); const unlocked = getUnlockedAchievements(); 
+  if (playerWon) { 
+    const acc = state.shots.player > 0 ? state.hits.player / state.shots.player : 0; const shipsLost = t.shipsLostByPlayer; const diffs = stats.difficultiesBeaten || []; const patrol = state.ships.player.find(s => s.id === 'patrol');
+    const checks = [ 
+      ['first_sink', state.sunk.player >= 1], ['first_win', stats.gamesWon === 1], ['win_1', stats.gamesWon >= 1], ['beat_recrue', state.difficulty === 'recrue'], ['win_2_ships', shipsLost === 2], ['double_sink', t.maxShipsSunkInOneTurn >= 2], ['beat_tactique', state.difficulty === 'tactique'], ['win_5', stats.gamesWon >= 5], ['win_10', stats.gamesWon >= 10], ['accuracy_70', acc >= 0.7], ['sink_2', state.sunk.player >= 2], ['sink_3', state.sunk.player >= 3], ['win_no_sonar', t.sonarUses === 0], ['win_no_special', !t.usedSpecialWeapon && !t.usedAbility], ['win_1_lost', shipsLost === 1], ['win_2_lost', shipsLost === 2], ['beat_stratege', state.difficulty === 'stratege'], ['beat_amiral', state.difficulty === 'amiral'], ['speed_50', state.shots.player < 50], ['speed_40', state.shots.player < 40], ['speed_30', state.shots.player < 30], ['speed_25', state.shots.player < 25], ['accuracy_80', acc >= 0.8], ['accuracy_90', acc >= 0.9], ['accuracy_100', acc >= 1.0], ['flawless', shipsLost === 0], ['untouched', t.playerHitsReceived === 0], ['last_stand', 5 - shipsLost === 1], ['patrol_survivor', patrol && !patrol.sunk], ['comeback_3', shipsLost >= 3], ['comeback_4', shipsLost >= 4], ['sink_4', state.sunk.player >= 4], ['sink_5', state.sunk.player >= 5], ['play_25', stats.gamesPlayed >= 25], ['play_50', stats.gamesPlayed >= 50], ['win_25', stats.gamesWon >= 25], ['win_50', stats.gamesWon >= 50], ['sink_carrier_first', t.firstShipSunkId === 'carrier'], ['beat_amiral_flawless', state.difficulty === 'amiral' && shipsLost === 0], ['speed_20', state.shots.player < 20], ['perfect_game', acc >= 1.0 && shipsLost === 0], ['untouched_amiral', state.difficulty === 'amiral' && t.playerHitsReceived === 0], ['win_no_ability_no_special', !t.usedSpecialWeapon && !t.usedAbility], ['play_100', stats.gamesPlayed >= 100], ['win_100', stats.gamesWon >= 100], ['ach_75', unlocked.length >= 75], ['ach_90', unlocked.length >= 90], ['online_first_win', state.mode === 'online' && (stats.onlineGamesWon || 0) >= 1], ['online_win_5', state.mode === 'online' && (stats.onlineGamesWon || 0) >= 5], ['online_flawless', state.mode === 'online' && shipsLost === 0], ['2p_first_win', state.mode === '2p' && (stats.local2pGamesWon || 0) >= 1], ['2p_win_5', state.mode === '2p' && (stats.local2pGamesWon || 0) >= 5], ['no_pa_spent', state.paSpent === 0], ['pa_bankrupt', state.pa.player === 0], ['speed_15', state.shots.player < 15], ['multi_hit5', t.maxMultiHit >= 5], ['win_all_difficulties', diffs.length >= 4], ['play_250', stats.gamesPlayed >= 250], ['win_250', stats.gamesWon >= 250], ['total_shots_1000', stats.totalShots >= 1000], ['ach_100', unlocked.length >= 100], ['ach_all', unlocked.length >= ACHIEVEMENTS.length - 1] 
+    ]; 
+    checks.forEach(([id, cond]) => { if (cond && !unlocked.includes(id) && !state.newlyUnlocked.includes(id)) { if (unlockAchievement(id)) state.newlyUnlocked.push(id); } }); 
+  } 
+}
+
+function showScreen(id) { ['menu-screen', 'placement-screen', 'combat-screen', 'combat-screen-2p', 'end-screen'].forEach(s => document.getElementById(s).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); window.scrollTo(0, 0); const fab = document.getElementById('orientation-fab'); if (id !== 'combat-screen') fab.classList.remove('visible'); }
+document.getElementById('replay-btn').addEventListener('click', () => { if (state.mode === '1p') startPlacement1P(); else if (state.mode === '2p') startPlacement2P(); else resetOnlineMode(); });
+document.getElementById('menu-btn').addEventListener('click', () => { state.phase = 'menu'; document.body.className = ''; showScreen('menu-screen'); renderMenu(); });
+state.playerName = loadData().lastName; renderMenu();
+
+// PWA Service Worker Registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then(registration => {
+      console.log('ServiceWorker registration successful with scope: ', registration.scope);
+    }, err => {
+      console.log('ServiceWorker registration failed: ', err);
+    });
+  });
+}
+</script>
+</body>
+</html>
