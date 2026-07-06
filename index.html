@@ -329,7 +329,31 @@ const DAILY_CHALLENGES = [
   { id: 'palindrome_shots', text: 'Terminez avec un nombre de tirs palindrome (11, 22...)', icon: '🔢', check: (t, ctx) => isPalindrome(ctx.shots) },
   { id: 'exact_17', text: 'Gagnez en exactement 17 tirs', icon: '🎯', check: (t, ctx) => ctx.shots === 17 },
   { id: 'clutch_pa', text: 'Gagnez avec exactement 1 PA restant', icon: '😅', check: (t, ctx) => ctx.paLeft === 1 },
-  { id: 'carrier_last', text: 'Coulez le porte-avions en dernier', icon: '🎬', check: (t, ctx) => t.lastShipSunkId === 'carrier' }
+  { id: 'carrier_last', text: 'Coulez le porte-avions en dernier', icon: '🎬', check: (t, ctx) => t.lastShipSunkId === 'carrier' },
+  { id: 'line_specialist', text: 'Gagnez en utilisant l\'arme Ligne', icon: '📏', check: (t, ctx) => t.weaponsUsed.includes('line') },
+  { id: 'cross_specialist', text: 'Gagnez en utilisant l\'arme Croix', icon: '✕', check: (t, ctx) => t.weaponsUsed.includes('cross') },
+  { id: 'diagonal_specialist', text: 'Gagnez en utilisant l\'arme Diagonale', icon: '◢', check: (t, ctx) => t.weaponsUsed.includes('diagonal') },
+  { id: 'sonar_2x', text: 'Gagnez en utilisant le sonar au moins 2 fois', icon: '📡', check: (t, ctx) => t.sonarUses >= 2 },
+  { id: 'carrier_ability', text: 'Activez la Frappe orbitale du porte-avions', icon: '🛩️', check: (t, ctx) => t.shipAbilitiesUsed.includes('carrier') },
+  { id: 'battleship_ability', text: 'Activez la Salve lourde du croiseur', icon: '⚓', check: (t, ctx) => t.shipAbilitiesUsed.includes('battleship') },
+  { id: 'destroyer_ability', text: 'Activez l\'Éventail du contre-torpilleur', icon: '♢', check: (t, ctx) => t.shipAbilitiesUsed.includes('destroyer') },
+  { id: 'submarine_ability', text: 'Activez la Révélation du sous-marin', icon: '◉', check: (t, ctx) => t.shipAbilitiesUsed.includes('submarine') },
+  { id: 'patrol_ability', text: 'Activez les Contre-mesures du torpilleur', icon: '🛡️', check: (t, ctx) => t.shipAbilitiesUsed.includes('patrol') },
+  { id: 'multi_hit_3', text: 'Touchez au moins 3 cases en un seul tir', icon: '💥', check: (t, ctx) => t.maxMultiHit >= 3 },
+  { id: 'sonar_jackpot', text: 'Détectez au moins 3 navires en un seul sonar', icon: '🎯', check: (t, ctx) => t.sonarMaxShips >= 3 },
+  { id: 'double_kill', text: 'Coulez 2 navires en un seul tour', icon: '⚡', check: (t, ctx) => t.maxShipsSunkInOneTurn >= 2 },
+  { id: 'flawless_defense', text: 'Gagnez sans perdre de navire ni subir la moindre touche', icon: '🛡️', check: (t, ctx) => t.shipsLostByPlayer === 0 && t.playerHitsReceived === 0 },
+  { id: 'tactique_win', text: 'Battez le Tactique', icon: '⚔️', check: (t, ctx) => ctx.difficulty === 'tactique' },
+  { id: 'stratege_win', text: 'Battez le Stratège', icon: '⚔️', check: (t, ctx) => ctx.difficulty === 'stratege' },
+  { id: 'amiral_win', text: 'Battez l\'Amiral', icon: '👑', check: (t, ctx) => ctx.difficulty === 'amiral' },
+  { id: 'saturday_win', text: 'Gagnez un samedi', icon: '🎉', check: (t, ctx) => new Date().getDay() === 6 },
+  { id: 'morning_win', text: 'Gagnez entre 7h et 9h du matin', icon: '🌄', check: (t, ctx) => { const h = new Date().getHours(); return h >= 7 && h < 9; } },
+  { id: 'evening_win', text: 'Gagnez entre 18h et 20h', icon: '🌆', check: (t, ctx) => { const h = new Date().getHours(); return h >= 18 && h < 20; } },
+  { id: 'lucky_13', text: 'Gagnez en exactement 13 tirs', icon: '🍀', check: (t, ctx) => ctx.shots === 13 },
+  { id: 'round_number', text: 'Terminez avec un nombre de tirs multiple de 10 (10, 20, 30...)', icon: '🔟', check: (t, ctx) => ctx.shots > 0 && ctx.shots % 10 === 0 },
+  { id: 'perfect_short', text: 'Gagnez avec 100% de précision en moins de 20 tirs', icon: '💎', check: (t, ctx) => ctx.acc === 1 && ctx.shots < 20 },
+  { id: 'free_sonar_used', text: 'Profitez d\'un sonar gratuit offert par un événement', icon: '📡', check: (t, ctx) => t.eventTypesTriggered.includes('free_sonar') },
+  { id: 'storm_survivor', text: 'Bénéficiez d\'un tour où l\'ennemi rate son attaque', icon: '🌊', check: (t, ctx) => t.eventTypesTriggered.includes('skip_bot') }
 ];
 function getDailyKey() { return new Date().toISOString().slice(0, 10); }
 function getDailyChallenges() { const d = new Date(); const start = new Date(d.getFullYear(), 0, 0); const doy = Math.floor((d - start) / 86400000); const n = DAILY_CHALLENGES.length; const i1 = doy % n; let i2 = (doy * 7 + 13) % n; if (i2 === i1) i2 = (i2 + 1) % n; return [DAILY_CHALLENGES[i1], DAILY_CHALLENGES[i2]]; }
@@ -1022,7 +1046,21 @@ document.getElementById('promotion-close-btn').addEventListener('click', closePr
 state.playerName = loadData().lastName; state.gameOptions = getSettings(); const savedPrefs = getPreferences(); state.difficulty = savedPrefs.difficulty || state.difficulty; state.enabledWeapons = savedPrefs.enabledWeapons || state.enabledWeapons; state.shipAbilitiesEnabled = savedPrefs.abilitiesEnabled !== undefined ? savedPrefs.abilitiesEnabled : state.shipAbilitiesEnabled; resetBodyTheme(); renderMenu();
 
 // PWA Service Worker
-if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').then(reg => console.log('SW registered:', reg.scope)).catch(err => console.log('SW failed:', err)); }); }
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      console.log('SW registered:', reg.scope);
+      reg.update(); // force une vérification immédiate d'une nouvelle version
+      setInterval(() => reg.update(), 60 * 60 * 1000); // revérifie toutes les heures
+    }).catch(err => console.log('SW failed:', err));
+  });
+  let swRefreshed = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (swRefreshed) return;
+    swRefreshed = true;
+    window.location.reload();
+  });
+}
 </script>
 </body>
 </html>

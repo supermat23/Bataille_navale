@@ -1,62 +1,45 @@
-const CACHE_NAME = 'bataille-navale-v6';
-const LOCAL_ASSETS = [
+// ⚠️ IMPORTANT : incrémentez ce numéro à CHAQUE mise à jour que vous déployez.
+// C'est ce qui force la création d'un nouveau cache et le rejet de l'ancien.
+const CACHE_VERSION = 'v2';
+const CACHE_NAME = `bataille-navale-${CACHE_VERSION}`;
+
+// Adaptez cette liste au(x) fichier(s) réel(s) de votre site
+// (nom exact du HTML, manifest, icônes, etc.)
+const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './manifest.json',
-  './icon.svg'
+  './manifest.json'
 ];
 
-// Installation : on ne met en cache QUE les fichiers locaux pour éviter les erreurs CORS des CDN
+// --- Installation : met en cache les fichiers ET active la nouvelle version SANS ATTENDRE ---
 self.addEventListener('install', (event) => {
+  self.skipWaiting(); // ne pas attendre la fermeture des onglets existants
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(LOCAL_ASSETS))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
   );
-  self.skipWaiting();
 });
 
-// Activation : on nettoie les anciens caches
+// --- Activation : supprime les anciens caches ET prend le contrôle des pages déjà ouvertes ---
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)));
-    })
+    caches.keys()
+      .then((keys) => Promise.all(
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+      ))
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// Fetch : Stratégie intelligente
+// --- Récupération : réseau en priorité, cache seulement en secours (hors-ligne) ---
 self.addEventListener('fetch', (event) => {
-  // On ignore les requêtes qui ne sont pas en GET (comme les WebSockets de PeerJS)
   if (event.request.method !== 'GET') return;
-
-  const url = new URL(event.request.url);
-
-  // 1. Pour la navigation (quand tu ouvres l'app), on force le cache local
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      caches.match('./index.html').then(cached => cached || fetch(event.request))
-    );
-    return;
-  }
-
-  // 2. Pour les autres fichiers (Tailwind, PeerJS, polices)
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      // Si on a le fichier en cache, on le renvoie (mode hors-ligne)
-      if (cached) return cached;
-
-      // Sinon, on va le chercher sur le réseau
-      return fetch(event.request).then((response) => {
-        // Si le réseau répond bien, on le met en cache pour la prochaine fois
-        if (response.ok || response.type === 'opaque') {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
-        }
+    fetch(event.request)
+      .then((response) => {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
         return response;
-      }).catch(() => {
-        // En cas d'échec total, on tente de renvoyer le cache si on en a un
-        return cached;
-      });
-    })
+      })
+      .catch(() => caches.match(event.request))
   );
 });
