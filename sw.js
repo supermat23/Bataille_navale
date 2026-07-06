@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bataille-navale-v5';
+const CACHE_NAME = 'bataille-navale-v6';
 const LOCAL_ASSETS = [
   './',
   './index.html',
