@@ -1,6 +1,6 @@
 // ⚠️ IMPORTANT : incrémentez ce numéro à CHAQUE mise à jour que vous déployez.
 // C'est ce qui force la création d'un nouveau cache et le rejet de l'ancien.
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const CACHE_NAME = `bataille-navale-${CACHE_VERSION}`;
 
 // Adaptez cette liste au(x) fichier(s) réel(s) de votre site
@@ -8,7 +8,14 @@ const CACHE_NAME = `bataille-navale-${CACHE_VERSION}`;
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './icon.svg',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon-maskable-192.png',
+  './icons/icon-maskable-512.png',
+  './icons/icon-32.png',
+  './icons/apple-touch-icon.png'
 ];
 
 // --- Installation : met en cache les fichiers ET active la nouvelle version SANS ATTENDRE ---
