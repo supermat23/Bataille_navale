@@ -449,14 +449,49 @@ function renderDailyChallenge() {
   const wEl = document.getElementById('weekly-challenge-panel'); if (wEl) { const wc = getWeeklyChallenge(); const wDone = isWeeklyDone(); wEl.innerHTML = `<div class="flex items-center gap-3"><div class="text-xl">${wc.icon}</div><div class="flex-1 text-left"><div class="text-[10px] uppercase tracking-widest font-bold" style="color:var(--r-legend);">Succès de la semaine</div><div class="text-sm font-semibold text-white">${wc.text}</div></div><div class="text-xs font-bold ${wDone ? 'text-emerald-400' : 'text-slate-500'}">${wDone ? '✓ Fait' : 'En attente'}</div></div>`; }
 }
 
-function renderGameOptions() { const grid = document.getElementById('game-options-grid'); if (!grid) return; grid.innerHTML = ''; const opts = [ { key: 'randomEvents', icon: '⛈️', name: 'Événements aléatoires', desc: 'Effets surprises pendant la partie' }, { key: 'chrono', icon: '⏱️', name: 'Mode chrono', desc: 'Sinon tir automatique' } ]; opts.forEach(o => { const enabled = !!state.gameOptions[o.key]; const el = document.createElement('div'); el.className = 'weapon-toggle ' + (enabled ? 'enabled' : 'disabled') + ' flex items-center gap-2 p-2 text-left'; el.style.cursor = 'pointer'; const extra = o.key === 'chrono' ? `<div class="flex gap-1 flex-shrink-0" id="chrono-duration-wrap"></div>` : ''; el.innerHTML = `<div class="text-xl">${o.icon}</div><div class="flex-1 min-w-0"><div class="text-xs font-bold text-white">${o.name}</div><div class="text-[10px] text-slate-400 leading-tight">${o.desc}</div></div>${extra}`; el.addEventListener('click', () => { state.gameOptions[o.key] = !state.gameOptions[o.key]; saveSettings(state.gameOptions); renderGameOptions(); }); grid.appendChild(el); if (o.key === 'chrono') { const durWrap = el.querySelector('#chrono-duration-wrap'); [5, 10, 20].forEach(sec => { const b = document.createElement('button'); const active = (state.gameOptions.chronoDuration || 20) === sec; b.className = 'btn ' + (active ? 'btn-primary' : 'btn-secondary') + ' text-[10px] py-1 px-2'; b.textContent = sec + 's'; b.addEventListener('click', e => { e.stopPropagation(); state.gameOptions.chronoDuration = sec; saveSettings(state.gameOptions); renderGameOptions(); }); durWrap.appendChild(b); }); } });
+function renderGameOptions() { 
+  const grid = document.getElementById('game-options-grid'); if (!grid) return; grid.innerHTML = ''; 
+  const opts = [ { key: 'randomEvents', icon: '⛈️', name: 'Événements aléatoires', desc: 'Effets surprises pendant la partie' }, { key: 'chrono', icon: '⏱️', name: 'Mode chrono', desc: 'Sinon tir automatique' } ]; 
+  opts.forEach(o => { 
+    const enabled = !!state.gameOptions[o.key]; 
+    const el = document.createElement('div'); 
+    el.className = 'weapon-toggle ' + (enabled ? 'enabled' : 'disabled') + ' flex items-center gap-2 p-2 text-left'; 
+    el.style.cursor = 'pointer'; 
+    const extra = o.key === 'chrono' ? `<div class="flex gap-1 flex-shrink-0" id="chrono-duration-wrap"></div>` : ''; 
+    el.innerHTML = `<div class="text-xl">${o.icon}</div><div class="flex-1 min-w-0"><div class="text-xs font-bold text-white">${o.name}</div><div class="text-[10px] text-slate-400 leading-tight">${o.desc}</div></div>${extra}`; 
+    el.addEventListener('click', () => { state.gameOptions[o.key] = !state.gameOptions[o.key]; saveSettings(state.gameOptions); renderGameOptions(); }); 
+    grid.appendChild(el); 
+    if (o.key === 'chrono') { 
+      const durWrap = el.querySelector('#chrono-duration-wrap'); 
+      [5, 10, 20].forEach(sec => { 
+        const b = document.createElement('button'); 
+        const active = (state.gameOptions.chronoDuration || 20) === sec; 
+        b.className = 'btn ' + (active ? 'btn-primary' : 'btn-secondary') + ' text-[10px] py-1 px-2'; 
+        b.textContent = sec + 's'; 
+        b.addEventListener('click', e => { e.stopPropagation(); state.gameOptions.chronoDuration = sec; saveSettings(state.gameOptions); renderGameOptions(); }); 
+        durWrap.appendChild(b); 
+      }); 
+    } 
+  });
   if (!isFeatureUnlocked(4)) {
     const lockedEl = document.createElement('div'); lockedEl.className = 'weapon-toggle disabled flex items-center justify-center p-2 text-center'; lockedEl.style.cursor = 'default'; lockedEl.innerHTML = `<div class="text-xs font-bold text-slate-500">🔒 Débloqué au Rang 4</div>`; grid.appendChild(lockedEl);
   } else {
     const sizeEl = document.createElement('div'); sizeEl.className = 'weapon-toggle enabled flex items-center gap-2 p-2 text-left'; sizeEl.innerHTML = `<div class="text-xl">🌊</div><div class="flex-1 min-w-0"><div class="text-xs font-bold text-white">Taille de l'océan</div><div class="flex gap-1 mt-1 flex-wrap" id="ocean-size-wrap"></div></div>`; grid.appendChild(sizeEl);
     const sizeWrap = sizeEl.querySelector('#ocean-size-wrap');
-    [6, 10, 13, 18].forEach(sz => { const b = document.createElement('button'); const active = (state.gameOptions.gridSize || 10) === sz; b.className = 'btn ' + (active ? 'btn-primary' : 'btn-secondary') + ' text-[10px] py-1 px-2'; b.textContent = sz; b.addEventListener('click', e => { e.stopPropagation(); state.gameOptions.gridSize = sz; saveSettings(state.gameOptions); SHIPS = getShipsForSize(sz); renderAbilityInfo(); }); sizeWrap.appendChild(b); });
-    const obsEl = document.createElement('div'); const obsEnabled = !!state.gameOptions.obstaclesEnabled; obsEl.className = 'weapon-toggle ' + (obsEnabled ? 'enabled' : 'disabled') + ' flex items-center gap-2 p-2 text-left'; obsEl.style.cursor = 'pointer'; obsEl.innerHTML = `<div class="text-xl">🪨</div><div class="flex-1 min-w-0"><div class="text-xs font-bold text-white">Obstacles <button id="obstacles-help-btn" class="inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold ml-1" style="background:rgba(255,255,255,0.15);">?</button></div><div class="text-[10px] text-slate-400 leading-tight">Rochers et mines aléatoires</div></div>`;
+    [6, 10, 13, 18].forEach(sz => { 
+      const b = document.createElement('button'); 
+      const active = (state.gameOptions.gridSize || 10) === sz; 
+      b.className = 'btn ' + (active ? 'btn-primary' : 'btn-secondary') + ' text-[10px] py-1 px-2'; 
+      b.textContent = sz; 
+      // Ajout de renderGameOptions() à la fin pour forcer la mise à jour visuelle
+      b.addEventListener('click', e => { e.stopPropagation(); state.gameOptions.gridSize = sz; saveSettings(state.gameOptions); SHIPS = getShipsForSize(sz); renderAbilityInfo(); renderGameOptions(); }); 
+      sizeWrap.appendChild(b); 
+    });
+    const obsEl = document.createElement('div'); 
+    const obsEnabled = !!state.gameOptions.obstaclesEnabled; 
+    obsEl.className = 'weapon-toggle ' + (obsEnabled ? 'enabled' : 'disabled') + ' flex items-center gap-2 p-2 text-left'; 
+    obsEl.style.cursor = 'pointer'; 
+    obsEl.innerHTML = `<div class="text-xl">🪨</div><div class="flex-1 min-w-0"><div class="text-xs font-bold text-white">Obstacles <button id="obstacles-help-btn" class="inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold ml-1" style="background:rgba(255,255,255,0.15);">?</button></div><div class="text-[10px] text-slate-400 leading-tight">Rochers et mines aléatoires</div></div>`;
     obsEl.addEventListener('click', (e) => { if (e.target.id === 'obstacles-help-btn') return; state.gameOptions.obstaclesEnabled = !state.gameOptions.obstaclesEnabled; saveSettings(state.gameOptions); renderGameOptions(); });
     grid.appendChild(obsEl);
     const helpBtn = obsEl.querySelector('#obstacles-help-btn'); if (helpBtn) helpBtn.addEventListener('click', e => { e.stopPropagation(); openObstaclesHelpModal(); });
@@ -692,25 +727,29 @@ function renderPlacementScreen() {
   
   const row1 = document.createElement('div'); row1.className = 'grid grid-cols-2 gap-2 mb-2';
   const row2 = document.createElement('div'); row2.className = 'grid grid-cols-3 gap-2 mb-2';
-  const row3 = document.createElement('div'); row3.className = 'grid grid-cols-2 gap-2'; // Ligne dédiée pour les 2 nouveaux gros navires (50% chacun)
+  const row3 = document.createElement('div'); row3.className = 'grid grid-cols-2 gap-2';
   
   SHIPS.forEach((shipDef, idx) => { 
     const placed = shipsData.find(s => s.id === shipDef.id);
     const card = document.createElement('div');
-    card.className = 'ship-card' + (state.selectedShipToPlace === shipDef.id ? ' active' : '') + (placed ? ' placed' : '');
+    card.className = 'ship-card flex-col items-center text-center' + (state.selectedShipToPlace === shipDef.id ? ' active' : '') + (placed ? ' placed' : '');
     
     // Génération de l'aperçu du motif (shape) réel du navire
     let segs = '';
+    // On définit une taille uniforme de 11px pour tous les carrés (comme les navires classiques)
+    const segSize = 11; 
+    
     if (shipDef.shape) {
       const maxR = Math.max(...shipDef.shape.map(s => s[0]));
       const maxC = Math.max(...shipDef.shape.map(s => s[1]));
-      segs = `<div style="display:grid;grid-template-columns:repeat(${maxC+1}, 8px);grid-template-rows:repeat(${maxR+1}, 8px);gap:1px;">`;
+      segs = `<div style="display:grid;grid-template-columns:repeat(${maxC+1}, ${segSize}px);grid-template-rows:repeat(${maxR+1}, ${segSize}px);gap:1px;">`;
       for (let r = 0; r <= maxR; r++) {
         for (let c = 0; c <= maxC; c++) {
           if (shipDef.shape.some(([sr, sc]) => sr === r && sc === c)) {
-            segs += '<div class="ship-preview-segment" style="width:8px;height:8px;"></div>';
+            // On retire le style inline pour utiliser la classe CSS standard (11px)
+            segs += '<div class="ship-preview-segment"></div>';
           } else {
-            segs += '<div style="width:8px;height:8px;"></div>'; // Case vide invisible pour garder la forme
+            segs += `<div style="width:${segSize}px;height:${segSize}px;"></div>`; // Case vide pour la forme
           }
         }
       }
@@ -720,25 +759,24 @@ function renderPlacementScreen() {
       segs = Array.from({ length: shipDef.size }, () => '<div class="ship-preview-segment"></div>').join('');
     }
     
-    card.innerHTML = `<div class="ship-preview">${segs}</div><div class="flex-1 min-w-0"><div class="font-semibold text-white text-sm truncate">${shipDef.name}</div><div class="text-xs text-slate-400">${shipDef.size} cases</div></div><div class="text-xs font-bold ${placed ? 'text-green-400' : 'text-amber-400'} ml-2">${placed ? '✓' : ''}</div>`;
+    // Espace réduit : mb-1 au lieu de mb-2, et nom au-dessus
+    card.innerHTML = `<div class="flex items-center justify-between w-full mb-0"><span class="font-semibold text-white text-sm truncate flex-1 text-left">${shipDef.name}</span><span class="text-xs font-bold ${placed ? 'text-green-400' : 'text-amber-400'} ml-2">${placed ? '✓' : ''}</span></div><div class="ship-preview">${segs}</div>`;
+    
     if (!placed) card.addEventListener('click', () => { state.selectedShipToPlace = shipDef.id; renderPlacementScreen(); });
     
     // Répartition des navires dans les bonnes lignes
     if (shipDef.shape) {
-      // Les navires avec une forme spéciale vont dans la ligne 3
       row3.appendChild(card);
     } else if (idx < 2) {
-      // Porte-avions et Croiseur dans la ligne 1
       row1.appendChild(card);
     } else {
-      // Les 3 autres navires classiques dans la ligne 2
       row2.appendChild(card);
     }
   });
   
   list.appendChild(row1); 
   list.appendChild(row2); 
-  if (row3.hasChildNodes()) list.appendChild(row3); // N'affiche la 3ème ligne que si les gros navires sont présents (taille 18)
+  if (row3.hasChildNodes()) list.appendChild(row3);
   
   const btn = document.getElementById('confirm-placement-btn');
   if (state.mode === '2p') {
