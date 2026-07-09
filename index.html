@@ -518,7 +518,18 @@ document.getElementById('online-host-btn').addEventListener('click', () => {
   document.getElementById('online-menu').classList.add('hidden'); document.getElementById('online-host-view').classList.remove('hidden'); document.getElementById('online-code-display').textContent = state.net.code;
   state.net.peer = new Peer(`battlenavale-${state.net.code}`);
   state.net.peer.on('open', (id) => { console.log('Peer ID:', id); });
-  state.net.peer.on('connection', (conn) => { state.net.conn = conn; conn.on('open', () => { state.net.connected = true; conn.send({ type: 'handshake', hostName: state.playerName || 'Hôte' }); startPlacement1P(); state.mode = 'online'; state.difficulty = null; }); conn.on('data', (data) => handleNetData(data)); conn.on('close', () => { showToast('Adversaire déconnecté.', 'danger'); resetOnlineMode(); }); });
+  state.net.peer.on('connection', (conn) => { 
+    state.net.conn = conn; 
+    conn.on('open', () => { 
+      state.net.connected = true; 
+      state.mode = 'online'; // Mis ici pour être sûr que le mode est bien défini avant de lancer
+      state.difficulty = null;
+      conn.send({ type: 'handshake', hostName: state.playerName || 'Hôte', gridSize: state.gameOptions.gridSize || 10, obstaclesEnabled: state.gameOptions.obstaclesEnabled || false }); 
+      startPlacement1P(); 
+    }); 
+    conn.on('data', (data) => handleNetData(data)); 
+    conn.on('close', () => { showToast('Adversaire déconnecté.', 'danger'); resetOnlineMode(); }); 
+  });
   state.net.peer.on('error', (err) => { showToast('Erreur réseau: ' + err.type, 'danger'); resetOnlineMode(); });
 });
 document.getElementById('online-cancel-host-btn').addEventListener('click', () => resetOnlineMode());
@@ -529,13 +540,43 @@ document.getElementById('online-connect-btn').addEventListener('click', () => {
   state.net.code = code;
   document.getElementById('online-code-input').disabled = true; document.getElementById('online-connect-btn').disabled = true; document.getElementById('online-connecting').classList.remove('hidden');
   state.net.peer = new Peer();
-  state.net.peer.on('open', (id) => { state.net.conn = state.net.peer.connect(`battlenavale-${state.net.code}`); state.net.conn.on('open', () => { state.net.connected = true; state.mode = 'online'; state.difficulty = null; }); state.net.conn.on('data', (data) => handleNetData(data)); state.net.conn.on('close', () => { showToast('Adversaire déconnecté.', 'danger'); resetOnlineMode(); }); });
+  state.net.peer.on('open', (id) => { 
+    state.net.conn = state.net.peer.connect(`battlenavale-${state.net.code}`); 
+    state.net.conn.on('open', () => { 
+      state.net.connected = true; 
+      state.mode = 'online'; // Mis ici aussi
+      state.difficulty = null; 
+    }); 
+    state.net.conn.on('data', (data) => handleNetData(data)); 
+    state.net.conn.on('close', () => { showToast('Adversaire déconnecté.', 'danger'); resetOnlineMode(); }); 
+  });
   state.net.peer.on('error', (err) => { showToast('Erreur réseau: ' + err.type, 'danger'); resetOnlineMode(); });
 });
 document.getElementById('online-cancel-join-btn').addEventListener('click', () => resetOnlineMode());
 function resetOnlineMode() { if (state.net.conn) state.net.conn.close(); if (state.net.peer) state.net.peer.destroy(); state.net = { peer: null, conn: null, isHost: false, code: '', connected: false }; document.getElementById('online-menu').classList.remove('hidden'); document.getElementById('online-host-view').classList.add('hidden'); document.getElementById('online-join-view').classList.add('hidden'); document.getElementById('online-code-input').disabled = false; document.getElementById('online-code-input').value = ''; document.getElementById('online-connect-btn').disabled = false; document.getElementById('online-connecting').classList.add('hidden'); }
 function sendNetData(data) { if (state.net.conn && state.net.connected) state.net.conn.send(data); }
-function handleNetData(data) { if (!data) return; try { switch(data.type) { case 'handshake': state.playerName = state.playerName || 'Joueur 2'; state.boards.enemyName = data.hostName; startPlacement1P(); break; case 'placement_done': state.enemyReady = true; checkOnlineCombatStart(); break; case 'shot': handleNetShot(data); break; case 'shot_result': handleNetShotResult(data); break; case 'shield_activated': state.counterMeasureEnemy = true; addLog('L\'adversaire active un bouclier !', 'info', 'bot'); break; case 'reveal_request': handleNetRevealRequest(); break; case 'reveal_result': handleNetRevealResult(data); break; case 'reveal_mines_request': handleNetRevealMinesRequest(); break; case 'reveal_mines_result': handleNetRevealMinesResult(data); break; case 'surrender': endGame1P(true); break; } } catch(e) { console.error("Network Data Error:", e); } }
+function handleNetData(data) { 
+  if (!data) return; 
+  try { 
+    switch(data.type) { 
+      case 'handshake': 
+        state.playerName = state.playerName || 'Joueur 2'; 
+        state.boards.enemyName = data.hostName; 
+        state.gameOptions.gridSize = data.gridSize || 10; 
+        state.gameOptions.obstaclesEnabled = data.obstaclesEnabled || false; 
+        startPlacement1P(); break; 
+      case 'placement_done': state.enemyReady = true; checkOnlineCombatStart(); break; 
+      case 'shot': handleNetShot(data); break; 
+      case 'shot_result': handleNetShotResult(data); break; 
+      case 'shield_activated': state.counterMeasureEnemy = true; addLog('L\'adversaire active un bouclier !', 'info', 'bot'); break; 
+      case 'reveal_request': handleNetRevealRequest(); break; 
+      case 'reveal_result': handleNetRevealResult(data); break; 
+      case 'reveal_mines_request': handleNetRevealMinesRequest(); break; 
+      case 'reveal_mines_result': handleNetRevealMinesResult(data); break; 
+      case 'surrender': endGame1P(true); break; 
+    } 
+  } catch(e) { console.error("Network Data Error:", e); } 
+}
 function checkOnlineCombatStart() { if (state.playerReady && state.enemyReady) { state.isPlayerTurn = state.net.isHost; startCombat1P(); if (!state.isPlayerTurn) document.getElementById('combat-subtitle').textContent = 'En attente du tir adverse...'; else document.getElementById('combat-subtitle').textContent = 'À vous de jouer, commandant.'; } }
 
 const originalHandleEnemyClick1P = handleEnemyClick1P;
@@ -544,8 +585,8 @@ handleEnemyClick1P = function(row, col) {
     if (!state.isPlayerTurn || state.isAnimating) { showToast('Patientez...', 'info', 1200); return; }
     const w = WEAPONS[state.selectedWeapon]; const cost = state.activeAbility ? 0 : w.cost;
     if (state.pa.player < cost) { showToast(`Pas assez de PA`, 'danger'); return; }
-    let cells; let weaponType = state.selectedWeapon;
-    if (state.activeAbility) { const ab = SHIP_ABILITIES[state.activeAbility]; cells = getAbilityCells(row, col, ab.pattern); weaponType = 'standard'; } 
+    let cells; let weaponType = state.selectedWeapon; let pattern = null;
+    if (state.activeAbility) { const ab = SHIP_ABILITIES[state.activeAbility]; cells = getAbilityCells(row, col, ab.pattern); weaponType = 'standard'; pattern = ab.pattern; } 
     else { cells = getWeaponCells(row, col, state.selectedWeapon, state.weaponOrientation); }
     const valid = cells.filter(([r, c]) => inBounds(r, c) && !state.boards.enemy[r][c].hit && !state.boards.enemy[r][c].miss);
     if (valid.length === 0) { showToast('Cases déjà ciblées.', 'info', 1200); return; }
@@ -554,7 +595,8 @@ handleEnemyClick1P = function(row, col) {
     if (state.activeAbility) { state.abilityCooldowns[state.activeAbility] = SHIP_ABILITIES[state.activeAbility].cooldown; state.tracking.shipAbilitiesUsed.push(state.activeAbility); state.activeAbility = null; }
     if (weaponType !== 'standard' || usedAbility) state.tracking.usedSpecialWeapon = true;
     const cellsToSend = valid.map(c => ({ r: c[0], c: c[1] }));
-    sendNetData({ type: 'shot', cells: cellsToSend, weaponType, usedAbility: !!usedAbility });
+    // On envoie primaryTarget et pattern pour que le défenseur puisse calculer l'arrêt du tir
+    sendNetData({ type: 'shot', cells: cellsToSend, weaponType, usedAbility: !!usedAbility, primaryTarget: { r: row, c: col }, pattern: pattern });
     state.isPlayerTurn = false; document.getElementById('combat-subtitle').textContent = 'En attente du résultat...';
     renderAbilities1P('abilities-list'); renderWeapons1P('weapons-list'); updatePA1P();
   } else { originalHandleEnemyClick1P(row, col); }
@@ -562,7 +604,7 @@ handleEnemyClick1P = function(row, col) {
 
 function handleNetShot(data) {
   if (data.weaponType === 'sonar') {
-    let count = 0; data.cells.forEach(cell => { if (inBounds(cell.r, cell.c)) { state.boards.player[cell.r][cell.c].sonarRevealed = true; if (state.boards.player[cell.r][cell.c].ship) count++; } });
+    let count = 0; data.cells.forEach(cell => { if (inBounds(cell.r, cell.c)) { state.boards.player[cell.r][cell.c].sonarRevealed = true; if (state.boards.player[cell.r][cell.c].ship || state.boards.player[cell.r][cell.c].rock || state.boards.player[cell.r][cell.c].mine) count++; } });
     if (data.cells.length > 0) { const mid = data.cells[Math.floor(data.cells.length / 2)]; if (inBounds(mid.r, mid.c)) state.boards.player[mid.r][mid.c].sonarCount = count; }
     sendNetData({ type: 'shot_result', sonarCount: count, sonarCells: data.cells });
     playSound('sonar'); addLog(`L'adversaire utilise le <strong>Sonar</strong> sur votre flotte.`, 'info', 'bot'); showToast('📡 Radar adverse détecté sur votre flotte !', 'info', 2500);
@@ -572,19 +614,93 @@ function handleNetShot(data) {
     renderWeapons1P('weapons-list'); renderAbilities1P('abilities-list'); return;
   }
   state.isPlayerTurn = false; let hits = 0; let sunkShips = []; let results = [];
-  data.cells.forEach(cell => {
-    const r = cell.r, c = cell.c; if (!inBounds(r, c)) return;
-    const cd = state.boards.player[r][c]; if (cd.hit || cd.miss) return;
-    const cellEl = document.querySelector(`#player-grid .cell[data-row="${r}"][data-col="${c}"]`);
-    if (state.counterMeasure && cd.ship && !cd.ship.sunk) {
-      state.counterMeasure = false;
+  
+  const primaryTarget = data.primaryTarget ? [data.primaryTarget.r, data.primaryTarget.c] : null;
+  const pattern = data.pattern || null;
+  let rockCancelled = false;
+  let blockedDirs = new Set();
+  let cells = data.cells.map(c => [c.r, c.c]);
+
+  // Trier les cases par distance par rapport au point de clic
+  if (primaryTarget && pattern !== 'star' && pattern !== 'salvo') {
+    cells = cells.slice().sort((a, b) => {
+      const distA = Math.abs(a[0] - primaryTarget[0]) + Math.abs(a[1] - primaryTarget[1]);
+      const distB = Math.abs(b[0] - primaryTarget[0]) + Math.abs(b[1] - primaryTarget[1]);
+      return distA - distB;
+    });
+  }
+
+  // Vérifier si la case principale est un rocher (annule tout le tir)
+  if (primaryTarget && inBounds(primaryTarget[0], primaryTarget[1])) {
+    const [pr, pc] = primaryTarget; const pcd = state.boards.player[pr][pc];
+    if (pcd.rock && !pcd.rockRevealed) {
+      pcd.rockRevealed = true; pcd.miss = true; rockCancelled = true;
+      const cellEl = document.querySelector(`#player-grid .cell[data-row="${pr}"][data-col="${pc}"]`);
       if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); }
-      results.push({ r, c, status: 'shielded' });
-      return;
+      results.push({ r: pr, c: pc, status: 'rock' });
     }
-    if (cd.ship) { cd.hit = true; hits++; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); } if (!cd.ship.sunk && isShipSunk(state.boards.player, cd.ship)) { cd.ship.sunk = true; sunkShips.push(cd.ship); } results.push({ r, c, status: 'hit', shipId: cd.ship.id, sunk: cd.ship.sunk }); } 
-    else { cd.miss = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } results.push({ r, c, status: 'miss' }); }
-  });
+  }
+
+  if (!rockCancelled) {
+    cells.forEach(([r, c]) => {
+      if (!inBounds(r, c)) return; const cd = state.boards.player[r][c]; if (cd.hit || cd.miss) return; 
+      const cellEl = document.querySelector(`#player-grid .cell[data-row="${r}"][data-col="${c}"]`);
+      
+      let dirKey = '0,0';
+      if (primaryTarget && pattern !== 'star' && pattern !== 'salvo') {
+        const dr = Math.sign(r - primaryTarget[0]);
+        const dc = Math.sign(c - primaryTarget[1]);
+        dirKey = `${dr},${dc}`;
+        if (blockedDirs.has(dirKey)) return; // Arrêt de la propagation dans cette direction
+      }
+
+      if (state.counterMeasure && cd.ship && !cd.ship.sunk) {
+        state.counterMeasure = false;
+        if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); }
+        results.push({ r, c, status: 'shielded' });
+        return;
+      }
+      if (cd.rock) {
+        cd.rockRevealed = true; cd.miss = true;
+        if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); }
+        results.push({ r, c, status: 'rock' });
+        if (primaryTarget && !(r === primaryTarget[0] && c === primaryTarget[1])) blockedDirs.add(dirKey);
+        return;
+      }
+      if (cd.mine && !cd.mineTriggered) {
+        cd.mineTriggered = true; cd.miss = true;
+        if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); }
+        results.push({ r, c, status: 'mine' });
+        const result = triggerMineExplosion(state.boards.player, r, c, 'player-grid');
+        hits += result.hits; sunkShips = sunkShips.concat(result.sunkShips);
+        results = results.concat(result.affectedCells);
+        if (primaryTarget && pattern !== 'star' && pattern !== 'salvo') {
+          if (r === primaryTarget[0] && c === primaryTarget[1]) {
+            blockedDirs.add('-1,0'); blockedDirs.add('1,0'); blockedDirs.add('0,-1'); blockedDirs.add('0,1');
+            blockedDirs.add('-1,-1'); blockedDirs.add('-1,1'); blockedDirs.add('1,-1'); blockedDirs.add('1,1');
+          } else {
+            blockedDirs.add(dirKey);
+          }
+        }
+        return;
+      }
+      if (cd.ship) { 
+        if (cd.nearRock && !cd.halfHit) { 
+          cd.halfHit = true; 
+          if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
+          results.push({ r, c, status: 'halfhit' }); return; 
+        }
+        cd.hit = true; hits++; 
+        if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
+        if (!cd.ship.sunk && isShipSunk(state.boards.player, cd.ship)) { cd.ship.sunk = true; sunkShips.push(cd.ship); } 
+        results.push({ r, c, status: 'hit', shipId: cd.ship.id, sunk: cd.ship.sunk }); 
+      } else { 
+        cd.miss = true; 
+        if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
+        results.push({ r, c, status: 'miss' }); 
+      }
+    });
+  }
   if (hits > 0) { playSound('hit'); if (sunkShips.length > 0) setTimeout(() => playSound('sunk'), 300); } else playSound('miss');
   state.shots.bot++; state.hits.bot += hits; state.sunk.bot += sunkShips.length;
   if (sunkShips.length > 0) state.tracking.shipsLostByPlayer += sunkShips.length;
@@ -615,13 +731,21 @@ function handleNetShotResult(data) {
     state.isPlayerTurn = false; document.getElementById('combat-subtitle').textContent = 'En attente du tir adverse...'; return;
   }
   let hits = 0; let sunkShips = [];
-  if (data.results && Array.isArray(data.results)) {
+      if (data.results && Array.isArray(data.results)) {
     data.results.forEach(res => {
       const r = parseInt(res.r), c = parseInt(res.c);
       if (isNaN(r) || isNaN(c) || !inBounds(r, c)) return;
       const cd = state.boards.enemy[r][c];
-      if (res.status === 'hit') { cd.hit = true; hits++; } 
-      else if (res.status === 'miss') { cd.miss = true; }
+      const cellEl = document.querySelector(`#enemy-grid .cell[data-row="${r}"][data-col="${c}"]`);
+      if (res.status === 'hit') { cd.hit = true; hits++; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); } } 
+      else if (res.status === 'miss') { cd.miss = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } }
+      else if (res.status === 'rock') { cd.rockRevealed = true; cd.miss = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } addLog(`Tir bloqué par un rocher en ${getCoord([r,c])}!`, 'miss', 'player'); }
+      else if (res.status === 'mine') { cd.mineTriggered = true; cd.miss = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); } addLog(`Mine déclenchée en ${getCoord([r,c])}!`, 'hit', 'player'); }
+      else if (res.status === 'halfhit') { cd.halfHit = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } addLog(`Armure renforcée! Case ${getCoord([r,c])} touchée mais résiste.`, 'hit', 'player'); }
+      else if (res.status === 'sunk') { 
+        cd.hit = true; 
+        if (cd.ship) cd.ship.sunk = true; 
+      }
     });
   }
   if (data.sunkShips && Array.isArray(data.sunkShips)) {
@@ -699,8 +823,9 @@ function handleNetRevealMinesResult(data) {
 }
 
 function startPlacement1P() {
+  GRID_SIZE = parseInt(state.gameOptions.gridSize, 10) || 10; 
+  SHIPS = getShipsForSize(GRID_SIZE);
   state.phase = 'placement'; resetBodyTheme();
-  if (state.mode === '1p') { GRID_SIZE = state.gameOptions.gridSize || 10; SHIPS = getShipsForSize(GRID_SIZE); } else { GRID_SIZE = 10; SHIPS = SHIPS_CLASSIC; }
   state.boards.player = createEmptyBoard(); state.boards.enemy = createEmptyBoard(); 
   state.ships.player = []; state.ships.enemy = [];
   state.selectedShipToPlace = null; state.placementOrientation = 'h';
@@ -712,7 +837,8 @@ function startPlacement1P() {
 }
 function startPlacement2P() {
   state.phase = 'placement'; state.placementPhase = 'p1'; state.activePlayer = 'p1';
-  GRID_SIZE = 10; SHIPS = SHIPS_CLASSIC;
+  GRID_SIZE = state.gameOptions.gridSize || 10; 
+  SHIPS = getShipsForSize(GRID_SIZE);
   state.p1.name = state.p1Name || 'Joueur 1'; state.p2.name = state.p2Name || 'Joueur 2';
   state.p1.board = createEmptyBoard(); state.p1.ships = []; state.p2.board = createEmptyBoard(); state.p2.ships = [];
   state.selectedShipToPlace = null; state.placementOrientation = 'h'; state.activeAbility = null;
@@ -844,10 +970,19 @@ document.getElementById('clear-btn').addEventListener('click', () => {
 });
 document.getElementById('confirm-placement-btn').addEventListener('click', () => { 
   if (state.mode === '1p' && state.ships.player.length === SHIPS.length) startCombat1P(); 
-  else if (state.mode === 'online' && state.ships.player.length === SHIPS.length && !state.playerReady) { state.playerReady = true; sendNetData({ type: 'placement_done' }); renderPlacementScreen(); checkOnlineCombatStart(); }
+  else if (state.mode === 'online' && state.ships.player.length === SHIPS.length && !state.playerReady) { 
+    if (state.gameOptions.obstaclesEnabled) scatterObstacles(state.boards.player);
+    state.playerReady = true; sendNetData({ type: 'placement_done' }); renderPlacementScreen(); checkOnlineCombatStart(); 
+  }
   else if (state.mode === '2p') { 
-    if (state.placementPhase === 'p1' && state.p1.ships.length === SHIPS.length) { state.selectedShipToPlace = null; state.placementPhase = 'p2'; state.activePlayer = 'p2'; showPassScreen('placement'); } 
-    else if (state.placementPhase === 'p2' && state.p2.ships.length === SHIPS.length) { initCombat2P(); state.activePlayer = 'p1'; showPassScreen('combat'); } 
+    if (state.placementPhase === 'p1' && state.p1.ships.length === SHIPS.length) { 
+      if (state.gameOptions.obstaclesEnabled) scatterObstacles(state.p1.board);
+      state.selectedShipToPlace = null; state.placementPhase = 'p2'; state.activePlayer = 'p2'; showPassScreen('placement'); 
+    } 
+    else if (state.placementPhase === 'p2' && state.p2.ships.length === SHIPS.length) { 
+      if (state.gameOptions.obstaclesEnabled) scatterObstacles(state.p2.board);
+      initCombat2P(); state.activePlayer = 'p1'; showPassScreen('combat'); 
+    } 
   } 
 });
 
@@ -869,6 +1004,8 @@ document.getElementById('pass-reveal-btn').addEventListener('click', () => {
 });
 
 function startCombat1P() {
+  GRID_SIZE = parseInt(state.gameOptions.gridSize, 10) || 10; 
+  SHIPS = getShipsForSize(GRID_SIZE);
   state.phase = 'combat'; state.pa = { player: 3, bot: 3 }; state.paGained = 0; state.paSpent = 0;
   state.selectedWeapon = 'standard'; state.isPlayerTurn = state.mode === 'online' ? state.net.isHost : true; state.botMemory = createBotMemory();
   state.shots = { player: 0, bot: 0 }; state.hits = { player: 0, bot: 0 }; state.sunk = { player: 0, bot: 0 };
@@ -1000,24 +1137,63 @@ function activateAbility1P(shipId) {
   setTimeout(() => botTurn(), 800);
 }
 
-    function explodeMine(board, mr, mc, owner) {
-      let hits = 0; const sunkShips = []; const hitShipIds = [];
-      for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+    function triggerMineExplosion(board, initialR, initialC, gridId) {
+  let hits = 0; const sunkShips = []; const hitShipIds = []; const affectedCells = [];
+  const queue = [[initialR, initialC]];
+  const processedMines = new Set();
+
+  while (queue.length > 0) {
+    const [mr, mc] = queue.shift();
+    const mineKey = `${mr},${mc}`;
+    if (processedMines.has(mineKey)) continue;
+    processedMines.add(mineKey);
+
+    for (let dr = -1; dr <= 1; dr++) {
+      for (let dc = -1; dc <= 1; dc++) {
         if (dr === 0 && dc === 0) continue;
         const r = mr + dr, c = mc + dc; if (!inBounds(r, c)) continue;
         const cd = board[r][c]; if (cd.hit || cd.miss) continue;
-        const cellEl = document.querySelector(owner === 'player' ? `#enemy-grid .cell[data-row="${r}"][data-col="${c}"]` : `#player-grid .cell[data-row="${r}"][data-col="${c}"]`);
-        if (cd.rock) { cd.rockRevealed = true; cd.miss = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } continue; }
-        if (cd.mine) { cd.mineTriggered = true; cd.miss = true; continue; }
-        if (cd.ship) {
-          if (cd.nearRock && !cd.halfHit) { cd.halfHit = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } continue; }
-          cd.hit = true; hits++; hitShipIds.push(cd.ship.id);
+        const cellEl = document.querySelector(`${gridId} .cell[data-row="${r}"][data-col="${c}"]`);
+        
+        if (cd.rock) { 
+          cd.rockRevealed = true; cd.miss = true; 
+          affectedCells.push({ r, c, status: 'rock' });
+          if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
+          continue; 
+        }
+        
+        if (cd.mine && !cd.mineTriggered) {
+          cd.mineTriggered = true; cd.miss = true;
+          affectedCells.push({ r, c, status: 'mine' });
           if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); }
-          if (!cd.ship.sunk && isShipSunk(board, cd.ship)) { cd.ship.sunk = true; sunkShips.push(cd.ship); }
-        } else { cd.miss = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } }
+          queue.push([r, c]); // RÉACTION EN CHAÎNE !
+        } 
+        else if (cd.ship) {
+          if (cd.nearRock && !cd.halfHit) { 
+            cd.halfHit = true; 
+            affectedCells.push({ r, c, status: 'halfhit' });
+            if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
+            continue; 
+          }
+          cd.hit = true; hits++; hitShipIds.push(cd.ship.id);
+          affectedCells.push({ r, c, status: 'hit', shipId: cd.ship.id });
+          if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); }
+          if (!cd.ship.sunk && isShipSunk(board, cd.ship)) { 
+            cd.ship.sunk = true; sunkShips.push(cd.ship); 
+            cd.ship.cells.forEach(([sr, sc]) => {
+              affectedCells.push({ r: sr, c: sc, status: 'sunk', shipId: cd.ship.id });
+            });
+          }
+        } else { 
+          cd.miss = true; 
+          affectedCells.push({ r, c, status: 'miss' });
+          if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
+        }
       }
-      return { hits, sunkShips, hitShipIds };
     }
+  }
+  return { hits, sunkShips, hitShipIds, affectedCells };
+}
 function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', primaryTarget = null, pattern = null) {
   if (weaponType === 'sonar' && source !== 'ability') {
     let count = 0; cells.forEach(([r, c]) => { if (inBounds(r, c)) { board[r][c].sonarRevealed = true; if (board[r][c].ship || board[r][c].rock || board[r][c].mine) count++; } });
@@ -1072,10 +1248,11 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
         if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
         showToast('Tir dévié par contre-mesures !', 'success'); addLog('Tir dévié par contre-mesures.', 'miss', 'bot'); return; 
       }
-      if (cd.mine && !cd.mineTriggered) {
+            if (cd.mine && !cd.mineTriggered) {
         cd.mineTriggered = true; cd.miss = true;
         if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); }
-        const result = explodeMine(board, r, c, owner);
+        const gridId = owner === 'player' ? 'enemy-grid' : 'player-grid';
+        const result = triggerMineExplosion(board, r, c, gridId);
         hits += result.hits; sunkShips = sunkShips.concat(result.sunkShips);
         if (owner === 'player') result.hitShipIds.forEach(id => { state.tracking.shipsHit.add(id); if (id === 'carrier') state.tracking.carrierHits++; });
         if (primaryTarget && pattern !== 'star' && pattern !== 'salvo') {
@@ -1214,8 +1391,37 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
 
     function initCombat2P() { state.phase = 'combat'; state.activeAbility = null; state.selectedWeapon = 'standard'; state.weaponOrientation = 'h'; state.p1.pa = 3; state.p2.pa = 3; state.p1.abilitiesUsed = {}; state.p2.abilitiesUsed = {}; state.p1.abilityCooldowns = {}; state.p2.abilityCooldowns = {}; state.p1.activeAbility = null; state.p2.activeAbility = null; state.p1.counterMeasure = false; state.p2.counterMeasure = false; state.p1.shots = 0; state.p1.hits = 0; state.p1.sunk = 0; state.p2.shots = 0; state.p2.hits = 0; state.p2.sunk = 0; SHIPS.forEach(s => { state.p1.abilityCooldowns[s.id] = SHIP_ABILITIES[s.id].cooldown; state.p2.abilityCooldowns[s.id] = SHIP_ABILITIES[s.id].cooldown; }); state.lastAction2P = ''; state.peeking = false; state.isPlayerTurn = true; const logC = document.getElementById('p2p-log-container'); if (logC) logC.innerHTML = ''; }
     function renderCombat2P() { const ap = state.activePlayer; const opp = ap === 'p1' ? 'p2' : 'p1'; document.body.className = ap === 'p1' ? 'theme-p1' : 'theme-p2'; document.getElementById('p2p-title').textContent = state[ap].name; document.getElementById('p2p-subtitle').textContent = state.peeking ? 'Votre flotte (Vue tactique)' : `Grille de ${state[opp].name}`; document.getElementById('p2p-pa').textContent = state[ap].pa; document.getElementById('p2p-peek-btn').textContent = state.peeking ? 'Grille de tir' : 'Vision Flotte'; document.getElementById('p2p-peek-btn').onclick = () => { state.peeking = !state.peeking; renderCombat2P(); }; const container = document.getElementById('p2p-grid-container'); container.innerHTML = ''; if (state.peeking) { const div = document.createElement('div'); div.className = 'grid-board'; div.id = 'p2p-self-grid'; container.appendChild(div); renderGrid2P('p2p-self-grid', state[ap].board, true); } else { const div = document.createElement('div'); div.className = 'grid-board'; div.id = 'p2p-enemy-grid'; container.appendChild(div); renderGrid2P('p2p-enemy-grid', state[opp].board, false); } renderWeapons2P('p2p-weapons-list'); renderAbilities2P('p2p-abilities-list'); }
-    function renderGrid2P(gridId, boardData, isPlayerGrid) { const ap = state.activePlayer; const grid = document.getElementById(gridId); if (!grid) return; grid.innerHTML = ''; grid.appendChild(document.createElement('div')); for (let c = 0; c < GRID_SIZE; c++) { const l = document.createElement('div'); l.className = 'grid-label'; l.textContent = String.fromCharCode(65 + c); grid.appendChild(l); } for (let r = 0; r < GRID_SIZE; r++) { const rl = document.createElement('div'); rl.className = 'grid-label'; rl.textContent = (r + 1).toString(); grid.appendChild(rl); for (let c = 0; c < GRID_SIZE; c++) { const cell = document.createElement('div'); cell.className = 'cell' + (isPlayerGrid ? ' cell-disabled' : ''); cell.dataset.row = r; cell.dataset.col = c; const cd = boardData[r][c]; if (cd.ship && (isPlayerGrid || cd.hit)) { cell.classList.add('cell-ship'); if (cd.ship.sunk) cell.classList.add('cell-ship-sunk'); } if (cd.hit) cell.classList.add('cell-hit'); else if (cd.miss) cell.classList.add('cell-miss'); else if (cd.sonarRevealed) { cell.classList.add('cell-sonar-revealed'); if (cd.sonarCount !== null && cd.sonarCount > 0) cell.innerHTML = `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent);font-size:14px;">${cd.sonarCount}</div>`; } if (state[ap].counterMeasure && cd.ship && !cd.ship.sunk && cd.ship.id === 'patrol' && isPlayerGrid) { const shield = document.createElement('div'); shield.className = 'shield-indicator'; shield.innerHTML = '🛡'; cell.appendChild(shield); } if (!isPlayerGrid) { cell.addEventListener('click', () => handleEnemyClick2P(r, c)); cell.addEventListener('mouseenter', () => showWeaponPreview2P(r, c, 'p2p-enemy-grid')); cell.addEventListener('mouseleave', () => clearWeaponPreview('p2p-enemy-grid')); cell.addEventListener('contextmenu', e => { e.preventDefault(); state.weaponOrientation = state.weaponOrientation === 'h' ? 'v' : 'h'; showWeaponPreview2P(r, c, 'p2p-enemy-grid'); }); } grid.appendChild(cell); } } }
-    function showWeaponPreview2P(row, col, gridId) { clearWeaponPreview(gridId); if (state.peeking || !state.isPlayerTurn) return; const ap = state.activePlayer; const opp = ap === 'p1' ? 'p2' : 'p1'; const enemyBoard = state[opp].board; const w = WEAPONS[state.selectedWeapon]; const cost = state.activeAbility ? 0 : w.cost; if (state[ap].pa < cost) return; let cells; if (state.activeAbility) { const ab = SHIP_ABILITIES[state.activeAbility]; cells = getAbilityCells(row, col, ab.pattern); } else { cells = getWeaponCells(row, col, state.selectedWeapon, state.weaponOrientation); } cells.forEach(([r, c]) => { if (inBounds(r, c)) { const el = document.querySelector(`#${gridId} .cell[data-row="${r}"][data-col="${c}"]`); if (el && !enemyBoard[r][c].hit && !enemyBoard[r][c].miss) el.classList.add('cell-weapon-preview'); } }); }
+function renderGrid2P(gridId, boardData, isPlayerGrid) { 
+  const ap = state.activePlayer; 
+  const grid = document.getElementById(gridId); if (!grid) return; 
+  grid.innerHTML = ''; 
+  grid.style.gridTemplateColumns = `20px repeat(${GRID_SIZE}, 1fr)`; grid.style.gridTemplateRows = `20px repeat(${GRID_SIZE}, 1fr)`;
+  grid.appendChild(document.createElement('div')); 
+  for (let c = 0; c < GRID_SIZE; c++) { const l = document.createElement('div'); l.className = 'grid-label'; l.textContent = String.fromCharCode(65 + c); grid.appendChild(l); } 
+  for (let r = 0; r < GRID_SIZE; r++) { 
+    const rl = document.createElement('div'); rl.className = 'grid-label'; rl.textContent = (r + 1).toString(); grid.appendChild(rl); 
+    for (let c = 0; c < GRID_SIZE; c++) { 
+      const cell = document.createElement('div'); cell.className = 'cell' + (isPlayerGrid ? ' cell-disabled' : ''); cell.dataset.row = r; cell.dataset.col = c; 
+      const cd = boardData[r][c]; 
+      if (cd.ship && (isPlayerGrid || cd.hit)) { cell.classList.add('cell-ship'); if (cd.ship.sunk) cell.classList.add('cell-ship-sunk'); } 
+      const showRock = cd.rockRevealed || (isPlayerGrid && cd.rock);
+      if (showRock) cell.classList.add('cell-rock');
+      else if (cd.mineTriggered) cell.classList.add('cell-mine-triggered');
+      else if (cd.halfHit && !cd.hit) cell.classList.add('cell-half-hit');
+      else if (cd.hit) cell.classList.add('cell-hit'); 
+      else if (cd.miss) cell.classList.add('cell-miss'); 
+      if (!showRock && !cd.mineTriggered && cd.sonarRevealed && !cd.hit && !cd.miss) { 
+        cell.classList.add('cell-sonar-revealed'); 
+        if (cd.sonarCount === -1) cell.innerHTML = `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--hit);font-size:14px;">💣</div>`; 
+        else if (cd.sonarCount !== null && cd.sonarCount > 0) cell.innerHTML = `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent);font-size:14px;">${cd.sonarCount}</div>`; 
+      } 
+      if (state[ap].counterMeasure && cd.ship && !cd.ship.sunk && cd.ship.id === 'patrol' && isPlayerGrid) { const shield = document.createElement('div'); shield.className = 'shield-indicator'; shield.innerHTML = '🛡'; cell.appendChild(shield); } 
+      if (!isPlayerGrid) { cell.addEventListener('click', () => handleEnemyClick2P(r, c)); cell.addEventListener('mouseenter', () => showWeaponPreview2P(r, c, 'p2p-enemy-grid')); cell.addEventListener('mouseleave', () => clearWeaponPreview('p2p-enemy-grid')); cell.addEventListener('contextmenu', e => { e.preventDefault(); state.weaponOrientation = state.weaponOrientation === 'h' ? 'v' : 'h'; showWeaponPreview2P(r, c, 'p2p-enemy-grid'); }); } 
+      grid.appendChild(cell); 
+    } 
+  } 
+}    
+	function showWeaponPreview2P(row, col, gridId) { clearWeaponPreview(gridId); if (state.peeking || !state.isPlayerTurn) return; const ap = state.activePlayer; const opp = ap === 'p1' ? 'p2' : 'p1'; const enemyBoard = state[opp].board; const w = WEAPONS[state.selectedWeapon]; const cost = state.activeAbility ? 0 : w.cost; if (state[ap].pa < cost) return; let cells; if (state.activeAbility) { const ab = SHIP_ABILITIES[state.activeAbility]; cells = getAbilityCells(row, col, ab.pattern); } else { cells = getWeaponCells(row, col, state.selectedWeapon, state.weaponOrientation); } cells.forEach(([r, c]) => { if (inBounds(r, c)) { const el = document.querySelector(`#${gridId} .cell[data-row="${r}"][data-col="${c}"]`); if (el && !enemyBoard[r][c].hit && !enemyBoard[r][c].miss) el.classList.add('cell-weapon-preview'); } }); }
     function renderWeapons2P(containerId) { const container = document.getElementById(containerId); if (!container) return; const ap = state.activePlayer; container.innerHTML = ''; Object.entries(WEAPONS).forEach(([key, w]) => { if (!state.enabledWeapons[key] && !state[ap].activeAbility) return; if (!state.enabledWeapons[key] && state[ap].activeAbility !== key) return; const isFree = state[ap].activeAbility === key; const cost = isFree ? 0 : w.cost; const canAfford = state[ap].pa >= cost; const btn = document.createElement('div'); btn.className = 'weapon-btn' + (state.selectedWeapon === key ? ' active' : '') + (!canAfford ? ' weapon-disabled' : ''); btn.innerHTML = `<div class="pa-cost ${isFree ? 'free' : ''}">${isFree ? '0' : cost}</div><div class="weapon-icon">${getWeaponIcon(w.icon)}</div><div class="text-xs font-semibold text-white">${w.name}</div>`; if (canAfford) btn.addEventListener('click', () => { state.selectedWeapon = key; renderWeapons2P(containerId); }); container.appendChild(btn); }); }
 
     function renderAbilities2P(containerId) { 
@@ -1265,11 +1471,11 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
   executeWeapon2P(cells, weaponType, actionSummary, [row, col], pattern); 
 }
 
-    function executeWeapon2P(cells, weaponType, actionSummary, primaryTarget = null, pattern = null) {
+function executeWeapon2P(cells, weaponType, actionSummary, primaryTarget = null, pattern = null) {
   const ap = state.activePlayer; const opp = ap === 'p1' ? 'p2' : 'p1'; const enemyBoard = state[opp].board;
   let hits = 0; let sunkShips = []; let sonarCount = 0;
-  if (weaponType === 'sonar') { 
-    cells.forEach(([r, c]) => { if (inBounds(r, c)) { enemyBoard[r][c].sonarRevealed = true; if (enemyBoard[r][c].ship) sonarCount++; } }); 
+    if (weaponType === 'sonar') { 
+    cells.forEach(([r, c]) => { if (inBounds(r, c)) { enemyBoard[r][c].sonarRevealed = true; if (enemyBoard[r][c].ship || enemyBoard[r][c].rock || enemyBoard[r][c].mine) sonarCount++; } }); 
     if (cells.length > 0) { const [cr, cc] = cells[Math.floor(cells.length / 2)]; if (inBounds(cr, cc)) enemyBoard[cr][cc].sonarCount = sonarCount; } 
     playSound('sonar'); 
     const center = document.querySelector(`#p2p-enemy-grid .cell[data-row="${cells[4] ? cells[4][0] : cells[0][0]}"][data-col="${cells[4] ? cells[4][1] : cells[0][1]}"]`); 
@@ -1284,7 +1490,7 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
         return distA - distB;
       });
     }
-    cells.forEach(([r, c]) => {
+        cells.forEach(([r, c]) => {
       if (!inBounds(r, c)) return; const cd = enemyBoard[r][c]; if (cd.hit || cd.miss) return; 
       const cellEl = document.querySelector(`#p2p-enemy-grid .cell[data-row="${r}"][data-col="${c}"]`);
       
@@ -1312,9 +1518,11 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
         return;
       }
       
-      if (cd.mine && !cd.mineTriggered) {
+            if (cd.mine && !cd.mineTriggered) {
         cd.mineTriggered = true; cd.miss = true;
         if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); }
+        const result = triggerMineExplosion(enemyBoard, r, c, 'p2p-enemy-grid');
+        hits += result.hits; sunkShips = sunkShips.concat(result.sunkShips);
         if (primaryTarget && pattern !== 'star' && pattern !== 'salvo') {
           if (r === primaryTarget[0] && c === primaryTarget[1]) {
             blockedDirs.add('-1,0'); blockedDirs.add('1,0'); blockedDirs.add('0,-1'); blockedDirs.add('0,1');
