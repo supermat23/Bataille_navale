@@ -972,33 +972,33 @@ function activateAbility1P(shipId) {
     document.getElementById('surrender-btn').addEventListener('click', () => { if (state.mode === 'online') sendNetData({ type: 'surrender' }); showToast('<strong>Abandon</strong>', 'danger', 2000); setTimeout(() => endGame1P(false), 800); });
 
     function handleEnemyClick1P(row, col) {
-      if (!state.isPlayerTurn || state.isAnimating) { showToast('Patientez...', 'info', 1200); return; }
-      stopChrono();
-      const w = WEAPONS[state.selectedWeapon]; let cost = state.activeAbility ? 0 : w.cost;
-      if (state.selectedWeapon === 'sonar' && state.freeSonarNext && !state.activeAbility) cost = 0;
-      if (state.pa.player < cost) { showToast(`Pas assez de PA`, 'danger'); return; }
-      let cells; let weaponType = state.selectedWeapon;
-      if (state.activeAbility) { const ab = SHIP_ABILITIES[state.activeAbility]; cells = getAbilityCells(row, col, ab.pattern); weaponType = 'standard'; } 
-      else { cells = getWeaponCells(row, col, state.selectedWeapon, state.weaponOrientation); }
-      const valid = cells.filter(([r, c]) => inBounds(r, c) && !state.boards.enemy[r][c].hit && !state.boards.enemy[r][c].miss);
-      if (valid.length === 0) { showToast('Cases déjà ciblées.', 'info', 1200); return; }
-      state.pa.player -= cost; state.paSpent += cost;
-      if (state.selectedWeapon === 'sonar' && state.freeSonarNext) state.freeSonarNext = false;
-      const wasFirstShot = state.shots.player === 0; const usedAbility = state.activeAbility;
-      if (state.activeAbility) { state.abilityCooldowns[state.activeAbility] = SHIP_ABILITIES[state.activeAbility].cooldown; state.tracking.shipAbilitiesUsed.push(state.activeAbility); state.activeAbility = null; }
-      if (weaponType !== 'standard' || usedAbility) state.tracking.usedSpecialWeapon = true;
-      executeWeapon1P(state.boards.enemy, cells, 'player', weaponType, usedAbility ? 'ability' : (weaponType !== 'standard' ? 'special' : 'standard'), [row, col]);
-      if (wasFirstShot) { state.tracking.firstShotHit = state.boards.enemy[row][col].hit; }
-      if (!state.tracking.weaponsUsed.includes(weaponType)) state.tracking.weaponsUsed.push(weaponType);
-      if (weaponType === 'sonar') state.tracking.sonarUses++;
-      const stats = getStats(); updateStats({ totalShots: stats.totalShots + 1 });
-      checkAchievementsDuringPlay();
-      state.isPlayerTurn = false; state.isAnimating = true; state.turnCount++;
-      renderAbilities1P('abilities-list'); renderWeapons1P('weapons-list'); updatePA1P();
-      if (checkVictory1P()) { state.isAnimating = false; return; }
-      document.getElementById('combat-subtitle').textContent = 'L\'ennemi prépare son tir...';
-      setTimeout(() => botTurn(), 800);
-    }
+  if (!state.isPlayerTurn || state.isAnimating) { showToast('Patientez...', 'info', 1200); return; }
+  stopChrono();
+  const w = WEAPONS[state.selectedWeapon]; let cost = state.activeAbility ? 0 : w.cost;
+  if (state.selectedWeapon === 'sonar' && state.freeSonarNext && !state.activeAbility) cost = 0;
+  if (state.pa.player < cost) { showToast(`Pas assez de PA`, 'danger'); return; }
+  let cells; let weaponType = state.selectedWeapon; let pattern = null;
+  if (state.activeAbility) { const ab = SHIP_ABILITIES[state.activeAbility]; cells = getAbilityCells(row, col, ab.pattern); weaponType = 'standard'; pattern = ab.pattern; } 
+  else { cells = getWeaponCells(row, col, state.selectedWeapon, state.weaponOrientation); }
+  const valid = cells.filter(([r, c]) => inBounds(r, c) && !state.boards.enemy[r][c].hit && !state.boards.enemy[r][c].miss);
+  if (valid.length === 0) { showToast('Cases déjà ciblées.', 'info', 1200); return; }
+  state.pa.player -= cost; state.paSpent += cost;
+  if (state.selectedWeapon === 'sonar' && state.freeSonarNext) state.freeSonarNext = false;
+  const wasFirstShot = state.shots.player === 0; const usedAbility = state.activeAbility;
+  if (state.activeAbility) { state.abilityCooldowns[state.activeAbility] = SHIP_ABILITIES[state.activeAbility].cooldown; state.tracking.shipAbilitiesUsed.push(state.activeAbility); state.activeAbility = null; }
+  if (weaponType !== 'standard' || usedAbility) state.tracking.usedSpecialWeapon = true;
+  executeWeapon1P(state.boards.enemy, cells, 'player', weaponType, usedAbility ? 'ability' : (weaponType !== 'standard' ? 'special' : 'standard'), [row, col], pattern);
+  if (wasFirstShot) { state.tracking.firstShotHit = state.boards.enemy[row][col].hit; }
+  if (!state.tracking.weaponsUsed.includes(weaponType)) state.tracking.weaponsUsed.push(weaponType);
+  if (weaponType === 'sonar') state.tracking.sonarUses++;
+  const stats = getStats(); updateStats({ totalShots: stats.totalShots + 1 });
+  checkAchievementsDuringPlay();
+  state.isPlayerTurn = false; state.isAnimating = true; state.turnCount++;
+  renderAbilities1P('abilities-list'); renderWeapons1P('weapons-list'); updatePA1P();
+  if (checkVictory1P()) { state.isAnimating = false; return; }
+  document.getElementById('combat-subtitle').textContent = 'L\'ennemi prépare son tir...';
+  setTimeout(() => botTurn(), 800);
+}
 
     function explodeMine(board, mr, mc, owner) {
       let hits = 0; const sunkShips = []; const hitShipIds = [];
@@ -1018,70 +1018,99 @@ function activateAbility1P(shipId) {
       }
       return { hits, sunkShips, hitShipIds };
     }
-    function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', primaryTarget = null) {
-      if (weaponType === 'sonar' && source !== 'ability') {
-        let count = 0; cells.forEach(([r, c]) => { if (inBounds(r, c)) { board[r][c].sonarRevealed = true; if (board[r][c].ship || board[r][c].rock || board[r][c].mine) count++; } });
-        if (cells.length > 0) { const [cr, cc] = cells[Math.floor(cells.length / 2)]; if (inBounds(cr, cc)) board[cr][cc].sonarCount = count; }
-        if (owner === 'player') state.tracking.sonarMaxShips = Math.max(state.tracking.sonarMaxShips, count);
-        const gridId = owner === 'player' ? 'enemy-grid' : 'player-grid';
-        playSound('sonar'); const center = document.querySelector(`#${gridId} .cell[data-row="${cells[4] ? cells[4][0] : cells[0][0]}"][data-col="${cells[4] ? cells[4][1] : cells[0][1]}"]`);
-        if (center) { const rect = center.getBoundingClientRect(); spawnSonar(rect.left + rect.width / 2, rect.top + rect.height / 2); }
-        addLog(`Sonar — ${count} contact${count > 1 ? 's' : ''} détecté${count > 1 ? 's' : ''}.`, 'info', owner);
-        if (owner === 'player') renderGrid1P('enemy-grid', 'enemy', false); else { renderGrid1P('player-grid', 'player', true); showToast('📡 Radar adverse détecté sur votre flotte !', 'info', 2500); }
+function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', primaryTarget = null, pattern = null) {
+  if (weaponType === 'sonar' && source !== 'ability') {
+    let count = 0; cells.forEach(([r, c]) => { if (inBounds(r, c)) { board[r][c].sonarRevealed = true; if (board[r][c].ship || board[r][c].rock || board[r][c].mine) count++; } });
+    if (cells.length > 0) { const [cr, cc] = cells[Math.floor(cells.length / 2)]; if (inBounds(cr, cc)) board[cr][cc].sonarCount = count; }
+    if (owner === 'player') state.tracking.sonarMaxShips = Math.max(state.tracking.sonarMaxShips, count);
+    const gridId = owner === 'player' ? 'enemy-grid' : 'player-grid';
+    playSound('sonar'); const center = document.querySelector(`#${gridId} .cell[data-row="${cells[4] ? cells[4][0] : cells[0][0]}"][data-col="${cells[4] ? cells[4][1] : cells[0][1]}"]`);
+    if (center) { const rect = center.getBoundingClientRect(); spawnSonar(rect.left + rect.width / 2, rect.top + rect.height / 2); }
+    addLog(`Sonar — ${count} contact${count > 1 ? 's' : ''} détecté${count > 1 ? 's' : ''}.`, 'info', owner);
+    if (owner === 'player') renderGrid1P('enemy-grid', 'enemy', false); else { renderGrid1P('player-grid', 'player', true); showToast('📡 Radar adverse détecté sur votre flotte !', 'info', 2500); }
+    return;
+  }
+  let hits = 0; let sunkShips = []; let rockCancelled = false;
+  if (primaryTarget && inBounds(primaryTarget[0], primaryTarget[1])) {
+    const [pr, pc] = primaryTarget; const pcd = board[pr][pc];
+    if (pcd.rock && !pcd.rockRevealed) {
+      pcd.rockRevealed = true; pcd.miss = true; rockCancelled = true;
+      const cellEl = document.querySelector(owner === 'player' ? `#enemy-grid .cell[data-row="${pr}"][data-col="${pc}"]` : `#player-grid .cell[data-row="${pr}"][data-col="${pc}"]`);
+      if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); }
+    }
+  }
+  if (!rockCancelled) {
+    let blockedDirs = new Set();
+    if (primaryTarget && pattern !== 'star' && pattern !== 'salvo') {
+      cells = cells.slice().sort((a, b) => {
+        const distA = Math.abs(a[0] - primaryTarget[0]) + Math.abs(a[1] - primaryTarget[1]);
+        const distB = Math.abs(b[0] - primaryTarget[0]) + Math.abs(b[1] - primaryTarget[1]);
+        return distA - distB;
+      });
+    }
+    cells.forEach(([r, c]) => {
+      if (!inBounds(r, c)) return; const cd = board[r][c]; if (cd.hit || cd.miss) return;
+      let dirKey = '0,0';
+      if (primaryTarget && pattern !== 'star' && pattern !== 'salvo') {
+        const dr = Math.sign(r - primaryTarget[0]);
+        const dc = Math.sign(c - primaryTarget[1]);
+        dirKey = `${dr},${dc}`;
+        if (blockedDirs.has(dirKey)) return;
+      }
+      const cellEl = document.querySelector(owner === 'player' ? `#enemy-grid .cell[data-row="${r}"][data-col="${c}"]` : `#player-grid .cell[data-row="${r}"][data-col="${c}"]`);
+      if (cd.rock) {
+        cd.rockRevealed = true; cd.miss = true;
+        if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); }
+        if (primaryTarget && !(r === primaryTarget[0] && c === primaryTarget[1])) {
+          addLog(`Tir bloqué par un rocher en ${getCoord([r,c])}!`, 'miss', owner);
+          blockedDirs.add(dirKey);
+        }
         return;
       }
-      let hits = 0; let sunkShips = []; let rockCancelled = false;
-      if (primaryTarget && inBounds(primaryTarget[0], primaryTarget[1])) {
-        const [pr, pc] = primaryTarget; const pcd = board[pr][pc];
-        if (pcd.rock && !pcd.rockRevealed) {
-          pcd.rockRevealed = true; pcd.miss = true; rockCancelled = true;
-          const cellEl = document.querySelector(owner === 'player' ? `#enemy-grid .cell[data-row="${pr}"][data-col="${pc}"]` : `#player-grid .cell[data-row="${pr}"][data-col="${pc}"]`);
-          if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); }
+      if (owner === 'bot' && state.counterMeasure && cd.ship && !cd.ship.sunk) { 
+        state.counterMeasure = false; 
+        if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
+        showToast('Tir dévié par contre-mesures !', 'success'); addLog('Tir dévié par contre-mesures.', 'miss', 'bot'); return; 
+      }
+      if (cd.mine && !cd.mineTriggered) {
+        cd.mineTriggered = true; cd.miss = true;
+        if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); }
+        const result = explodeMine(board, r, c, owner);
+        hits += result.hits; sunkShips = sunkShips.concat(result.sunkShips);
+        if (owner === 'player') result.hitShipIds.forEach(id => { state.tracking.shipsHit.add(id); if (id === 'carrier') state.tracking.carrierHits++; });
+        if (primaryTarget && pattern !== 'star' && pattern !== 'salvo') {
+          if (r === primaryTarget[0] && c === primaryTarget[1]) {
+            blockedDirs.add('-1,0'); blockedDirs.add('1,0'); blockedDirs.add('0,-1'); blockedDirs.add('0,1');
+            blockedDirs.add('-1,-1'); blockedDirs.add('-1,1'); blockedDirs.add('1,-1'); blockedDirs.add('1,1');
+          } else {
+            blockedDirs.add(dirKey);
+          }
         }
+        return;
       }
-      if (!rockCancelled) {
-        let blocked = false;
-        cells.forEach(([r, c]) => {
-          if (blocked) return;
-          if (!inBounds(r, c)) return; const cd = board[r][c]; if (cd.hit || cd.miss) return;
-          const cellEl = document.querySelector(owner === 'player' ? `#enemy-grid .cell[data-row="${r}"][data-col="${c}"]` : `#player-grid .cell[data-row="${r}"][data-col="${c}"]`);
-          if (cd.rock) { cd.rockRevealed = true; cd.miss = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } blocked = true; return; }
-          if (owner === 'bot' && state.counterMeasure && cd.ship && !cd.ship.sunk) { 
-            state.counterMeasure = false; 
-            if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
-            showToast('Tir dévié par contre-mesures !', 'success'); addLog('Tir dévié par contre-mesures.', 'miss', 'bot'); return; 
-          }
-          if (cd.mine && !cd.mineTriggered) {
-            cd.mineTriggered = true; cd.miss = true;
-            if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); }
-            const result = explodeMine(board, r, c, owner);
-            hits += result.hits; sunkShips = sunkShips.concat(result.sunkShips);
-            if (owner === 'player') result.hitShipIds.forEach(id => { state.tracking.shipsHit.add(id); if (id === 'carrier') state.tracking.carrierHits++; });
-            return;
-          }
-          if (cd.ship) {
-            if (cd.nearRock && !cd.halfHit) { cd.halfHit = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } return; }
-            cd.hit = true; hits++; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); } if (!cd.ship.sunk && isShipSunk(board, cd.ship)) { cd.ship.sunk = true; sunkShips.push(cd.ship); }
-          } else { cd.miss = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } }
-        });
-      }
-      if (hits > 0) { playSound('hit'); if (sunkShips.length > 0) setTimeout(() => playSound('sunk'), 300); } else playSound('miss');
-      state.shots[owner]++;
-      if (owner === 'player') {
-        if (hits > 0) { state.tracking.consecutiveHits += hits; state.tracking.maxConsecutiveHits = Math.max(state.tracking.maxConsecutiveHits, state.tracking.consecutiveHits); state.tracking.maxMultiHit = Math.max(state.tracking.maxMultiHit, hits); } else state.tracking.consecutiveHits = 0;
-        state.hits.player += hits; state.sunk.player += sunkShips.length; state.pa.player += hits + sunkShips.length * 2; state.paGained += hits + sunkShips.length * 2;
-        if (sunkShips.length > 0) { state.tracking.maxShipsSunkInOneTurn = Math.max(state.tracking.maxShipsSunkInOneTurn, sunkShips.length); if (source === 'special' || source === 'ability') state.tracking.specialKill = true; if (!state.tracking.firstShipSunkId) state.tracking.firstShipSunkId = sunkShips[0].id; state.tracking.lastShipSunkId = sunkShips[sunkShips.length - 1].id; }
-        cells.forEach(([r, c]) => { if (inBounds(r, c) && board[r][c].ship) { state.tracking.shipsHit.add(board[r][c].ship.id); if (board[r][c].ship.id === 'carrier') state.tracking.carrierHits++; } });
-      } else { state.hits.bot += hits; state.sunk.bot += sunkShips.length; if (sunkShips.length > 0) state.tracking.shipsLostByPlayer += sunkShips.length; state.tracking.playerHitsReceived += hits; }
-      const wName = source === 'ability' ? 'Capacité' : (weaponType !== 'standard' ? WEAPONS[weaponType].name : '');
-      let msg = wName ? `${state.playerName || 'Vous'} utilise <strong>${wName}</strong>. ` : '';
-      if (rockCancelled) { msg += `<span style="color:#9a9a9a;">Le tir heurte un rocher — aucun effet.</span>`; addLog(msg, 'miss', owner); if (owner === 'player') showToast('🪨 Le tir heurte un rocher — aucun effet.', 'info', 2200); }
-      else if (hits > 0 && sunkShips.length > 0) { msg += `<span style="color:#c084fc;font-weight:700">⚡ COULÉ ⚡</span> <strong>${sunkShips.map(s => s.name).join(', ')}</strong>`; addLog(msg, 'sunk', owner); if (owner === 'player') showToast(sunkShips.map(s => `${SHIP_SUNK_FLAVOR[s.id] ? SHIP_SUNK_FLAVOR[s.id].icon : '💥'} <strong>${s.name}</strong> ${SHIP_SUNK_FLAVOR[s.id] ? SHIP_SUNK_FLAVOR[s.id].line : 'coulé'} !`).join('<br>'), 'success'); } 
-      else if (hits > 0) { msg += `<span style="color:var(--hit);font-weight:700">TOUCHÉ</span>`; addLog(msg, 'hit', owner); } 
-      else { msg += `<span style="color:var(--miss);">Raté</span>`; addLog(msg, 'miss', owner); }
-      if (owner === 'player') renderGrid1P('enemy-grid', 'enemy', false); else renderGrid1P('player-grid', 'player', true);
-      updateStatsUI1P(); updatePA1P(); renderWeapons1P('weapons-list'); renderAbilities1P('abilities-list');
-    }
+      if (cd.ship) {
+        if (cd.nearRock && !cd.halfHit) { cd.halfHit = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } return; }
+        cd.hit = true; hits++; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); } if (!cd.ship.sunk && isShipSunk(board, cd.ship)) { cd.ship.sunk = true; sunkShips.push(cd.ship); }
+      } else { cd.miss = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } }
+    });
+  }
+  if (hits > 0) { playSound('hit'); if (sunkShips.length > 0) setTimeout(() => playSound('sunk'), 300); } else playSound('miss');
+  state.shots[owner]++;
+  if (owner === 'player') {
+    if (hits > 0) { state.tracking.consecutiveHits += hits; state.tracking.maxConsecutiveHits = Math.max(state.tracking.maxConsecutiveHits, state.tracking.consecutiveHits); state.tracking.maxMultiHit = Math.max(state.tracking.maxMultiHit, hits); } else state.tracking.consecutiveHits = 0;
+    state.hits.player += hits; state.sunk.player += sunkShips.length; state.pa.player += hits + sunkShips.length * 2; state.paGained += hits + sunkShips.length * 2;
+    if (sunkShips.length > 0) { state.tracking.maxShipsSunkInOneTurn = Math.max(state.tracking.maxShipsSunkInOneTurn, sunkShips.length); if (source === 'special' || source === 'ability') state.tracking.specialKill = true; if (!state.tracking.firstShipSunkId) state.tracking.firstShipSunkId = sunkShips[0].id; state.tracking.lastShipSunkId = sunkShips[sunkShips.length - 1].id; }
+    cells.forEach(([r, c]) => { if (inBounds(r, c) && board[r][c].ship) { state.tracking.shipsHit.add(board[r][c].ship.id); if (board[r][c].ship.id === 'carrier') state.tracking.carrierHits++; } });
+  } else { state.hits.bot += hits; state.sunk.bot += sunkShips.length; if (sunkShips.length > 0) state.tracking.shipsLostByPlayer += sunkShips.length; state.tracking.playerHitsReceived += hits; }
+  const wName = source === 'ability' ? 'Capacité' : (weaponType !== 'standard' ? WEAPONS[weaponType].name : '');
+  let msg = wName ? `${state.playerName || 'Vous'} utilise <strong>${wName}</strong>. ` : '';
+  if (rockCancelled) { msg += `<span style="color:#9a9a9a;">Le tir heurte un rocher — aucun effet.</span>`; addLog(msg, 'miss', owner); if (owner === 'player') showToast('🪨 Le tir heurte un rocher — aucun effet.', 'info', 2200); }
+  else if (hits > 0 && sunkShips.length > 0) { msg += `<span style="color:#c084fc;font-weight:700">⚡ COULÉ ⚡</span> <strong>${sunkShips.map(s => s.name).join(', ')}</strong>`; addLog(msg, 'sunk', owner); if (owner === 'player') showToast(sunkShips.map(s => `${SHIP_SUNK_FLAVOR[s.id] ? SHIP_SUNK_FLAVOR[s.id].icon : '💥'} <strong>${s.name}</strong> ${SHIP_SUNK_FLAVOR[s.id] ? SHIP_SUNK_FLAVOR[s.id].line : 'coulé'} !`).join('<br>'), 'success'); } 
+  else if (hits > 0) { msg += `<span style="color:var(--hit);font-weight:700">TOUCHÉ</span>`; addLog(msg, 'hit', owner); } 
+  else { msg += `<span style="color:var(--miss);">Raté</span>`; addLog(msg, 'miss', owner); }
+  if (owner === 'player') renderGrid1P('enemy-grid', 'enemy', false); else renderGrid1P('player-grid', 'player', true);
+  updateStatsUI1P(); updatePA1P(); renderWeapons1P('weapons-list'); renderAbilities1P('abilities-list');
+}
     function checkVictory1P() { const enemyAlive = state.ships.enemy.filter(s => !s.sunk).length; const playerAlive = state.ships.player.filter(s => !s.sunk).length; if (enemyAlive === 0) { endGame1P(true); return true; } if (playerAlive === 0) { endGame1P(false); return true; } return false; }
     function stopChrono() { if (state.chronoInterval) { clearInterval(state.chronoInterval); state.chronoInterval = null; } const b = document.getElementById('chrono-badge'); if (b) b.classList.add('hidden'); }
     function startChrono() {
@@ -1214,30 +1243,109 @@ function activateAbility1P(shipId) {
     function getAbilityCells(row, col, pattern) { const cells = []; if (pattern === 'star') { cells.push([row, col], [row-1, col-1], [row-1, col+1], [row+1, col-1], [row+1, col+1]); } else if (pattern === 'salvo') { const candidates = []; for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) candidates.push([row+dr, col+dc]); for (let i = candidates.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [candidates[i], candidates[j]] = [candidates[j], candidates[i]]; } cells.push(...candidates.slice(0, 3)); } else if (pattern === 'fan') { cells.push([row, col], [row, col-1], [row, col+1], [row, col-2], [row, col+2]); } else if (pattern === 'rocket') { for(let r=0; r<GRID_SIZE; r++) cells.push([r, col]); for(let c=0; c<GRID_SIZE; c++) if(c !== col) cells.push([row, c]); } return cells; }
     function getWeaponCells(row, col, weapon, orientation) { const cells = []; if (weapon === 'standard') cells.push([row, col]); else if (weapon === 'line') { if (orientation === 'h') for (let dc = -1; dc <= 1; dc++) cells.push([row, col + dc]); else for (let dr = -1; dr <= 1; dr++) cells.push([row + dr, col]); } else if (weapon === 'cross') { cells.push([row, col], [row - 1, col], [row + 1, col], [row, col - 1], [row, col + 1]); } else if (weapon === 'diagonal') { if (orientation === 'h') for (let i = 0; i < 4; i++) cells.push([row - 1 + i, col - 1 + i]); else for (let i = 0; i < 4; i++) cells.push([row - 1 + i, col + 1 - i]); } else if (weapon === 'sonar') { for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) cells.push([row + dr, col + dc]); } return cells; }
 
-    function handleEnemyClick2P(row, col) { if (state.peeking || !state.isPlayerTurn) return; const ap = state.activePlayer; const opp = ap === 'p1' ? 'p2' : 'p1'; const enemyBoard = state[opp].board; const w = WEAPONS[state.selectedWeapon]; const cost = state[ap].activeAbility ? 0 : w.cost; if (state[ap].pa < cost) { showToast(`Pas assez de PA`, 'danger'); return; } let cells; let weaponType = state.selectedWeapon; let actionSummary = ''; if (state[ap].activeAbility) { const ab = SHIP_ABILITIES[state[ap].activeAbility]; cells = getAbilityCells(row, col, ab.pattern); weaponType = 'standard'; actionSummary = `${ab.name} en ${getCoord([row,col])} : `; state[ap].abilityCooldowns[state[ap].activeAbility] = SHIP_ABILITIES[state[ap].activeAbility].cooldown; state[ap].activeAbility = null; } else { cells = getWeaponCells(row, col, state.selectedWeapon, state.weaponOrientation); actionSummary = `${w.name} en ${getCoord([row,col])} : `; } const valid = cells.filter(([r, c]) => inBounds(r, c) && !enemyBoard[r][c].hit && !enemyBoard[r][c].miss); if (valid.length === 0) { showToast('Cases déjà ciblées.', 'info', 1200); return; } state[ap].pa -= cost; executeWeapon2P(cells, weaponType, actionSummary); }
+  function handleEnemyClick2P(row, col) { 
+  if (state.peeking || !state.isPlayerTurn) return; 
+  const ap = state.activePlayer; const opp = ap === 'p1' ? 'p2' : 'p1'; const enemyBoard = state[opp].board; 
+  const w = WEAPONS[state.selectedWeapon]; const cost = state[ap].activeAbility ? 0 : w.cost; 
+  if (state[ap].pa < cost) { showToast(`Pas assez de PA`, 'danger'); return; } 
+  let cells; let weaponType = state.selectedWeapon; let actionSummary = ''; let pattern = null;
+  if (state[ap].activeAbility) { 
+    const ab = SHIP_ABILITIES[state[ap].activeAbility]; 
+    cells = getAbilityCells(row, col, ab.pattern); weaponType = 'standard'; pattern = ab.pattern;
+    actionSummary = `${ab.name} en ${getCoord([row,col])} : `; 
+    state[ap].abilityCooldowns[state[ap].activeAbility] = SHIP_ABILITIES[state[ap].activeAbility].cooldown; 
+    state[ap].activeAbility = null; 
+  } else { 
+    cells = getWeaponCells(row, col, state.selectedWeapon, state.weaponOrientation); 
+    actionSummary = `${w.name} en ${getCoord([row,col])} : `; 
+  } 
+  const valid = cells.filter(([r, c]) => inBounds(r, c) && !enemyBoard[r][c].hit && !enemyBoard[r][c].miss); 
+  if (valid.length === 0) { showToast('Cases déjà ciblées.', 'info', 1200); return; } 
+  state[ap].pa -= cost; 
+  executeWeapon2P(cells, weaponType, actionSummary, [row, col], pattern); 
+}
 
-    function executeWeapon2P(cells, weaponType, actionSummary) {
-      const ap = state.activePlayer; const opp = ap === 'p1' ? 'p2' : 'p1'; const enemyBoard = state[opp].board;
-      let hits = 0; let sunkShips = []; let sonarCount = 0;
-      if (weaponType === 'sonar') { cells.forEach(([r, c]) => { if (inBounds(r, c)) { enemyBoard[r][c].sonarRevealed = true; if (enemyBoard[r][c].ship) sonarCount++; } }); if (cells.length > 0) { const [cr, cc] = cells[Math.floor(cells.length / 2)]; if (inBounds(cr, cc)) enemyBoard[cr][cc].sonarCount = sonarCount; } playSound('sonar'); const center = document.querySelector(`#p2p-enemy-grid .cell[data-row="${cells[4] ? cells[4][0] : cells[0][0]}"][data-col="${cells[4] ? cells[4][1] : cells[0][1]}"]`); if (center) { const rect = center.getBoundingClientRect(); spawnSonar(rect.left + rect.width / 2, rect.top + rect.height / 2); } state.lastAction2P = `${actionSummary} ${sonarCount} navire(s) détecté(s)`; addLog(state.lastAction2P, 'info', ap, 'p2p-log-container'); } 
-      else {
-        cells.forEach(([r, c]) => {
-          if (!inBounds(r, c)) return; const cd = enemyBoard[r][c]; if (cd.hit || cd.miss) return; const cellEl = document.querySelector(`#p2p-enemy-grid .cell[data-row="${r}"][data-col="${c}"]`);
-          if (state[opp].counterMeasure && cd.ship && !cd.ship.sunk) { state[opp].counterMeasure = false; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } showToast('Tir dévié par contre-mesures !', 'success'); addLog('Tir dévié par contre-mesures.', 'miss', ap, 'p2p-log-container'); return; }
-          if (cd.ship) { cd.hit = true; hits++; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); } if (!cd.ship.sunk && isShipSunk(enemyBoard, cd.ship)) { cd.ship.sunk = true; sunkShips.push(cd.ship); } } 
-          else { cd.miss = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } }
-        });
-        if (hits > 0) { playSound('hit'); if (sunkShips.length > 0) setTimeout(() => playSound('sunk'), 300); } else playSound('miss');
-        state[ap].shots++; state[ap].hits += hits; state[ap].sunk += sunkShips.length; state[ap].pa += hits + sunkShips.length * 2;
-        if (hits > 0 && sunkShips.length > 0) { state.lastAction2P = `${actionSummary} COULÉ ! (${sunkShips.map(s=>s.name).join(', ')})`; addLog(state.lastAction2P, 'sunk', ap, 'p2p-log-container'); } 
-        else if (hits > 0) { state.lastAction2P = `${actionSummary} TOUCHÉ`; addLog(state.lastAction2P, 'hit', ap, 'p2p-log-container'); } 
-        else { state.lastAction2P = `${actionSummary} RATÉ`; addLog(state.lastAction2P, 'miss', ap, 'p2p-log-container'); }
-      }
-      SHIPS.forEach(s => { if (state[ap].abilityCooldowns[s.id] > 0) { state[ap].abilityCooldowns[s.id]--; } });
-      renderCombat2P();
-      if (checkVictory2P()) return;
-      state.isPlayerTurn = false; setTimeout(() => { state.activePlayer = state.activePlayer === 'p1' ? 'p2' : 'p1'; state.isPlayerTurn = true; state.selectedWeapon = 'standard'; showPassScreen('combat'); }, 1500);
+    function executeWeapon2P(cells, weaponType, actionSummary, primaryTarget = null, pattern = null) {
+  const ap = state.activePlayer; const opp = ap === 'p1' ? 'p2' : 'p1'; const enemyBoard = state[opp].board;
+  let hits = 0; let sunkShips = []; let sonarCount = 0;
+  if (weaponType === 'sonar') { 
+    cells.forEach(([r, c]) => { if (inBounds(r, c)) { enemyBoard[r][c].sonarRevealed = true; if (enemyBoard[r][c].ship) sonarCount++; } }); 
+    if (cells.length > 0) { const [cr, cc] = cells[Math.floor(cells.length / 2)]; if (inBounds(cr, cc)) enemyBoard[cr][cc].sonarCount = sonarCount; } 
+    playSound('sonar'); 
+    const center = document.querySelector(`#p2p-enemy-grid .cell[data-row="${cells[4] ? cells[4][0] : cells[0][0]}"][data-col="${cells[4] ? cells[4][1] : cells[0][1]}"]`); 
+    if (center) { const rect = center.getBoundingClientRect(); spawnSonar(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
+    state.lastAction2P = `${actionSummary} ${sonarCount} navire(s) détecté(s)`; addLog(state.lastAction2P, 'info', ap, 'p2p-log-container'); 
+  } else {
+    let blockedDirs = new Set();
+    if (primaryTarget && pattern !== 'star' && pattern !== 'salvo') {
+      cells = cells.slice().sort((a, b) => {
+        const distA = Math.abs(a[0] - primaryTarget[0]) + Math.abs(a[1] - primaryTarget[1]);
+        const distB = Math.abs(b[0] - primaryTarget[0]) + Math.abs(b[1] - primaryTarget[1]);
+        return distA - distB;
+      });
     }
+    cells.forEach(([r, c]) => {
+      if (!inBounds(r, c)) return; const cd = enemyBoard[r][c]; if (cd.hit || cd.miss) return; 
+      const cellEl = document.querySelector(`#p2p-enemy-grid .cell[data-row="${r}"][data-col="${c}"]`);
+      
+      let dirKey = '0,0';
+      if (primaryTarget && pattern !== 'star' && pattern !== 'salvo') {
+        const dr = Math.sign(r - primaryTarget[0]);
+        const dc = Math.sign(c - primaryTarget[1]);
+        dirKey = `${dr},${dc}`;
+        if (blockedDirs.has(dirKey)) return;
+      }
+      
+      if (state[opp].counterMeasure && cd.ship && !cd.ship.sunk) { 
+        state[opp].counterMeasure = false; 
+        if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
+        showToast('Tir dévié par contre-mesures !', 'success'); addLog('Tir dévié par contre-mesures.', 'miss', ap, 'p2p-log-container'); return; 
+      }
+      
+      if (cd.rock) {
+        cd.rockRevealed = true; cd.miss = true;
+        if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); }
+        if (primaryTarget && !(r === primaryTarget[0] && c === primaryTarget[1])) {
+          addLog(`Tir bloqué par un rocher en ${getCoord([r,c])}!`, 'miss', ap, 'p2p-log-container');
+          blockedDirs.add(dirKey);
+        }
+        return;
+      }
+      
+      if (cd.mine && !cd.mineTriggered) {
+        cd.mineTriggered = true; cd.miss = true;
+        if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); }
+        if (primaryTarget && pattern !== 'star' && pattern !== 'salvo') {
+          if (r === primaryTarget[0] && c === primaryTarget[1]) {
+            blockedDirs.add('-1,0'); blockedDirs.add('1,0'); blockedDirs.add('0,-1'); blockedDirs.add('0,1');
+            blockedDirs.add('-1,-1'); blockedDirs.add('-1,1'); blockedDirs.add('1,-1'); blockedDirs.add('1,1');
+          } else {
+            blockedDirs.add(dirKey);
+          }
+        }
+        return;
+      }
+      
+      if (cd.ship) { 
+        cd.hit = true; hits++; 
+        if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
+        if (!cd.ship.sunk && isShipSunk(enemyBoard, cd.ship)) { cd.ship.sunk = true; sunkShips.push(cd.ship); } 
+      } else { 
+        cd.miss = true; 
+        if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
+      }
+    });
+    if (hits > 0) { playSound('hit'); if (sunkShips.length > 0) setTimeout(() => playSound('sunk'), 300); } else playSound('miss');
+    state[ap].shots++; state[ap].hits += hits; state[ap].sunk += sunkShips.length; state[ap].pa += hits + sunkShips.length * 2;
+    if (hits > 0 && sunkShips.length > 0) { state.lastAction2P = `${actionSummary} COULÉ ! (${sunkShips.map(s=>s.name).join(', ')})`; addLog(state.lastAction2P, 'sunk', ap, 'p2p-log-container'); } 
+    else if (hits > 0) { state.lastAction2P = `${actionSummary} TOUCHÉ`; addLog(state.lastAction2P, 'hit', ap, 'p2p-log-container'); } 
+    else { state.lastAction2P = `${actionSummary} RATÉ`; addLog(state.lastAction2P, 'miss', ap, 'p2p-log-container'); }
+  }
+  SHIPS.forEach(s => { if (state[ap].abilityCooldowns[s.id] > 0) { state[ap].abilityCooldowns[s.id]--; } });
+  renderCombat2P();
+  if (checkVictory2P()) return;
+  state.isPlayerTurn = false; setTimeout(() => { state.activePlayer = state.activePlayer === 'p1' ? 'p2' : 'p1'; state.isPlayerTurn = true; state.selectedWeapon = 'standard'; showPassScreen('combat'); }, 1500);
+}
     function checkVictory2P() { const ap = state.activePlayer; const opp = ap === 'p1' ? 'p2' : 'p1'; const enemyAlive = state[opp].ships.filter(s => !s.sunk).length; if (enemyAlive === 0) { endGame2P(ap); return true; } return false; }
     function endGame2P(winner) { state.phase = 'end'; if (winner === 'p1') { const stats = getStats(); updateStats({ local2pGamesWon: (stats.local2pGamesWon || 0) + 1 }); } setTimeout(() => { playSound('victory'); const icon = document.getElementById('end-icon'); const title = document.getElementById('end-title'); const subtitle = document.getElementById('end-subtitle'); const scoreDisplay = document.getElementById('end-score-display'); const statsGrid = document.getElementById('end-stats-grid'); icon.innerHTML = `<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ffb627" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#ffb627" fill-opacity="0.2"/></svg>`; title.textContent = 'VICTOIRE'; title.className = 'font-display text-4xl md:text-6xl mb-4 victory-text'; title.style.color = 'var(--accent)'; subtitle.innerHTML = `<strong>${state[winner].name}</strong> domine les mers !`; scoreDisplay.classList.add('hidden'); statsGrid.classList.add('hidden'); document.getElementById('end-achievements').innerHTML = ''; showScreen('end-screen'); }, 1500); }
     document.getElementById('p2p-surrender-btn').addEventListener('click', () => { const winner = state.activePlayer === 'p1' ? 'p2' : 'p1'; showToast('Abandon !', 'danger', 2000); setTimeout(() => endGame2P(winner), 800); });
