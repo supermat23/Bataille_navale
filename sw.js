@@ -1,9 +1,4 @@
-// ============================================================================
-// Service Worker - Bataille Navale
-// Incrémenter CACHE_VERSION à chaque nouvelle mise à jour
-// ============================================================================
-
-const CACHE_VERSION = "v9";
+const CACHE_VERSION = "v10-force-heal";
 const CACHE_NAME = `bataille-navale-${CACHE_VERSION}`;
 
 const ASSETS_TO_CACHE = [
@@ -16,94 +11,63 @@ const ASSETS_TO_CACHE = [
     "./icons/icon-512.png",
     "./icons/icon-maskable-192.png",
     "./icons/icon-maskable-512.png",
-    "./icons/apple-touch-icon.png"
+    "./icons/apple-touch-icon.png",
+    "https://cdn.tailwindcss.com",
+    "https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js",
+    "https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Rajdhani:wght@300;400;500;600;700&display=swap"
 ];
 
-// ---------------------------------------------------------------------------
-// Installation
-// ---------------------------------------------------------------------------
 self.addEventListener("install", event => {
-
     self.skipWaiting();
-
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(ASSETS_TO_CACHE))
+        caches.open(CACHE_NAME).then(cache => {
+            // allSettled empêche l'installation de planter si une icône est manquante (404)
+            return Promise.allSettled(ASSETS_TO_CACHE.map(url => cache.add(url)));
+        })
     );
-
 });
 
-// ---------------------------------------------------------------------------
-// Activation
-// ---------------------------------------------------------------------------
 self.addEventListener("activate", event => {
-
     event.waitUntil(
-
         caches.keys()
-
             .then(keys => Promise.all(
-
                 keys
-                    .filter(key => key !== CACHE_NAME)
+                    .filter(key => key !== CACHE_NAME) // Détruit l'ancien cache v8 et v9
                     .map(key => caches.delete(key))
-
             ))
-
             .then(() => self.clients.claim())
-
     );
-
 });
 
-// ---------------------------------------------------------------------------
-// Fetch
-// Réseau d'abord, cache en secours
-// ---------------------------------------------------------------------------
 self.addEventListener('fetch', event => {
-  // On ne cache pas les requêtes de connexion WebRTC de PeerJS
-  if (event.request.url.includes('peerjs.com') || event.request.url.includes('wss://')) {
-    return;
-  }
+  if (event.request.url.includes('peerjs.com') || event.request.url.includes('wss://')) return;
 
-  // Stratégie "Network First" pour index.html (pour forcer les mises à jour)
+  // Stratégie "Network First" pour le HTML
   if (event.request.mode === 'navigate' || event.request.url.endsWith('index.html')) {
     event.respondWith(
       fetch(event.request).then(networkResponse => {
         if (networkResponse && networkResponse.status === 200) {
           const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseToCache);
-          });
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
         }
         return networkResponse;
-      }).catch(() => {
-        return caches.match(event.request).then(response => {
-          return response || caches.match('./index.html');
-        });
-      })
+      }).catch(() => caches.match(event.request).then(response => response || caches.match('./index.html')))
     );
     return;
   }
 
-  // Stratégie "Cache First" pour le reste (CSS, JS, polices)
+  // Stratégie "Cache First" pour le reste
   event.respondWith(
     caches.match(event.request).then(response => {
-      if (response) {
-        return response;
-      }
+      if (response) return response;
       return fetch(event.request).then(networkResponse => {
         if (networkResponse && networkResponse.status === 200 && event.request.method === 'GET') {
           const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseToCache);
-          });
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
         }
         return networkResponse;
       }).catch(() => {
-        if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
-        }
+        if (event.request.mode === 'navigate') return caches.match('./index.html');
       });
     })
   );
