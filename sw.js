@@ -3,7 +3,7 @@
 // Incrémenter CACHE_VERSION à chaque nouvelle mise à jour
 // ============================================================================
 
-const CACHE_VERSION = "v8";
+const CACHE_VERSION = "v9";
 const CACHE_NAME = `bataille-navale-${CACHE_VERSION}`;
 
 const ASSETS_TO_CACHE = [
