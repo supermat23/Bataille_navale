@@ -3,7 +3,7 @@
 // Incrémenter CACHE_VERSION à chaque nouvelle mise à jour
 // ============================================================================
 
-const CACHE_VERSION = "v7";
+const CACHE_VERSION = "v8";
 const CACHE_NAME = `bataille-navale-${CACHE_VERSION}`;
 
 const ASSETS_TO_CACHE = [
@@ -60,39 +60,51 @@ self.addEventListener("activate", event => {
 // Fetch
 // Réseau d'abord, cache en secours
 // ---------------------------------------------------------------------------
-self.addEventListener("fetch", event => {
+self.addEventListener('fetch', event => {
+  // On ne cache pas les requêtes de connexion WebRTC de PeerJS
+  if (event.request.url.includes('peerjs.com') || event.request.url.includes('wss://')) {
+    return;
+  }
 
-    if (event.request.method !== "GET") return;
-
-    // Ignore les requêtes autres que http(s)
-    if (!event.request.url.startsWith("http")) return;
-
+  // Stratégie "Network First" pour index.html (pour forcer les mises à jour)
+  if (event.request.mode === 'navigate' || event.request.url.endsWith('index.html')) {
     event.respondWith(
-
-        fetch(event.request)
-
-            .then(response => {
-
-                // On ne met en cache que les réponses valides
-                if (response.ok) {
-
-                    const copy = response.clone();
-
-                    caches.open(CACHE_NAME)
-                        .then(cache => cache.put(event.request, copy));
-
-                }
-
-                return response;
-
-            })
-
-            .catch(() => {
-
-                return caches.match(event.request);
-
-            })
-
+      fetch(event.request).then(networkResponse => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseToCache);
+          });
+        }
+        return networkResponse;
+      }).catch(() => {
+        return caches.match(event.request).then(response => {
+          return response || caches.match('./index.html');
+        });
+      })
     );
+    return;
+  }
 
+  // Stratégie "Cache First" pour le reste (CSS, JS, polices)
+  event.respondWith(
+    caches.match(event.request).then(response => {
+      if (response) {
+        return response;
+      }
+      return fetch(event.request).then(networkResponse => {
+        if (networkResponse && networkResponse.status === 200 && event.request.method === 'GET') {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseToCache);
+          });
+        }
+        return networkResponse;
+      }).catch(() => {
+        if (event.request.mode === 'navigate') {
+          return caches.match('./index.html');
+        }
+      });
+    })
+  );
 });
