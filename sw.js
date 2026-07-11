@@ -1,4 +1,4 @@
-const CACHE_VERSION = "v10-force-heal";
+const CACHE_VERSION = "v11-force-heal";
 const CACHE_NAME = `bataille-navale-${CACHE_VERSION}`;
 
 const ASSETS_TO_CACHE = [
