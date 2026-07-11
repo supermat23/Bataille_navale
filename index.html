@@ -161,6 +161,10 @@
   @keyframes scanline { 0% { background-position: 0 0; } 100% { background-position: 0 100vh; } }
   .online-spinner { border: 4px solid rgba(255, 255, 255, 0.1); border-top: 4px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto; }
   @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  /* --- THÈMES DE CARTE --- */
+  body.theme-volcano { --bg: #1a0500; --bg-2: #2a0a00; --surface: #2a1010; --surface-2: #3a1515; --surface-3: #4a1a1a; --water: #3a1a15; --water-2: #2a100a; --water-3: #1a0500; --ship: #4a2a1a; --ship-2: #6b3a2a; --ship-3: #8a4a3a; --hit: #ffea00; --hit-2: #ffaa00; --miss: #8a4a2a; --miss-2: #6a3a1a; }
+  body.theme-arctic { --bg: #e6f2ff; --bg-2: #d1e8ff; --surface: #f0f8ff; --surface-2: #e1f0ff; --surface-3: #c8e0ff; --water: #8accf0; --water-2: #a3d6f5; --water-3: #6ab0e0; --ship: #ffffff; --ship-2: #f8fbff; --ship-3: #e6eff8; --text: #1a3258; --text-dim: #4a6a8a; --text-mute: #6a8aaa; --border: rgba(26, 50, 88, 0.15); --border-strong: rgba(26, 50, 88, 0.4); --miss: #4a8acc; --miss-2: #2a6a9c; --accent: #0ea5e9; --accent-2: #0284c7; --accent-glow: rgba(14, 165, 233, 0.5); }
+  body.theme-night { --bg: #050510; --bg-2: #0a0a20; --surface: #0a0f25; --surface-2: #101535; --surface-3: #181d40; --water: #0a1a3a; --water-2: #05102a; --water-3: #020815; --ship: #1a3a5a; --ship-2: #2a5a8a; --ship-3: #3a7aba; --accent: #00ff9f; --accent-2: #00cc7f; --accent-glow: rgba(0, 255, 159, 0.5); --border: rgba(0, 255, 159, 0.15); --border-strong: rgba(0, 255, 159, 0.4); }
   @media (max-width: 768px) { .grid-board { grid-template-columns: 18px repeat(10, 1fr); grid-template-rows: 18px repeat(10, 1fr); gap: 1px; padding: 3px; } .grid-label { font-size: 9px; } }
 </style>
 </head>
@@ -236,6 +240,7 @@ const state = {
   playerName: '', p1Name: 'Amiral Cyan', p2Name: 'Capitaine Magenta',
   enabledWeapons: { standard: true, line: true, cross: true, diagonal: true, sonar: true },
   shipAbilitiesEnabled: true,
+  theme: 'default',
   boards: { player: createEmptyBoard(), enemy: createEmptyBoard() },
   ships: { player: [], enemy: [] },
   pa: { player: 3, bot: 3 },
@@ -290,7 +295,7 @@ function getSettings() { return loadData().settings; }
 function saveSettings(s) { const d = loadData(); d.settings = s; saveData(d); }
 function getPreferences() { return loadData().preferences; }
 function savePreferences(p) { const d = loadData(); d.preferences = p; saveData(d); }
-function saveCurrentPreferences() { savePreferences({ difficulty: state.difficulty, enabledWeapons: state.enabledWeapons, abilitiesEnabled: state.shipAbilitiesEnabled }); }
+function saveCurrentPreferences() { savePreferences({ difficulty: state.difficulty, enabledWeapons: state.enabledWeapons, abilitiesEnabled: state.shipAbilitiesEnabled, theme: state.theme }); }
 function getUnlockedAchievements() { return loadData().achievements; }
 function unlockAchievement(id) { const d = loadData(); if (!d.achievements.includes(id)) { d.achievements.push(id); saveData(d); return true; } return false; }
 function getStats() { return loadData().stats; }
@@ -332,7 +337,7 @@ function addLog(html, type = 'info', owner = 'player', containerId = 'log-contai
 function renderMenu() {
   const grid = document.getElementById('difficulty-grid'); grid.innerHTML = '';
   DIFFICULTIES.forEach(diff => { const card = document.createElement('div'); card.className = 'difficulty-card' + (state.difficulty === diff.id ? ' selected' : ''); card.innerHTML = `<div class="flex items-center justify-between mb-1.5"><div class="difficulty-rank" style="background:${diff.color}20;color:${diff.color};border:1px solid ${diff.color}40;">RANG ${diff.rank}</div><div class="w-5 h-5 rounded-full flex items-center justify-center" style="background:${diff.color}15;border:1px solid ${diff.color}40;"><div class="w-1.5 h-1.5 rounded-full" style="background:${diff.color};box-shadow:0 0 8px ${diff.color};"></div></div></div><h3 class="font-display text-base md:text-lg mb-1" style="color:${diff.color};">${diff.name}</h3><p class="text-xs text-slate-400 leading-snug">${diff.desc}</p>`; card.addEventListener('click', () => { state.difficulty = diff.id; initAudio(); saveCurrentPreferences(); renderMenu(); }); grid.appendChild(card); });
-    renderWeaponToggles(); renderAbilityInfo(); renderAchievements(); renderScores(); renderCommanderName(); renderRank(); renderAchCounter(); renderBestToday(); renderChallengeStats(); renderDailyChallenge(); renderGameOptions();
+    renderWeaponToggles(); renderAbilityInfo(); renderAchievements(); renderScores(); renderCommanderName(); renderRank(); renderAchCounter(); renderBestToday(); renderChallengeStats(); renderDailyChallenge(); renderGameOptions(); renderThemes();
   const nameInput = document.getElementById('player-name-input'); if (nameInput && document.activeElement !== nameInput) nameInput.value = state.playerName;
   const abToggle = document.getElementById('abilities-toggle'); if (abToggle) abToggle.checked = state.shipAbilitiesEnabled;
   const p1Input = document.getElementById('p1-name-input'); if (p1Input) p1Input.value = state.p1Name;
@@ -462,7 +467,40 @@ function renderDailyChallenge() {
   const el = document.getElementById('daily-challenge-panel'); if (el) { const chs = getDailyChallenges(); const rows = chs.map(ch => { const done = isDailyDone(ch.id); return `<div class="flex items-center gap-3 py-1"><div class="text-xl">${ch.icon}</div><div class="flex-1 text-left"><div class="text-sm font-semibold text-white">${ch.text}</div></div><div class="text-xs font-bold ${done ? 'text-emerald-400' : 'text-slate-500'}">${done ? '✓ Fait' : 'En attente'}</div></div>`; }).join('<div class="border-t border-slate-800/60 my-1"></div>'); el.innerHTML = `<div class="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Défis du jour</div>${rows}`; }
   const wEl = document.getElementById('weekly-challenge-panel'); if (wEl) { const wc = getWeeklyChallenge(); const wDone = isWeeklyDone(); wEl.innerHTML = `<div class="flex items-center gap-3"><div class="text-xl">${wc.icon}</div><div class="flex-1 text-left"><div class="text-[10px] uppercase tracking-widest font-bold" style="color:var(--r-legend);">Succès de la semaine</div><div class="text-sm font-semibold text-white">${wc.text}</div></div><div class="text-xs font-bold ${wDone ? 'text-emerald-400' : 'text-slate-500'}">${wDone ? '✓ Fait' : 'En attente'}</div></div>`; }
 }
+function applyTheme(theme) {
+  document.body.classList.remove('theme-volcano', 'theme-arctic', 'theme-night');
+  if (theme && theme !== 'default') {
+    document.body.classList.add('theme-' + theme);
+  }
+}
 
+function renderThemes() {
+  const grid = document.getElementById('theme-grid'); if (!grid) return; grid.innerHTML = '';
+  const themes = [
+    { id: 'default', name: 'Standard', color: '#1a3258' },
+    { id: 'volcano', name: 'Volcan', color: '#3a1a15' },
+    { id: 'arctic', name: 'Arctique', color: '#aaddff' },
+    { id: 'night', name: 'Nuit', color: '#0a1a3a' }
+  ];
+  const unlocked = isFeatureUnlocked(7);
+  const lockMsg = document.getElementById('theme-lock-msg'); if (lockMsg) lockMsg.classList.toggle('hidden', unlocked);
+  
+  themes.forEach(t => {
+    const el = document.createElement('div');
+    el.className = 'weapon-toggle ' + (state.theme === t.id ? 'enabled' : 'disabled') + ' flex items-center gap-2 p-2 text-left';
+    if (!unlocked && t.id !== 'default') {
+      el.classList.add('opacity-50', 'pointer-events-none');
+      el.innerHTML = `<div class="text-xl">🔒</div><div class="flex-1 min-w-0"><div class="text-xs font-bold text-white">${t.name}</div><div class="text-[10px] text-slate-400">Grade 7 requis</div></div>`;
+    } else {
+      el.style.cursor = 'pointer';
+      el.innerHTML = `<div class="w-6 h-6 rounded-full border" style="background:${t.color}; border-color:var(--border-strong);"></div><div class="flex-1 min-w-0"><div class="text-xs font-bold text-white">${t.name}</div><div class="text-[10px] text-slate-400">${state.theme === t.id ? 'Sélectionné' : 'Choisir'}</div></div>`;
+      el.addEventListener('click', () => {
+        state.theme = t.id; applyTheme(t.id); saveCurrentPreferences(); renderThemes();
+      });
+    }
+    grid.appendChild(el);
+  });
+}
 function renderGameOptions() { 
   const grid = document.getElementById('game-options-grid'); if (!grid) return; grid.innerHTML = ''; 
   const opts = [ { key: 'randomEvents', icon: '⛈️', name: 'Événements aléatoires', desc: 'Effets surprises pendant la partie' }, { key: 'chrono', icon: '⏱️', name: 'Mode chrono', desc: 'Sinon tir automatique' } ]; 
@@ -1764,7 +1802,8 @@ function checkEndAchievements(playerWon) {
     document.getElementById('promotion-close-btn').addEventListener('click', closePromotionModal);
     document.getElementById('obstacles-modal-close').addEventListener('click', closeObstaclesHelpModal);
     document.getElementById('obstacles-modal').addEventListener('click', e => { if (e.target.id === 'obstacles-modal') closeObstaclesHelpModal(); });
-    state.playerName = loadData().lastName; state.gameOptions = getSettings(); const savedPrefs = getPreferences(); state.difficulty = savedPrefs.difficulty || state.difficulty; state.enabledWeapons = savedPrefs.enabledWeapons || state.enabledWeapons; state.shipAbilitiesEnabled = savedPrefs.abilitiesEnabled !== undefined ? savedPrefs.abilitiesEnabled : state.shipAbilitiesEnabled; SHIPS = getShipsForSize(state.gameOptions.gridSize || 10); resetBodyTheme(); renderMenu();
+    state.playerName = loadData().lastName; state.gameOptions = getSettings(); const savedPrefs = getPreferences(); state.difficulty = savedPrefs.difficulty || state.difficulty; state.enabledWeapons = savedPrefs.enabledWeapons || state.enabledWeapons; state.theme = savedPrefs.theme || 'default';
+applyTheme(state.theme); state.shipAbilitiesEnabled = savedPrefs.abilitiesEnabled !== undefined ? savedPrefs.abilitiesEnabled : state.shipAbilitiesEnabled; SHIPS = getShipsForSize(state.gameOptions.gridSize || 10); resetBodyTheme(); renderMenu();
 
     // PWA Service Worker
     if ('serviceWorker' in navigator) {
