@@ -514,7 +514,9 @@ document.getElementById('clear-scores-btn').addEventListener('click', () => { sa
 
 function generateGameCode() { const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code = ''; for (let i = 0; i < 4; i++) code += chars.charAt(Math.floor(Math.random() * chars.length)); return code; }
 document.getElementById('online-host-btn').addEventListener('click', () => {
+  if (!navigator.onLine) { showToast('✈️ Mode Avion actif : Le mode en ligne est indisponible.', 'danger', 3000); return; }
   initAudio(); state.net.isHost = true; state.net.code = generateGameCode();
+  // ... (le reste du code reste identique)
   document.getElementById('online-menu').classList.add('hidden'); document.getElementById('online-host-view').classList.remove('hidden'); document.getElementById('online-code-display').textContent = state.net.code;
   state.net.peer = new Peer(`battlenavale-${state.net.code}`);
   state.net.peer.on('open', (id) => { console.log('Peer ID:', id); });
@@ -535,9 +537,9 @@ document.getElementById('online-host-btn').addEventListener('click', () => {
 document.getElementById('online-cancel-host-btn').addEventListener('click', () => resetOnlineMode());
 document.getElementById('online-join-btn').addEventListener('click', () => { initAudio(); state.net.isHost = false; document.getElementById('online-menu').classList.add('hidden'); document.getElementById('online-join-view').classList.remove('hidden'); });
 document.getElementById('online-connect-btn').addEventListener('click', () => {
+  if (!navigator.onLine) { showToast('✈️ Mode Avion actif : Le mode en ligne est indisponible.', 'danger', 3000); return; }
   const code = document.getElementById('online-code-input').value.toUpperCase();
-  if (code.length !== 4) { showToast('Code invalide.', 'danger'); return; }
-  state.net.code = code;
+  // ... (le reste du code reste identique)
   document.getElementById('online-code-input').disabled = true; document.getElementById('online-connect-btn').disabled = true; document.getElementById('online-connecting').classList.remove('hidden');
   state.net.peer = new Peer();
   state.net.peer.on('open', (id) => { 
