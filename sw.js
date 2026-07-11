@@ -1,98 +1,63 @@
-// ============================================================================
-// Service Worker - Bataille Navale
-// Incrémenter CACHE_VERSION à chaque nouvelle mise à jour
-// ============================================================================
-
-const CACHE_VERSION = "v6";
-const CACHE_NAME = `bataille-navale-${CACHE_VERSION}`;
-
-const ASSETS_TO_CACHE = [
-    "./",
-    "./index.html",
-    "./manifest.json",
-    "./icon.svg",
-    "./icons/icon-32.png",
-    "./icons/icon-192.png",
-    "./icons/icon-512.png",
-    "./icons/icon-maskable-192.png",
-    "./icons/icon-maskable-512.png",
-    "./icons/apple-touch-icon.png"
+const CACHE_NAME = 'bataille-navale-cache-v24';
+const urlsToCache = [
+  './',
+  './index.html',
+  './manifest.json',
+  './icon.svg',
+  './icons/icon-32.png',
+  './icons/apple-touch-icon.png',
+  'https://cdn.tailwindcss.com',
+  'https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js',
+  'https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Rajdhani:wght@300;400;500;600;700&display=swap'
 ];
 
-// ---------------------------------------------------------------------------
-// Installation
-// ---------------------------------------------------------------------------
-self.addEventListener("install", event => {
-
-    self.skipWaiting();
-
-    event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(ASSETS_TO_CACHE))
-    );
-
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(urlsToCache).catch(err => {
+        console.error('Échec de la mise en cache d\'une ressource:', err);
+      });
+    })
+  );
+  self.skipWaiting();
 });
 
-// ---------------------------------------------------------------------------
-// Activation
-// ---------------------------------------------------------------------------
-self.addEventListener("activate", event => {
-
-    event.waitUntil(
-
-        caches.keys()
-
-            .then(keys => Promise.all(
-
-                keys
-                    .filter(key => key !== CACHE_NAME)
-                    .map(key => caches.delete(key))
-
-            ))
-
-            .then(() => self.clients.claim())
-
-    );
-
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.filter(name => name !== CACHE_NAME).map(name => caches.delete(name))
+      );
+    })
+  );
+  self.clients.claim();
 });
 
-// ---------------------------------------------------------------------------
-// Fetch
-// Réseau d'abord, cache en secours
-// ---------------------------------------------------------------------------
-self.addEventListener("fetch", event => {
-
-    if (event.request.method !== "GET") return;
-
-    // Ignore les requêtes autres que http(s)
-    if (!event.request.url.startsWith("http")) return;
-
-    event.respondWith(
-
-        fetch(event.request)
-
-            .then(response => {
-
-                // On ne met en cache que les réponses valides
-                if (response.ok) {
-
-                    const copy = response.clone();
-
-                    caches.open(CACHE_NAME)
-                        .then(cache => cache.put(event.request, copy));
-
-                }
-
-                return response;
-
-            })
-
-            .catch(() => {
-
-                return caches.match(event.request);
-
-            })
-
-    );
-
+self.addEventListener('fetch', event => {
+  // On ne cache pas les requêtes de connexion WebRTC de PeerJS
+  if (event.request.url.includes('peerjs.com') || event.request.url.includes('wss://')) {
+    return;
+  }
+  
+  event.respondWith(
+    caches.match(event.request).then(response => {
+      if (response) {
+        return response; // Retourne le fichier depuis le cache si on est hors-ligne
+      }
+      return fetch(event.request).then(networkResponse => {
+        if (networkResponse && networkResponse.status === 200 && event.request.method === 'GET') {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseToCache);
+          });
+        }
+        return networkResponse;
+      }).catch(() => {
+        // Si on est hors-ligne et que le fichier n'est pas au cache
+        if (event.request.mode === 'navigate') {
+          return caches.match('./index.html');
+        }
+      });
+    })
+  );
 });
