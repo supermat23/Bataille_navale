@@ -228,7 +228,8 @@
 <div id="combat-screen" class="screen min-h-screen p-2 md:p-8 hidden"><div class="max-w-7xl mx-auto"><div class="flex flex-wrap items-center justify-between gap-3 mb-4"><div><h2 class="font-display text-xl md:text-3xl text-white">Engagement</h2><p class="text-slate-400 text-xs md:text-sm" id="combat-subtitle">À vous de jouer, commandant.</p></div><div class="flex items-center gap-2 flex-wrap"><div class="pa-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="color: var(--accent);"><path d="M13 2L3 14h7v8l10-12h-7V2z"/></svg><span class="text-sm">PA :</span><span class="text-lg font-bold text-amber-400" id="player-pa">3</span></div><div class="pa-badge hidden" id="chrono-badge"><span class="text-sm">⏱</span><span class="text-lg font-bold text-white" id="chrono-display">20</span></div><button id="orientation-combat-btn" class="btn btn-secondary text-xs" title="Changer l'orientation des tirs spéciaux"><span id="orient-display">↔ H</span></button><button id="surrender-btn" class="btn btn-danger text-xs">Abandonner</button></div></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-4"><div class="lg:col-span-8"><div class="flex flex-col items-center"><div class="flex items-center justify-between w-full max-w-xl mb-2"><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400">Grille ennemie</h3><span class="text-xs text-slate-400" id="enemy-ships-info">5 navires</span></div><div id="enemy-grid" class="grid-board"></div></div><div class="mt-4"><div class="flex items-center justify-between mb-2"><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400">Arsenal</h3></div><div id="weapons-list" class="weapons-grid"></div>
 <div id="tactical-actions" class="mt-2"></div><div class="mt-4"><div class="flex items-center justify-between mb-2"><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400">Capacités</h3></div><div id="abilities-list" class="grid grid-cols-5 gap-1"></div></div></div></div><div class="lg:col-span-4 space-y-4"><div class="flex flex-col items-center"><div class="flex items-center justify-between w-full mb-2"><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400">Votre flotte</h3><span class="text-xs text-slate-400" id="player-ships-info">5 navires</span></div><div id="player-grid" class="grid-board" style="max-width: 100%;"></div></div><div class="grid grid-cols-3 gap-2"><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Tirs</div><div class="text-xl font-bold text-white" id="stat-shots">0</div></div><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Touchés</div><div class="text-xl font-bold" style="color: var(--hit);" id="stat-hits">0</div></div><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Précis.</div><div class="text-xl font-bold text-amber-400" id="stat-acc">—</div></div></div><div><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400 mb-2">Journal</h3><div id="log-container" class="space-y-1 max-h-48 overflow-y-auto pr-1"></div></div></div></div></div></div>
 
-<div id="combat-screen-2p" class="screen min-h-screen p-2 md:p-8 hidden"><div class="max-w-xl mx-auto"><div class="flex items-center justify-between gap-3 mb-4"><div><h2 class="font-display text-xl md:text-2xl" id="p2p-title" style="color: var(--accent);">Joueur 1</h2><p class="text-slate-400 text-xs md:text-sm" id="p2p-subtitle">Grille de tir</p></div><div class="flex items-center gap-2 flex-wrap"><div class="pa-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="color: var(--accent);"><path d="M13 2L3 14h7v8l10-12h-7V2z"/></svg><span class="text-sm">PA :</span><span class="text-lg font-bold" id="p2p-pa" style="color: var(--accent);">3</span></div><button id="p2p-peek-btn" class="btn btn-secondary text-xs">Vision Flotte</button></div></div><div id="p2p-grid-container" class="mb-4"></div><div class="grid grid-cols-2 gap-4 mt-4"><div><h3 class="text-sm font-bold tracking-widest uppercase mb-2" style="color: var(--accent);">Arsenal</h3><div id="p2p-weapons-list" class="weapons-grid"></div><div class="mt-4"><div class="flex items-center justify-between mb-2"><h3 class="text-sm font-bold tracking-widest uppercase" style="color: var(--accent);">Capacités</h3></div><div id="p2p-abilities-list" class="grid grid-cols-5 gap-1"></div></div></div><div><h3 class="text-sm font-bold tracking-widest uppercase mb-2" style="color: var(--accent);">Journal</h3><div id="p2p-log-container" class="space-y-1 max-h-32 overflow-y-auto pr-1"></div></div></div><div class="text-center mt-6"><button id="p2p-surrender-btn" class="btn btn-danger text-xs">Abandonner</button></div></div></div>
+<div id="combat-screen-2p" class="screen min-h-screen p-2 md:p-8 hidden"><div class="max-w-xl mx-auto"><div class="flex items-center justify-between gap-3 mb-4"><div><h2 class="font-display text-xl md:text-2xl" id="p2p-title" style="color: var(--accent);">Joueur 1</h2><p class="text-slate-400 text-xs md:text-sm" id="p2p-subtitle">Grille de tir</p></div><div class="flex items-center gap-2 flex-wrap"><div class="pa-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="color: var(--accent);"><path d="M13 2L3 14h7v8l10-12h-7V2z"/></svg><span class="text-sm">PA :</span><span class="text-lg font-bold" id="p2p-pa" style="color: var(--accent);">3</span></div><button id="p2p-peek-btn" class="btn btn-secondary text-xs">Vision Flotte</button></div></div><div id="p2p-grid-container" class="mb-4"></div><div class="grid grid-cols-2 gap-4 mt-4"><div><h3 class="text-sm font-bold tracking-widest uppercase mb-2" style="color: var(--accent);">Arsenal</h3><div id="p2p-weapons-list" class="weapons-grid"></div>
+<div id="tactical-actions-2p" class="mt-2"></div><div class="mt-4"><div class="flex items-center justify-between mb-2"><h3 class="text-sm font-bold tracking-widest uppercase" style="color: var(--accent);">Capacités</h3></div><div id="p2p-abilities-list" class="grid grid-cols-5 gap-1"></div></div></div><div><h3 class="text-sm font-bold tracking-widest uppercase mb-2" style="color: var(--accent);">Journal</h3><div id="p2p-log-container" class="space-y-1 max-h-32 overflow-y-auto pr-1"></div></div></div><div class="text-center mt-6"><button id="p2p-surrender-btn" class="btn btn-danger text-xs">Abandonner</button></div></div></div>
 
 <div id="end-screen" class="screen min-h-screen flex items-center justify-center p-4 hidden"><div class="max-w-3xl w-full text-center"><div id="end-icon" class="mx-auto mb-6 w-24 h-24 flex items-center justify-center"></div><h2 id="end-title" class="font-display text-4xl md:text-6xl mb-4"></h2><p id="end-subtitle" class="text-lg text-slate-400 mb-4"></p><div id="end-score-display" class="mb-6 hidden"><div class="text-sm text-slate-400 uppercase tracking-widest">Score</div><div class="font-display text-5xl text-amber-400" id="end-score">0</div></div><div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6" id="end-stats-grid"><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Tirs</div><div class="text-2xl font-bold text-white" id="end-shots">0</div></div><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Touchés</div><div class="text-2xl font-bold" style="color: var(--hit);" id="end-hits">0</div></div><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Précision</div><div class="text-2xl font-bold text-amber-400" id="end-acc">0%</div></div><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Coulés</div><div class="text-2xl font-bold" style="color: var(--success);" id="end-sunk">0</div></div></div><div id="end-achievements" class="mb-6"></div><div id="end-extra-info" class="mb-4 text-sm text-slate-400"></div><div class="flex flex-wrap gap-3 justify-center"><button id="replay-btn" class="btn btn-primary"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 4v5h5"/></svg>Rejouer</button><button id="share-score-btn" class="btn btn-secondary hidden"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Partager</button><button id="menu-btn" class="btn btn-secondary"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>Menu</button></div></div></div>
 
@@ -801,6 +802,7 @@ function handleNetData(data) {
       case 'reveal_result': handleNetRevealResult(data); break; 
       case 'reveal_mines_request': handleNetRevealMinesRequest(); break; 
       case 'reveal_mines_result': handleNetRevealMinesResult(data); break; 
+      case 'teleport_sync': handleNetTeleportSync(data); break;
       case 'surrender': endGame1P(true); break; 
     } 
   } catch(e) { console.error("Network Data Error:", e); } 
@@ -1049,7 +1051,22 @@ function handleNetRevealMinesResult(data) {
     showToast('<strong>Repérage Mines</strong> échoué.', 'danger');
   }
 }
-
+function handleNetTeleportSync(data) {
+  if (data.oldCells) {
+    data.oldCells.forEach(cell => {
+      const r = parseInt(cell[0]), c = parseInt(cell[1]);
+      if (inBounds(r, c)) {
+        state.boards.enemy[r][c].ship = null;
+        state.boards.enemy[r][c].hit = false;
+        state.boards.enemy[r][c].halfHit = false;
+        state.boards.enemy[r][c].miss = true;
+      }
+    });
+    renderGrid1P('enemy-grid', 'enemy', false);
+    addLog('🚀 L\'adversaire a <strong>téléporté</strong> un de ses navires !', 'sunk', 'bot');
+    showToast('🚀 Alerte : L\'adversaire a téléporté un navire !', 'danger', 4000);
+  }
+}
 function startPlacement1P() {
   GRID_SIZE = parseInt(state.gameOptions.gridSize, 10) || 10; 
   SHIPS = getShipsForSize(GRID_SIZE);
@@ -1230,7 +1247,15 @@ function showPassScreen(type) {
 document.getElementById('pass-reveal-btn').addEventListener('click', () => {
   document.getElementById('pass-screen-2p').style.display = 'none';
   if (state.phase === 'placement') { showScreen('placement-screen'); renderPlacementScreen(); } 
-  else { state.peeking = false; state.isPlayerTurn = true; state.selectedWeapon = 'standard'; showScreen('combat-screen-2p'); renderCombat2P(); }
+  else { 
+    state.peeking = false; state.isPlayerTurn = true; state.selectedWeapon = 'standard'; 
+    showScreen('combat-screen-2p'); renderCombat2P(); 
+    // Si l'adversaire a utilisé la téléportation au tour précédent, on alerte !
+    if (state.teleportAlert2P) {
+      showToast('🚀 Alerte : Votre adversaire a utilisé la Téléportation Tactique !', 'danger', 4000);
+      state.teleportAlert2P = false;
+    }
+  }
 });
 
 function startCombat1P() {
@@ -1285,10 +1310,19 @@ function showWeaponPreview1P(row, col, gridId) {
 }
 function renderWeapons1P(containerId) { const container = document.getElementById(containerId); if (!container) return; container.innerHTML = ''; Object.entries(WEAPONS).forEach(([key, w]) => { if (!state.enabledWeapons[key] && !state.activeAbility) return; if (!state.enabledWeapons[key] && state.activeAbility !== key) return; const isFree = state.activeAbility === key || (key === 'sonar' && state.freeSonarNext); const cost = isFree ? 0 : w.cost; const canAfford = state.pa.player >= cost; const btn = document.createElement('div'); btn.className = 'weapon-btn' + (state.selectedWeapon === key ? ' active' : '') + (!canAfford ? ' weapon-disabled' : ''); btn.innerHTML = `<div class="pa-cost ${isFree ? 'free' : ''}">${isFree ? '0' : cost}</div><div class="weapon-icon">${getWeaponIcon(w.icon)}</div><div class="text-xs font-semibold text-white">${w.name}</div>`; if (canAfford) btn.addEventListener('click', () => { state.selectedWeapon = key; renderWeapons1P(containerId); }); container.appendChild(btn); }); }
 function renderTacticalActions() {
-  const container = document.getElementById('tactical-actions');
+  // On cible le bon conteneur selon le mode de jeu
+  const containerId = state.mode === '2p' ? 'tactical-actions-2p' : 'tactical-actions';
+  const container = document.getElementById(containerId);
   if (!container) return;
-  if (state.gameOptions.fogOfWar && state.mode === '1p' && state.phase === 'combat') {
-    const disabled = state.teleportUsed || state.pa.player < 6 || !state.isPlayerTurn;
+
+  if (state.gameOptions.fogOfWar && state.phase === 'combat') {
+    let disabled = false;
+    if (state.mode === '2p') {
+      const ap = state.activePlayer;
+      disabled = state[ap].teleportUsed || state[ap].pa < 6 || !state.isPlayerTurn || state.peeking;
+    } else {
+      disabled = state.teleportUsed || state.pa.player < 6 || !state.isPlayerTurn;
+    }
     container.innerHTML = `<button id="teleport-btn" class="btn ${disabled ? 'btn-secondary opacity-50 pointer-events-none' : 'btn-primary'} w-full text-xs py-2 px-4 mt-2">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
       🚀 Téléportation Tactique (6 PA)
@@ -1299,40 +1333,50 @@ function renderTacticalActions() {
     container.innerHTML = '';
   }
 }
-
 function activateTeleport() {
-  if (state.teleportUsed || state.pa.player < 6) return;
-  const aliveShips = state.ships.player.filter(s => !s.sunk);
+  let myShips, myBoard, ap;
+  if (state.mode === '2p') {
+    ap = state.activePlayer;
+    myShips = state[ap].ships;
+    myBoard = state[ap].board;
+  } else {
+    myShips = state.ships.player;
+    myBoard = state.boards.player;
+  }
+
+  const isUsed = state.mode === '2p' ? state[ap].teleportUsed : state.teleportUsed;
+  const myPa = state.mode === '2p' ? state[ap].pa : state.pa.player;
+  if (isUsed || myPa < 6) return;
+
+  const aliveShips = myShips.filter(s => !s.sunk);
   if (aliveShips.length === 0) return;
 
-  // Trouve le navire le plus endommagé
   aliveShips.sort((a, b) => {
-    const hitsA = a.cells.filter(cell => state.boards.player[cell[0]][cell[1]].hit).length;
-    const hitsB = b.cells.filter(cell => state.boards.player[cell[0]][cell[1]].hit).length;
+    const hitsA = a.cells.filter(cell => myBoard[cell[0]][cell[1]].hit).length;
+    const hitsB = b.cells.filter(cell => myBoard[cell[0]][cell[1]].hit).length;
     return hitsB - hitsA;
   });
 
   const targetShip = aliveShips[0];
-  const hitsOnTarget = targetShip.cells.filter(cell => state.boards.player[cell[0]][cell[1]].hit).length;
+  const hitsOnTarget = targetShip.cells.filter(cell => myBoard[cell[0]][cell[1]].hit).length;
 
-    // Suivi pour les succès
   state.tracking.teleportUsed = true;
   state.tracking.teleportedShipId = targetShip.id;
-  if (hitsOnTarget === targetShip.size - 1) {
-    state.tracking.teleportWasClutch = true; // Il ne restait plus qu'1 PV au navire !
-  }
+  if (hitsOnTarget === targetShip.size - 1) state.tracking.teleportWasClutch = true;
 
   if (hitsOnTarget === 0) {
     showToast('Aucun navire endommagé à téléporter !', 'danger');
     return;
   }
 
+  const oldCells = targetShip.cells.map(c => [c[0], c[1]]);
+
   // 1. Effacer le navire de sa position actuelle
   targetShip.cells.forEach(([r, c]) => {
-    state.boards.player[r][c].ship = null;
-    state.boards.player[r][c].hit = false; // On efface les dégâts
-    state.boards.player[r][c].halfHit = false;
-    state.boards.player[r][c].miss = true; // On marque l'ancienne zone comme ratée pour tromper l'ennemi
+    myBoard[r][c].ship = null;
+    myBoard[r][c].hit = false;
+    myBoard[r][c].halfHit = false;
+    myBoard[r][c].miss = true;
   });
 
   // 2. Trouver un nouvel emplacement valide
@@ -1343,49 +1387,54 @@ function activateTeleport() {
     const o = Math.random() < 0.5 ? 'h' : 'v';
     const r = Math.floor(Math.random() * GRID_SIZE);
     const c = Math.floor(Math.random() * GRID_SIZE);
-    
-    // Vérification stricte : on s'assure qu'il n'y a pas de navire, rocher ou mine
     const shape = getShipShape(targetShip, o);
     let validSpot = true;
     for (const [dr, dc] of shape) {
       const nr = r + dr, nc = c + dc;
-      if (!inBounds(nr, nc) || state.boards.player[nr][nc].ship || state.boards.player[nr][nc].rock || state.boards.player[nr][nc].mine) {
+      if (!inBounds(nr, nc) || myBoard[nr][nc].ship || myBoard[nr][nc].rock || myBoard[nr][nc].mine) {
         validSpot = false; break;
       }
     }
-
     if (validSpot) {
-      const newShip = placeShip(state.boards.player, targetShip, r, c, o);
-      // NETTOYAGE DES ANCIENS ÉTATS DE LA CASE (raté, demi-touché, sonar)
+      const newShip = placeShip(myBoard, targetShip, r, c, o);
       newShip.cells.forEach(([nr, nc]) => {
-        state.boards.player[nr][nc].miss = false;
-        state.boards.player[nr][nc].halfHit = false;
-        state.boards.player[nr][nc].sonarRevealed = false;
-        state.boards.player[nr][nc].sonarCount = null;
+        myBoard[nr][nc].miss = false;
+        myBoard[nr][nc].halfHit = false;
+        myBoard[nr][nc].sonarRevealed = false;
+        myBoard[nr][nc].sonarCount = null;
       });
-      
-      const idx = state.ships.player.findIndex(s => s.id === targetShip.id);
-      state.ships.player[idx] = newShip; // Met à jour le navire dans le state
+      const idx = myShips.findIndex(s => s.id === targetShip.id);
+      myShips[idx] = newShip;
       placed = true;
     }
   }
 
-  if (placed) {
-    state.pa.player -= 6;
-    state.teleportUsed = true;
+    if (placed) {
+    if (state.mode === '2p') {
+      state[ap].pa -= 6;
+      state[ap].teleportUsed = true;
+      state.teleportAlert2P = true; // Active l'alerte pour l'adversaire
+      addLog(`🚀 ${state[ap].name} a téléporté le ${targetShip.name} !`, 'sunk', ap, 'p2p-log-container');
+      renderCombat2P();
+    } else {
+      state.pa.player -= 6;
+      state.teleportUsed = true;
+      renderGrid1P('player-grid', 'player', true);
+      updatePA1P();
+      addLog(`Vous avez <strong>téléporté</strong> le ${targetShip.name} !`, 'info', 'player');
+      if (state.mode === 'online') {
+        sendNetData({ type: 'teleport_sync', oldCells: oldCells });
+      }
+    }
     showToast(`🚀 ${targetShip.name} téléporté avec succès !`, 'success');
     playSound('sonar');
-    renderGrid1P('player-grid', 'player', true);
-    updatePA1P();
     renderTacticalActions();
   } else {
-    // Si la grille est trop pleine, on annule
     showToast('Aucun espace disponible pour la téléportation !', 'danger');
-    // On restaure le navire là où il était
     targetShip.cells.forEach(([r, c]) => {
-      state.boards.player[r][c].ship = targetShip;
-      state.boards.player[r][c].miss = false;
-      state.boards.player[r][c].hit = true; // Il était endommagé avant
+      myBoard[r][c].ship = targetShip;
+      myBoard[r][c].miss = false;
+      myBoard[r][c].hit = true;
     });
   }
 }
@@ -1759,10 +1808,10 @@ let completedNames = [];
     m.missesSinceHit = (m.missesSinceHit || 0) + 1; // Compte les ratés
   }
 }
-    function initCombat2P() { state.phase = 'combat'; state.activeAbility = null; state.selectedWeapon = 'standard'; state.weaponOrientation = 'h'; state.p1.pa = 3; state.p2.pa = 3; state.p1.abilitiesUsed = {}; state.p2.abilitiesUsed = {}; state.p1.abilityCooldowns = {}; state.p2.abilityCooldowns = {}; state.p1.activeAbility = null; state.p2.activeAbility = null; state.p1.counterMeasure = false; state.p2.counterMeasure = false; state.p1.shots = 0; state.p1.hits = 0; state.p1.sunk = 0; state.p2.shots = 0; state.p2.hits = 0; state.p2.sunk = 0; SHIPS.forEach(s => { state.p1.abilityCooldowns[s.id] = SHIP_ABILITIES[s.id].cooldown; state.p2.abilityCooldowns[s.id] = SHIP_ABILITIES[s.id].cooldown; }); state.lastAction2P = ''; state.peeking = false; state.isPlayerTurn = true; const logC = document.getElementById('p2p-log-container'); if (logC) logC.innerHTML = ''; }
+    function initCombat2P() { state.phase = 'combat'; state.activeAbility = null; state.selectedWeapon = 'standard'; state.weaponOrientation = 'h'; state.p1.pa = 3; state.p2.pa = 3; state.p1.abilitiesUsed = {}; state.p2.abilitiesUsed = {}; state.p1.abilityCooldowns = {}; state.p2.abilityCooldowns = {}; state.p1.activeAbility = null; state.p2.activeAbility = null; state.p1.counterMeasure = false; state.p2.counterMeasure = false; state.p1.shots = 0; state.p1.hits = 0; state.p1.sunk = 0; state.p2.shots = 0; state.p2.hits = 0; state.p2.sunk = 0; SHIPS.forEach(s => { state.p1.abilityCooldowns[s.id] = SHIP_ABILITIES[s.id].cooldown; state.p2.abilityCooldowns[s.id] = SHIP_ABILITIES[s.id].cooldown; }); state.lastAction2P = ''; state.peeking = false; state.isPlayerTurn = true; state.p1.teleportUsed = false; state.p2.teleportUsed = false; state.teleportAlert2P = false; const logC = document.getElementById('p2p-log-container'); if (logC) logC.innerHTML = ''; }
     function renderCombat2P() { const ap = state.activePlayer; const opp = ap === 'p1' ? 'p2' : 'p1';   document.body.classList.remove('theme-p1', 'theme-p2');
   document.body.classList.add(ap === 'p1' ? 'theme-p1' : 'theme-p2');
-  applyTheme(state.theme || 'default'); document.getElementById('p2p-title').textContent = state[ap].name; document.getElementById('p2p-subtitle').textContent = state.peeking ? 'Votre flotte (Vue tactique)' : `Grille de ${state[opp].name}`; document.getElementById('p2p-pa').textContent = state[ap].pa; document.getElementById('p2p-peek-btn').textContent = state.peeking ? 'Grille de tir' : 'Vision Flotte'; document.getElementById('p2p-peek-btn').onclick = () => { state.peeking = !state.peeking; renderCombat2P(); }; const container = document.getElementById('p2p-grid-container'); container.innerHTML = ''; if (state.peeking) { const div = document.createElement('div'); div.className = 'grid-board'; div.id = 'p2p-self-grid'; container.appendChild(div); renderGrid2P('p2p-self-grid', state[ap].board, true); } else { const div = document.createElement('div'); div.className = 'grid-board'; div.id = 'p2p-enemy-grid'; container.appendChild(div); renderGrid2P('p2p-enemy-grid', state[opp].board, false); } renderWeapons2P('p2p-weapons-list'); renderAbilities2P('p2p-abilities-list'); }
+  applyTheme(state.theme || 'default'); document.getElementById('p2p-title').textContent = state[ap].name; document.getElementById('p2p-subtitle').textContent = state.peeking ? 'Votre flotte (Vue tactique)' : `Grille de ${state[opp].name}`; document.getElementById('p2p-pa').textContent = state[ap].pa; document.getElementById('p2p-peek-btn').textContent = state.peeking ? 'Grille de tir' : 'Vision Flotte'; document.getElementById('p2p-peek-btn').onclick = () => { state.peeking = !state.peeking; renderCombat2P(); }; const container = document.getElementById('p2p-grid-container'); container.innerHTML = ''; if (state.peeking) { const div = document.createElement('div'); div.className = 'grid-board'; div.id = 'p2p-self-grid'; container.appendChild(div); renderGrid2P('p2p-self-grid', state[ap].board, true); } else { const div = document.createElement('div'); div.className = 'grid-board'; div.id = 'p2p-enemy-grid'; container.appendChild(div); renderGrid2P('p2p-enemy-grid', state[opp].board, false); } renderWeapons2P('p2p-weapons-list'); renderAbilities2P('p2p-abilities-list'); renderTacticalActions(); }
 function renderGrid2P(gridId, boardData, isPlayerGrid) { 
   const ap = state.activePlayer; 
   const grid = document.getElementById(gridId); if (!grid) return; 
@@ -1781,7 +1830,7 @@ function renderGrid2P(gridId, boardData, isPlayerGrid) {
       else if (cd.mineTriggered) cell.classList.add('cell-mine-triggered');
       else if (cd.halfHit && !cd.hit) cell.classList.add('cell-half-hit');
       else if (cd.hit) cell.classList.add('cell-hit'); 
-      else if (cd.miss) cell.classList.add('cell-miss'); 
+      else if (cd.miss && !state.gameOptions.fogOfWar) cell.classList.add('cell-miss'); 
       if (!showRock && !cd.mineTriggered && cd.sonarRevealed && !cd.hit && !cd.miss) { 
         cell.classList.add('cell-sonar-revealed'); 
         if (cd.sonarCount === -1) cell.innerHTML = `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--hit);font-size:14px;">💣</div>`; 
@@ -1793,7 +1842,7 @@ function renderGrid2P(gridId, boardData, isPlayerGrid) {
     } 
   } 
 }    
-	function showWeaponPreview2P(row, col, gridId) { clearWeaponPreview(gridId); if (state.peeking || !state.isPlayerTurn) return; const ap = state.activePlayer; const opp = ap === 'p1' ? 'p2' : 'p1'; const enemyBoard = state[opp].board; const w = WEAPONS[state.selectedWeapon]; const cost = state.activeAbility ? 0 : w.cost; if (state[ap].pa < cost) return; let cells; if (state.activeAbility) { const ab = SHIP_ABILITIES[state.activeAbility]; cells = getAbilityCells(row, col, ab.pattern); } else { cells = getWeaponCells(row, col, state.selectedWeapon, state.weaponOrientation); } cells.forEach(([r, c]) => { if (inBounds(r, c)) { const el = document.querySelector(`#${gridId} .cell[data-row="${r}"][data-col="${c}"]`); if (el && !enemyBoard[r][c].hit && !enemyBoard[r][c].miss) el.classList.add('cell-weapon-preview'); } }); }
+	function showWeaponPreview2P(row, col, gridId) { clearWeaponPreview(gridId); if (state.peeking || !state.isPlayerTurn) return; const ap = state.activePlayer; const opp = ap === 'p1' ? 'p2' : 'p1'; const enemyBoard = state[opp].board; const w = WEAPONS[state.selectedWeapon]; const cost = state.activeAbility ? 0 : w.cost; if (state[ap].pa < cost) return; let cells; if (state.activeAbility) { const ab = SHIP_ABILITIES[state.activeAbility]; cells = getAbilityCells(row, col, ab.pattern); } else { cells = getWeaponCells(row, col, state.selectedWeapon, state.weaponOrientation); } cells.forEach(([r, c]) => { if (inBounds(r, c)) { const el = document.querySelector(`#${gridId} .cell[data-row="${r}"][data-col="${c}"]`); if (el && !enemyBoard[r][c].hit && (!enemyBoard[r][c].miss || state.gameOptions.fogOfWar)) el.classList.add('cell-weapon-preview'); } }); }
     function renderWeapons2P(containerId) { const container = document.getElementById(containerId); if (!container) return; const ap = state.activePlayer; container.innerHTML = ''; Object.entries(WEAPONS).forEach(([key, w]) => { if (!state.enabledWeapons[key] && !state[ap].activeAbility) return; if (!state.enabledWeapons[key] && state[ap].activeAbility !== key) return; const isFree = state[ap].activeAbility === key; const cost = isFree ? 0 : w.cost; const canAfford = state[ap].pa >= cost; const btn = document.createElement('div'); btn.className = 'weapon-btn' + (state.selectedWeapon === key ? ' active' : '') + (!canAfford ? ' weapon-disabled' : ''); btn.innerHTML = `<div class="pa-cost ${isFree ? 'free' : ''}">${isFree ? '0' : cost}</div><div class="weapon-icon">${getWeaponIcon(w.icon)}</div><div class="text-xs font-semibold text-white">${w.name}</div>`; if (canAfford) btn.addEventListener('click', () => { state.selectedWeapon = key; renderWeapons2P(containerId); }); container.appendChild(btn); }); }
 
     function renderAbilities2P(containerId) { 
@@ -1837,7 +1886,7 @@ function renderGrid2P(gridId, boardData, isPlayerGrid) {
     cells = getWeaponCells(row, col, state.selectedWeapon, state.weaponOrientation); 
     actionSummary = `${w.name} en ${getCoord([row,col])} : `; 
   } 
-  const valid = cells.filter(([r, c]) => inBounds(r, c) && !enemyBoard[r][c].hit && !enemyBoard[r][c].miss); 
+  const valid = cells.filter(([r, c]) => inBounds(r, c) && !enemyBoard[r][c].hit && (!enemyBoard[r][c].miss || state.gameOptions.fogOfWar)); 
   if (valid.length === 0) { showToast('Cases déjà ciblées.', 'info', 1200); return; } 
   state[ap].pa -= cost; 
   executeWeapon2P(cells, weaponType, actionSummary, [row, col], pattern); 
@@ -1863,7 +1912,7 @@ function executeWeapon2P(cells, weaponType, actionSummary, primaryTarget = null,
       });
     }
         cells.forEach(([r, c]) => {
-      if (!inBounds(r, c)) return; const cd = enemyBoard[r][c]; if (cd.hit || cd.miss) return; 
+      if (!inBounds(r, c)) return; const cd = enemyBoard[r][c]; if (cd.hit) return; if (cd.miss && !state.gameOptions.fogOfWar) return; 
       const cellEl = document.querySelector(`#p2p-enemy-grid .cell[data-row="${r}"][data-col="${c}"]`);
       
       let dirKey = '0,0';
