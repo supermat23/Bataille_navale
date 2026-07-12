@@ -90,6 +90,8 @@ Si vous souhaitez héberger le jeu sur votre propre serveur ou GitHub Pages :
 
 *Bon vent, Commandant ! ⚓*
 
+---
+
 ##⭐ Contribuer ou aider
 
 Vous pouvez aider le projet en :
