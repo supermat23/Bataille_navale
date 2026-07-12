@@ -34,7 +34,7 @@ Le jeu propose une difficulté évolutive pour tester vos compétences :
 
 ## 🏆 Contenu et Réjouissances
 
-- **Plus de 220 Succès** (du commun à l'ultime) à débloquer.
+- **Plus de 240 Succès** (du commun à l'ultime) à débloquer.
 - **Défis Quotidiens et Hebdomadaires** pour des récompenses régulières.
 - **Tableau des scores** local avec sauvegarde automatique.
 - **Exportation / Importation** de vos sauvegardes (format JSON).
@@ -89,7 +89,6 @@ Si vous souhaitez héberger le jeu sur votre propre serveur ou GitHub Pages :
 ---
 
 *Bon vent, Commandant ! ⚓*
-```
 
 ##⭐ Contribuer ou aider
 
