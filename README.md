@@ -1,3 +1,10 @@
+Voici une version mise à jour du `README.md`, avec un belle section dédiée au soutien sur Ko-fi en bas de page, tout en gardant le thème naval du jeu !
+
+Vous pouvez copier tout ce bloc et remplacer l'ancien contenu de votre fichier `README.md` :
+
+***
+
+```markdown
 # 🚢 Bataille Navale — Opération Tempête
 
 Plongez dans une expérience de jeu de stratégie navale intense et modernisée. 
@@ -88,22 +95,15 @@ Si vous souhaitez héberger le jeu sur votre propre serveur ou GitHub Pages :
 
 ---
 
-##⭐ Contribuer ou aider
+## ☕ Soutenir le projet
 
-Vous pouvez aider le projet en :
+**Bataille Navale — Opération Tempête** est un projet passion, entièrement gratuit et open-source. 
 
-* ⭐ Star le repository
-* 🔁 Partageant l'application
-* ☕ Soutenant via Ko-fi
+Si vous appréciez le jeu, que vous avez passé de bonnes heures à affronter le Fantôme ou à débloquer tous les succès, et que vous souhaitez soutenir son développement (hébergement, nouvelles fonctionnalités, nouveaux navires), vous pouvez m'offrir un café ! ☕
 
-👉 https://ko-fi.com/supermatv2
+Toute contribution est un immense soutien pour continuer à faire vivre cette flotte !
 
----
+👉 **[♥️ Supporter sur Ko-fi](https://ko-fi.com/supermatv2)** 👈
 
-## 📜 Licence
-
-Projet personnel — utilisation libre pour le jeu personnel.
-
----
-
-*Bon vent, Commandant ! ⚓*
+Merci infiniment, Commandant ! ⚓
+```
