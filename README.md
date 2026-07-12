@@ -1,4 +1,3 @@
-```markdown
 # 🚢 Bataille Navale — Opération Tempête
 
 Plongez dans une expérience de jeu de stratégie navale intense et modernisée. 
@@ -100,4 +99,3 @@ Toute contribution est un immense soutien pour continuer à faire vivre cette fl
 👉 **[♥️ Supporter sur Ko-fi](https://ko-fi.com/supermatv2)** 👈
 
 Merci infiniment, Commandant ! ⚓
-```
