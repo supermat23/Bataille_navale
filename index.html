@@ -222,7 +222,8 @@
 <div id="obstacles-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background: rgba(0,0,0,0.75);"><div class="bg-slate-900 border rounded-xl p-5 max-w-md w-full max-h-[80vh] overflow-y-auto text-left" style="border-color: var(--border-strong);"><div class="flex items-center justify-between mb-4"><h3 class="font-display text-xl" style="color: var(--accent);">🪨 Rochers &amp; Mines</h3><button id="obstacles-modal-close" class="text-slate-400 text-2xl leading-none px-2">&times;</button></div><div class="space-y-3 text-sm text-slate-300 leading-relaxed"><p><strong class="text-white">🪨 Rocher :</strong> un tir dessus ne fait rien à part le révéler (case grisée distincte). Il consomme quand même votre tir.</p><p><strong class="text-white">💣 Mine :</strong> un tir dessus déclenche une explosion sur les 8 cases autour — chacune est testée comme un tir normal.</p><p><strong class="text-white">🛡️ Case navire près d'un rocher :</strong> si un navire occupe une case adjacente à un rocher (une des 8 cases autour), le premier tir ne fait que la moitié des dégâts — il faut toucher cette case 2 fois pour la couler complètement.</p><p><strong class="text-white">📡 Sonar :</strong> détecte aussi les rochers et mines dans sa zone, mais le nombre affiché ne précise pas si ce sont des navires ou des obstacles.</p><p><strong class="text-white">🎯 Tir à plusieurs cases :</strong> s'il touche un rocher en chemin, il s'arrête net (les cases plus loin ne sont pas résolues). Si la case visée est directement un rocher, le tir entier est annulé.</p><p class="text-slate-400 text-xs pt-2 border-t border-slate-800">Nombre d'obstacles selon la taille de l'océan :<br>6×6 → 4 rochers, 2 mines · 10×10 → 8 rochers, 4 mines · 13×13 → 16 rochers, 8 mines · 18×18 → 20 rochers, 12 mines.</p></div></div></div>
 <div id="placement-screen" class="screen min-h-screen p-4 md:p-8 hidden"><div class="max-w-6xl mx-auto"><div class="flex flex-wrap items-center justify-between gap-4 mb-6"><div><h2 class="font-display text-2xl md:text-3xl text-white">Déploiement de la flotte</h2><p class="text-slate-400 text-sm">Cliquez un navire puis sur la grille. <span class="text-amber-400 font-bold">R</span> ou bouton pour pivoter.</p></div><div class="flex gap-2 flex-wrap"><button id="rotate-btn" class="btn btn-secondary text-xs md:text-sm"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 4v5h5"/></svg>Pivoter</button><button id="random-place-btn" class="btn btn-secondary text-xs md:text-sm">Aléatoire</button><button id="clear-btn" class="btn btn-danger text-xs md:text-sm">Effacer</button></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400 mb-3">Navires à déployer</h3><div id="ships-list"></div><button id="confirm-placement-btn" class="btn btn-primary w-full mt-6 py-4 justify-center" disabled><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Confirmer le déploiement</button></div><div class="flex flex-col items-center"><div class="text-sm font-bold tracking-widest uppercase text-amber-400 mb-3 self-start">Votre grille</div><div id="placement-grid" class="grid-board"></div></div></div></div></div>
 
-<div id="combat-screen" class="screen min-h-screen p-2 md:p-8 hidden"><div class="max-w-7xl mx-auto"><div class="flex flex-wrap items-center justify-between gap-3 mb-4"><div><h2 class="font-display text-xl md:text-3xl text-white">Engagement</h2><p class="text-slate-400 text-xs md:text-sm" id="combat-subtitle">À vous de jouer, commandant.</p></div><div class="flex items-center gap-2 flex-wrap"><div class="pa-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="color: var(--accent);"><path d="M13 2L3 14h7v8l10-12h-7V2z"/></svg><span class="text-sm">PA :</span><span class="text-lg font-bold text-amber-400" id="player-pa">3</span></div><div class="pa-badge hidden" id="chrono-badge"><span class="text-sm">⏱</span><span class="text-lg font-bold text-white" id="chrono-display">20</span></div><button id="orientation-combat-btn" class="btn btn-secondary text-xs" title="Changer l'orientation des tirs spéciaux"><span id="orient-display">↔ H</span></button><button id="surrender-btn" class="btn btn-danger text-xs">Abandonner</button></div></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-4"><div class="lg:col-span-8"><div class="flex flex-col items-center"><div class="flex items-center justify-between w-full max-w-xl mb-2"><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400">Grille ennemie</h3><span class="text-xs text-slate-400" id="enemy-ships-info">5 navires</span></div><div id="enemy-grid" class="grid-board"></div></div><div class="mt-4"><div class="flex items-center justify-between mb-2"><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400">Arsenal</h3></div><div id="weapons-list" class="weapons-grid"></div><div class="mt-4"><div class="flex items-center justify-between mb-2"><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400">Capacités</h3></div><div id="abilities-list" class="grid grid-cols-5 gap-1"></div></div></div></div><div class="lg:col-span-4 space-y-4"><div class="flex flex-col items-center"><div class="flex items-center justify-between w-full mb-2"><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400">Votre flotte</h3><span class="text-xs text-slate-400" id="player-ships-info">5 navires</span></div><div id="player-grid" class="grid-board" style="max-width: 100%;"></div></div><div class="grid grid-cols-3 gap-2"><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Tirs</div><div class="text-xl font-bold text-white" id="stat-shots">0</div></div><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Touchés</div><div class="text-xl font-bold" style="color: var(--hit);" id="stat-hits">0</div></div><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Précis.</div><div class="text-xl font-bold text-amber-400" id="stat-acc">—</div></div></div><div><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400 mb-2">Journal</h3><div id="log-container" class="space-y-1 max-h-48 overflow-y-auto pr-1"></div></div></div></div></div></div>
+<div id="combat-screen" class="screen min-h-screen p-2 md:p-8 hidden"><div class="max-w-7xl mx-auto"><div class="flex flex-wrap items-center justify-between gap-3 mb-4"><div><h2 class="font-display text-xl md:text-3xl text-white">Engagement</h2><p class="text-slate-400 text-xs md:text-sm" id="combat-subtitle">À vous de jouer, commandant.</p></div><div class="flex items-center gap-2 flex-wrap"><div class="pa-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="color: var(--accent);"><path d="M13 2L3 14h7v8l10-12h-7V2z"/></svg><span class="text-sm">PA :</span><span class="text-lg font-bold text-amber-400" id="player-pa">3</span></div><div class="pa-badge hidden" id="chrono-badge"><span class="text-sm">⏱</span><span class="text-lg font-bold text-white" id="chrono-display">20</span></div><button id="orientation-combat-btn" class="btn btn-secondary text-xs" title="Changer l'orientation des tirs spéciaux"><span id="orient-display">↔ H</span></button><button id="surrender-btn" class="btn btn-danger text-xs">Abandonner</button></div></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-4"><div class="lg:col-span-8"><div class="flex flex-col items-center"><div class="flex items-center justify-between w-full max-w-xl mb-2"><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400">Grille ennemie</h3><span class="text-xs text-slate-400" id="enemy-ships-info">5 navires</span></div><div id="enemy-grid" class="grid-board"></div></div><div class="mt-4"><div class="flex items-center justify-between mb-2"><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400">Arsenal</h3></div><div id="weapons-list" class="weapons-grid"></div>
+<div id="tactical-actions" class="mt-2"></div><div class="mt-4"><div class="flex items-center justify-between mb-2"><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400">Capacités</h3></div><div id="abilities-list" class="grid grid-cols-5 gap-1"></div></div></div></div><div class="lg:col-span-4 space-y-4"><div class="flex flex-col items-center"><div class="flex items-center justify-between w-full mb-2"><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400">Votre flotte</h3><span class="text-xs text-slate-400" id="player-ships-info">5 navires</span></div><div id="player-grid" class="grid-board" style="max-width: 100%;"></div></div><div class="grid grid-cols-3 gap-2"><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Tirs</div><div class="text-xl font-bold text-white" id="stat-shots">0</div></div><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Touchés</div><div class="text-xl font-bold" style="color: var(--hit);" id="stat-hits">0</div></div><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Précis.</div><div class="text-xl font-bold text-amber-400" id="stat-acc">—</div></div></div><div><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400 mb-2">Journal</h3><div id="log-container" class="space-y-1 max-h-48 overflow-y-auto pr-1"></div></div></div></div></div></div>
 
 <div id="combat-screen-2p" class="screen min-h-screen p-2 md:p-8 hidden"><div class="max-w-xl mx-auto"><div class="flex items-center justify-between gap-3 mb-4"><div><h2 class="font-display text-xl md:text-2xl" id="p2p-title" style="color: var(--accent);">Joueur 1</h2><p class="text-slate-400 text-xs md:text-sm" id="p2p-subtitle">Grille de tir</p></div><div class="flex items-center gap-2 flex-wrap"><div class="pa-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="color: var(--accent);"><path d="M13 2L3 14h7v8l10-12h-7V2z"/></svg><span class="text-sm">PA :</span><span class="text-lg font-bold" id="p2p-pa" style="color: var(--accent);">3</span></div><button id="p2p-peek-btn" class="btn btn-secondary text-xs">Vision Flotte</button></div></div><div id="p2p-grid-container" class="mb-4"></div><div class="grid grid-cols-2 gap-4 mt-4"><div><h3 class="text-sm font-bold tracking-widest uppercase mb-2" style="color: var(--accent);">Arsenal</h3><div id="p2p-weapons-list" class="weapons-grid"></div><div class="mt-4"><div class="flex items-center justify-between mb-2"><h3 class="text-sm font-bold tracking-widest uppercase" style="color: var(--accent);">Capacités</h3></div><div id="p2p-abilities-list" class="grid grid-cols-5 gap-1"></div></div></div><div><h3 class="text-sm font-bold tracking-widest uppercase mb-2" style="color: var(--accent);">Journal</h3><div id="p2p-log-container" class="space-y-1 max-h-32 overflow-y-auto pr-1"></div></div></div><div class="text-center mt-6"><button id="p2p-surrender-btn" class="btn btn-danger text-xs">Abandonner</button></div></div></div>
 
@@ -292,7 +293,7 @@ const state = {
   lastAction2P: '',
   isRandomPlacement: false,
   net: { peer: null, conn: null, isHost: false, code: '', connected: false },
-  gameOptions: { randomEvents: false, chrono: false, chronoDuration: 20, gridSize: 10, obstaclesEnabled: false },
+    gameOptions: { randomEvents: false, chrono: false, chronoDuration: 20, gridSize: 10, obstaclesEnabled: false, fogOfWar: false },
   hackMode: false, titleClickCount: 0, titleClickTimer: null,
   chronoInterval: null, chronoTime: 20, freeSonarNext: false, skipNextBotTurn: false, lastShareText: '', lastExtraInfo: '', pendingPromotion: null
 };
@@ -320,7 +321,7 @@ function createBotMemory() { return { mode: 'hunt', targets: [], currentDirectio
 function resetTracking() { return { consecutiveHits: 0, maxConsecutiveHits: 0, firstShotHit: null, weaponsUsed: ['standard'], sonarUses: 0, shipAbilitiesUsed: [], shipsLostByPlayer: 0, playerHitsReceived: 0, maxShipsSunkInOneTurn: 0, specialKill: false, shipsHit: new Set(), carrierHits: 0, firstShipSunkId: null, lastShipSunkId: null, usedSpecialWeapon: false, usedAbility: false, maxMultiHit: 0, sonarMaxShips: 0, eventTypesTriggered: [], chronoTimeoutOccurred: false }; }
 
 const STORAGE_KEY = 'bataille_navale_v23';
-function loadData() { try { const d = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); return { scores: d.scores || [], achievements: d.achievements || [], stats: d.stats || { gamesPlayed: 0, gamesWon: 0, totalShots: 0, onlineGamesWon: 0, local2pGamesWon: 0, difficultiesBeaten: [], careerScore: 0 }, lastName: d.lastName || '', settings: Object.assign({ randomEvents: false, chrono: false, chronoDuration: 20, gridSize: 10, obstaclesEnabled: false }, d.settings || {}), dailyChallenge: d.dailyChallenge || null, weeklyChallenge: d.weeklyChallenge || null, dailyStreak: d.dailyStreak || null, preferences: d.preferences || { difficulty: 'tactique', enabledWeapons: { standard: true, line: true, cross: true, diagonal: true, sonar: true }, abilitiesEnabled: true } }; } catch { return { scores: [], achievements: [], stats: { gamesPlayed: 0, gamesWon: 0, totalShots: 0, onlineGamesWon: 0, local2pGamesWon: 0, difficultiesBeaten: [], careerScore: 0 }, lastName: '', settings: { randomEvents: false, chrono: false, chronoDuration: 20, gridSize: 10, obstaclesEnabled: false }, dailyChallenge: null, weeklyChallenge: null, dailyStreak: null, preferences: { difficulty: 'tactique', enabledWeapons: { standard: true, line: true, cross: true, diagonal: true, sonar: true }, abilitiesEnabled: true } }; } }
+function loadData() { try { const d = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); return { scores: d.scores || [], achievements: d.achievements || [], stats: d.stats || { gamesPlayed: 0, gamesWon: 0, totalShots: 0, onlineGamesWon: 0, local2pGamesWon: 0, difficultiesBeaten: [], careerScore: 0 }, lastName: d.lastName || '', settings: Object.assign({ randomEvents: false, chrono: false, chronoDuration: 20, gridSize: 10, obstaclesEnabled: false, fogOfWar: false }, d.settings || {}), dailyChallenge: d.dailyChallenge || null, weeklyChallenge: d.weeklyChallenge || null, dailyStreak: d.dailyStreak || null, preferences: d.preferences || { difficulty: 'tactique', enabledWeapons: { standard: true, line: true, cross: true, diagonal: true, sonar: true }, abilitiesEnabled: true } }; } catch { return { scores: [], achievements: [], stats: { gamesPlayed: 0, gamesWon: 0, totalShots: 0, onlineGamesWon: 0, local2pGamesWon: 0, difficultiesBeaten: [], careerScore: 0 }, lastName: '', settings: { randomEvents: false, chrono: false, chronoDuration: 20, gridSize: 10, obstaclesEnabled: false, fogOfWar: false }, dailyChallenge: null, weeklyChallenge: null, dailyStreak: null, preferences: { difficulty: 'tactique', enabledWeapons: { standard: true, line: true, cross: true, diagonal: true, sonar: true }, abilitiesEnabled: true } }; } }
 function saveData(data) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {} }
 function addScore(entry) { const d = loadData(); d.scores.unshift(entry); d.scores = d.scores.slice(0, 50); d.stats.careerScore = (d.stats.careerScore || 0) + entry.score; saveData(d); }
 function getScores() { return loadData().scores; }
@@ -545,7 +546,20 @@ function renderThemes() {
 }
 function renderGameOptions() { 
   const grid = document.getElementById('game-options-grid'); if (!grid) return; grid.innerHTML = ''; 
-  const opts = [ { key: 'randomEvents', icon: '⛈️', name: 'Événements aléatoires', desc: 'Effets surprises pendant la partie' }, { key: 'chrono', icon: '⏱️', name: 'Mode chrono', desc: 'Sinon tir automatique' } ]; 
+  
+  // Options de base (toujours débloquées)
+  const opts = [ 
+    { key: 'randomEvents', icon: '⛈️', name: 'Événements aléatoires', desc: 'Effets surprises pendant la partie' }, 
+    { key: 'chrono', icon: '⏱️', name: 'Mode chrono', desc: 'Sinon tir automatique' }
+  ]; 
+  
+  // Ajout du Brouillard de Guerre si Rang 7 débloqué
+  if (isFeatureUnlocked(7)) {
+    opts.push({ key: 'fogOfWar', icon: '🌫️', name: 'Brouillard de Guerre', desc: 'Les ratés ne s\'affichent plus' });
+  } else {
+    state.gameOptions.fogOfWar = false; // Force la désactivation si non débloqué
+  }
+
   opts.forEach(o => { 
     const enabled = !!state.gameOptions[o.key]; 
     const el = document.createElement('div'); 
@@ -567,17 +581,34 @@ function renderGameOptions() {
       }); 
     } 
   });
+
+  // Bloc verrouillé pour le Brouillard (Rang 7)
+  if (!isFeatureUnlocked(7)) {
+    const lockedFogEl = document.createElement('div'); 
+    lockedFogEl.className = 'weapon-toggle disabled flex items-center justify-center p-2 text-center'; 
+    lockedFogEl.style.cursor = 'default'; 
+    lockedFogEl.innerHTML = `<div class="text-xs font-bold text-slate-500">🔒 Débloqué au Rang 7</div>`; 
+    grid.appendChild(lockedFogEl);
+  }
+
+  // Bloc verrouillé pour l'Océan et Obstacles (Rang 4)
   if (!isFeatureUnlocked(4)) {
-    const lockedEl = document.createElement('div'); lockedEl.className = 'weapon-toggle disabled flex items-center justify-center p-2 text-center'; lockedEl.style.cursor = 'default'; lockedEl.innerHTML = `<div class="text-xs font-bold text-slate-500">🔒 Débloqué au Rang 4</div>`; grid.appendChild(lockedEl);
+    const lockedEl = document.createElement('div'); 
+    lockedEl.className = 'weapon-toggle disabled flex items-center justify-center p-2 text-center'; 
+    lockedEl.style.cursor = 'default'; 
+    lockedEl.innerHTML = `<div class="text-xs font-bold text-slate-500">🔒 Débloqué au Rang 4</div>`; 
+    grid.appendChild(lockedEl);
   } else {
-    const sizeEl = document.createElement('div'); sizeEl.className = 'weapon-toggle enabled flex items-center gap-2 p-2 text-left'; sizeEl.innerHTML = `<div class="text-xl">🌊</div><div class="flex-1 min-w-0"><div class="text-xs font-bold text-white">Taille de l'océan</div><div class="flex gap-1 mt-1 flex-wrap" id="ocean-size-wrap"></div></div>`; grid.appendChild(sizeEl);
+    const sizeEl = document.createElement('div'); 
+    sizeEl.className = 'weapon-toggle enabled flex items-center gap-2 p-2 text-left'; 
+    sizeEl.innerHTML = `<div class="text-xl">🌊</div><div class="flex-1 min-w-0"><div class="text-xs font-bold text-white">Taille de l'océan</div><div class="flex gap-1 mt-1 flex-wrap" id="ocean-size-wrap"></div></div>`; 
+    grid.appendChild(sizeEl);
     const sizeWrap = sizeEl.querySelector('#ocean-size-wrap');
     [6, 10, 13, 18].forEach(sz => { 
       const b = document.createElement('button'); 
       const active = (state.gameOptions.gridSize || 10) === sz; 
       b.className = 'btn ' + (active ? 'btn-primary' : 'btn-secondary') + ' text-[10px] py-1 px-2'; 
       b.textContent = sz; 
-      // Ajout de renderGameOptions() à la fin pour forcer la mise à jour visuelle
       b.addEventListener('click', e => { e.stopPropagation(); state.gameOptions.gridSize = sz; saveSettings(state.gameOptions); SHIPS = getShipsForSize(sz); renderAbilityInfo(); renderGameOptions(); }); 
       sizeWrap.appendChild(b); 
     });
@@ -588,7 +619,8 @@ function renderGameOptions() {
     obsEl.innerHTML = `<div class="text-xl">🪨</div><div class="flex-1 min-w-0"><div class="text-xs font-bold text-white">Obstacles <button id="obstacles-help-btn" class="inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold ml-1" style="background:rgba(255,255,255,0.15);">?</button></div><div class="text-[10px] text-slate-400 leading-tight">Rochers et mines aléatoires</div></div>`;
     obsEl.addEventListener('click', (e) => { if (e.target.id === 'obstacles-help-btn') return; state.gameOptions.obstaclesEnabled = !state.gameOptions.obstaclesEnabled; saveSettings(state.gameOptions); renderGameOptions(); });
     grid.appendChild(obsEl);
-    const helpBtn = obsEl.querySelector('#obstacles-help-btn'); if (helpBtn) helpBtn.addEventListener('click', e => { e.stopPropagation(); openObstaclesHelpModal(); });
+    const helpBtn = obsEl.querySelector('#obstacles-help-btn'); 
+    if (helpBtn) helpBtn.addEventListener('click', e => { e.stopPropagation(); openObstaclesHelpModal(); });
   }
 }
 function getWeaponIcon(type) { const icons = { standard: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3" fill="currentColor"/><circle cx="12" cy="12" r="9"/></svg>', line: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="10" width="18" height="4" rx="1"/></svg>', cross: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="10" y="3" width="4" height="18" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/></svg>', diagonal: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="2" width="4" height="4" rx="1"/><rect x="9" y="9" width="4" height="4" rx="1"/><rect x="16" y="16" width="4" height="4" rx="1"/></svg>', sonar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3" fill="currentColor"/><circle cx="12" cy="12" r="7" opacity="0.6"/><circle cx="12" cy="12" r="11" opacity="0.3"/></svg>' }; return icons[type] || icons.standard; }
@@ -1168,7 +1200,8 @@ function startCombat1P() {
   state.selectedWeapon = 'standard'; state.isPlayerTurn = state.mode === 'online' ? state.net.isHost : true; state.botMemory = createBotMemory();
   state.shots = { player: 0, bot: 0 }; state.hits = { player: 0, bot: 0 }; state.sunk = { player: 0, bot: 0 };
   state.abilitiesUsed = {}; state.abilityCooldowns = {}; state.activeAbility = null; state.counterMeasure = false;
-  state.tracking = resetTracking(); state.newlyUnlocked = []; state.turnCount = 0;
+  state.teleportUsed = false;
+state.tracking = resetTracking(); state.newlyUnlocked = []; state.turnCount = 0;
   SHIPS.forEach(s => state.abilityCooldowns[s.id] = SHIP_ABILITIES[s.id].cooldown); 
   if (state.mode === '1p' && state.gameOptions.obstaclesEnabled) { scatterObstacles(state.boards.player); scatterObstacles(state.boards.enemy); }
   const logC = document.getElementById('log-container'); if (logC) logC.innerHTML = '';
@@ -1193,7 +1226,7 @@ function renderGrid1P(gridId, target, isPlayerGrid) {
       if (showRock) cell.classList.add('cell-rock');
       else if (cd.mineTriggered) cell.classList.add('cell-mine-triggered');
       else if (cd.halfHit && !cd.hit) cell.classList.add('cell-half-hit');
-      else if (cd.hit) cell.classList.add('cell-hit'); else if (cd.miss) cell.classList.add('cell-miss'); 
+      else if (cd.hit) cell.classList.add('cell-hit');       else if (cd.miss && !(target === 'enemy' && state.gameOptions.fogOfWar)) cell.classList.add('cell-miss'); 
       if (!showRock && !cd.mineTriggered && cd.sonarRevealed && !cd.hit && !cd.miss) { cell.classList.add('cell-sonar-revealed'); if (cd.sonarCount === -1) cell.innerHTML = `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--hit);font-size:14px;">💣</div>`; else if (cd.sonarCount !== null && cd.sonarCount > 0) cell.innerHTML = `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent);font-size:14px;">${cd.sonarCount}</div>`; } 
       if (state.counterMeasure && cd.ship && !cd.ship.sunk && cd.ship.id === 'patrol' && isPlayerGrid) { const shield = document.createElement('div'); shield.className = 'shield-indicator'; shield.innerHTML = '🛡'; cell.appendChild(shield); } 
       if (!isPlayerGrid) { cell.addEventListener('click', () => handleEnemyClick1P(r, c)); cell.addEventListener('mouseenter', () => showWeaponPreview1P(r, c, 'enemy-grid')); cell.addEventListener('mouseleave', () => clearWeaponPreview('enemy-grid')); cell.addEventListener('contextmenu', e => { e.preventDefault(); state.weaponOrientation = state.weaponOrientation === 'h' ? 'v' : 'h'; updateOrientationDisplay(); showWeaponPreview1P(r, c, 'enemy-grid'); }); } 
@@ -1208,10 +1241,107 @@ function showWeaponPreview1P(row, col, gridId) {
   if (state.pa.player < cost) return; 
   let cells; if (state.activeAbility) { const ab = SHIP_ABILITIES[state.activeAbility]; cells = getAbilityCells(row, col, ab.pattern); } 
   else { cells = getWeaponCells(row, col, state.selectedWeapon, state.weaponOrientation); } 
-  cells.forEach(([r, c]) => { if (inBounds(r, c)) { const el = document.querySelector(`#${gridId} .cell[data-row="${r}"][data-col="${c}"]`); if (el && !state.boards.enemy[r][c].hit && !state.boards.enemy[r][c].miss) el.classList.add('cell-weapon-preview'); } }); 
+  cells.forEach(([r, c]) => { if (inBounds(r, c)) { const el = document.querySelector(`#${gridId} .cell[data-row="${r}"][data-col="${c}"]`);       if (el && !state.boards.enemy[r][c].hit && (!state.boards.enemy[r][c].miss || state.gameOptions.fogOfWar)) el.classList.add('cell-weapon-preview'); } }); 
 }
 function renderWeapons1P(containerId) { const container = document.getElementById(containerId); if (!container) return; container.innerHTML = ''; Object.entries(WEAPONS).forEach(([key, w]) => { if (!state.enabledWeapons[key] && !state.activeAbility) return; if (!state.enabledWeapons[key] && state.activeAbility !== key) return; const isFree = state.activeAbility === key || (key === 'sonar' && state.freeSonarNext); const cost = isFree ? 0 : w.cost; const canAfford = state.pa.player >= cost; const btn = document.createElement('div'); btn.className = 'weapon-btn' + (state.selectedWeapon === key ? ' active' : '') + (!canAfford ? ' weapon-disabled' : ''); btn.innerHTML = `<div class="pa-cost ${isFree ? 'free' : ''}">${isFree ? '0' : cost}</div><div class="weapon-icon">${getWeaponIcon(w.icon)}</div><div class="text-xs font-semibold text-white">${w.name}</div>`; if (canAfford) btn.addEventListener('click', () => { state.selectedWeapon = key; renderWeapons1P(containerId); }); container.appendChild(btn); }); }
+function renderTacticalActions() {
+  const container = document.getElementById('tactical-actions');
+  if (!container) return;
+  if (state.gameOptions.fogOfWar && state.mode === '1p' && state.phase === 'combat') {
+    const disabled = state.teleportUsed || state.pa.player < 6 || !state.isPlayerTurn;
+    container.innerHTML = `<button id="teleport-btn" class="btn ${disabled ? 'btn-secondary opacity-50 pointer-events-none' : 'btn-primary'} w-full text-xs py-2 px-4 mt-2">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
+      🚀 Téléportation Tactique (6 PA)
+    </button>`;
+    const btn = document.getElementById('teleport-btn');
+    if (btn) btn.addEventListener('click', activateTeleport);
+  } else {
+    container.innerHTML = '';
+  }
+}
 
+function activateTeleport() {
+  if (state.teleportUsed || state.pa.player < 6) return;
+  const aliveShips = state.ships.player.filter(s => !s.sunk);
+  if (aliveShips.length === 0) return;
+
+  // Trouve le navire le plus endommagé
+  aliveShips.sort((a, b) => {
+    const hitsA = a.cells.filter(cell => state.boards.player[cell[0]][cell[1]].hit).length;
+    const hitsB = b.cells.filter(cell => state.boards.player[cell[0]][cell[1]].hit).length;
+    return hitsB - hitsA;
+  });
+
+  const targetShip = aliveShips[0];
+  const hitsOnTarget = targetShip.cells.filter(cell => state.boards.player[cell[0]][cell[1]].hit).length;
+
+  if (hitsOnTarget === 0) {
+    showToast('Aucun navire endommagé à téléporter !', 'danger');
+    return;
+  }
+
+  // 1. Effacer le navire de sa position actuelle
+  targetShip.cells.forEach(([r, c]) => {
+    state.boards.player[r][c].ship = null;
+    state.boards.player[r][c].hit = false; // On efface les dégâts
+    state.boards.player[r][c].halfHit = false;
+    state.boards.player[r][c].miss = true; // On marque l'ancienne zone comme ratée pour tromper l'ennemi
+  });
+
+  // 2. Trouver un nouvel emplacement valide
+  let placed = false;
+  let attempts = 0;
+  while (!placed && attempts < 300) {
+    attempts++;
+    const o = Math.random() < 0.5 ? 'h' : 'v';
+    const r = Math.floor(Math.random() * GRID_SIZE);
+    const c = Math.floor(Math.random() * GRID_SIZE);
+    
+    // Vérification stricte : on s'assure qu'il n'y a pas de navire, rocher ou mine
+    const shape = getShipShape(targetShip, o);
+    let validSpot = true;
+    for (const [dr, dc] of shape) {
+      const nr = r + dr, nc = c + dc;
+      if (!inBounds(nr, nc) || state.boards.player[nr][nc].ship || state.boards.player[nr][nc].rock || state.boards.player[nr][nc].mine) {
+        validSpot = false; break;
+      }
+    }
+
+    if (validSpot) {
+      const newShip = placeShip(state.boards.player, targetShip, r, c, o);
+      // NETTOYAGE DES ANCIENS ÉTATS DE LA CASE (raté, demi-touché, sonar)
+      newShip.cells.forEach(([nr, nc]) => {
+        state.boards.player[nr][nc].miss = false;
+        state.boards.player[nr][nc].halfHit = false;
+        state.boards.player[nr][nc].sonarRevealed = false;
+        state.boards.player[nr][nc].sonarCount = null;
+      });
+      
+      const idx = state.ships.player.findIndex(s => s.id === targetShip.id);
+      state.ships.player[idx] = newShip; // Met à jour le navire dans le state
+      placed = true;
+    }
+  }
+
+  if (placed) {
+    state.pa.player -= 6;
+    state.teleportUsed = true;
+    showToast(`🚀 ${targetShip.name} téléporté avec succès !`, 'success');
+    playSound('sonar');
+    renderGrid1P('player-grid', 'player', true);
+    updatePA1P();
+    renderTacticalActions();
+  } else {
+    // Si la grille est trop pleine, on annule
+    showToast('Aucun espace disponible pour la téléportation !', 'danger');
+    // On restaure le navire là où il était
+    targetShip.cells.forEach(([r, c]) => {
+      state.boards.player[r][c].ship = targetShip;
+      state.boards.player[r][c].miss = false;
+      state.boards.player[r][c].hit = true; // Il était endommagé avant
+    });
+  }
+}
 function renderAbilities1P(containerId) { 
   const container = document.getElementById(containerId); if (!container) return; 
   container.innerHTML = ''; container.className = `grid grid-cols-${Math.min(SHIPS.length, 5)} gap-1`;
@@ -1260,7 +1390,7 @@ function activateAbility1P(shipId) {
       checkAchievementsDuringPlay(); renderAbilities1P('abilities-list'); renderWeapons1P('weapons-list'); 
     }
     function updateStatsUI1P() { document.getElementById('stat-shots').textContent = state.shots.player; document.getElementById('stat-hits').textContent = state.hits.player; const acc = state.shots.player > 0 ? Math.round((state.hits.player / state.shots.player) * 100) : 0; document.getElementById('stat-acc').textContent = state.shots.player > 0 ? acc + '%' : '—'; }
-    function updatePA1P() { document.getElementById('player-pa').textContent = state.pa.player; }
+    function updatePA1P() { document.getElementById('player-pa').textContent = state.pa.player; renderTacticalActions(); }
     function updateOrientationDisplay() { const el = document.getElementById('orient-display'); if (el) el.textContent = state.weaponOrientation === 'h' ? '↔ H' : '↕ V'; const fab = document.getElementById('orientation-fab'); if (fab && state.phase === 'combat' && (state.selectedWeapon === 'line' || state.selectedWeapon === 'diagonal')) fab.classList.add('visible'); else if (fab) fab.classList.remove('visible'); }
     document.getElementById('orientation-fab').addEventListener('click', () => { state.weaponOrientation = state.weaponOrientation === 'h' ? 'v' : 'h'; updateOrientationDisplay(); });
     document.getElementById('orientation-combat-btn').addEventListener('click', () => { state.weaponOrientation = state.weaponOrientation === 'h' ? 'v' : 'h'; updateOrientationDisplay(); });
@@ -1275,7 +1405,7 @@ function activateAbility1P(shipId) {
   let cells; let weaponType = state.selectedWeapon; let pattern = null;
   if (state.activeAbility) { const ab = SHIP_ABILITIES[state.activeAbility]; cells = getAbilityCells(row, col, ab.pattern); weaponType = 'standard'; pattern = ab.pattern; } 
   else { cells = getWeaponCells(row, col, state.selectedWeapon, state.weaponOrientation); }
-  const valid = cells.filter(([r, c]) => inBounds(r, c) && !state.boards.enemy[r][c].hit && !state.boards.enemy[r][c].miss);
+    const valid = cells.filter(([r, c]) => inBounds(r, c) && !state.boards.enemy[r][c].hit && (!state.boards.enemy[r][c].miss || state.gameOptions.fogOfWar));
   if (valid.length === 0) { showToast('Cases déjà ciblées.', 'info', 1200); return; }
   state.pa.player -= cost; state.paSpent += cost;
   if (state.selectedWeapon === 'sonar' && state.freeSonarNext) state.freeSonarNext = false;
@@ -1383,7 +1513,7 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
       });
     }
     cells.forEach(([r, c]) => {
-      if (!inBounds(r, c)) return; const cd = board[r][c]; if (cd.hit || cd.miss) return;
+            if (!inBounds(r, c)) return; const cd = board[r][c]; if (cd.hit) return; if (cd.miss && !state.gameOptions.fogOfWar) return;
       let dirKey = '0,0';
       if (primaryTarget && pattern !== 'star' && pattern !== 'salvo') {
         const dr = Math.sign(r - primaryTarget[0]);
@@ -1549,8 +1679,8 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
       showToast(`${ev.icon} <strong>${ev.title}</strong><br>${msg}`, 'info', 3500); addLog(`${ev.title} — ${msg}`, 'info', 'player');
     }
     function botTurn() {
-      if (state.skipNextBotTurn) { state.skipNextBotTurn = false; state.isAnimating = false; showToast('🌊 L\'ennemi rate son tour !', 'success', 2200); addLog("L'ennemi est désorienté et rate son tour.", 'info', 'player'); state.isPlayerTurn = true; state.selectedWeapon = 'standard'; SHIPS.forEach(s => { if (state.abilityCooldowns[s.id] > 0) state.abilityCooldowns[s.id]--; }); document.getElementById('combat-subtitle').textContent = 'À vous de jouer, commandant.'; renderWeapons1P('weapons-list'); renderAbilities1P('abilities-list'); checkAchievementsDuringPlay(); startChrono(); return; }
-      const diff = state.difficulty; let action; if (diff === 'recrue') action = botRecrue(); else if (diff === 'tactique') action = botTactique(); else if (diff === 'stratege') action = botStratege(); else action = botAmiral(); if (!action) action = botRecrue(); const cells = getWeaponCells(action.target[0], action.target[1], action.type, action.orientation || 'h'); state.selectedWeapon = action.type; state.isAnimating = true; const targetCell = document.querySelector(`#player-grid .cell[data-row="${action.target[0]}"][data-col="${action.target[1]}"]`); if (targetCell) { targetCell.classList.add('cell-flash'); setTimeout(() => targetCell.classList.remove('cell-flash'), 400); } setTimeout(() => { executeWeapon1P(state.boards.player, cells, 'bot', action.type, 'standard', action.target); state.pa.bot -= WEAPONS[action.type].cost; updateBotMemory(action.target[0], action.target[1]); setTimeout(() => { state.isAnimating = false; if (checkVictory1P()) return; state.isPlayerTurn = true; state.selectedWeapon = 'standard'; SHIPS.forEach(s => { if (state.abilityCooldowns[s.id] > 0) state.abilityCooldowns[s.id]--; }); if (state.mode === '1p' && state.gameOptions.randomEvents && Math.random() < 0.18) triggerRandomEvent(); document.getElementById('combat-subtitle').textContent = 'À vous de jouer, commandant.'; renderWeapons1P('weapons-list'); renderAbilities1P('abilities-list'); checkAchievementsDuringPlay(); startChrono(); }, 800); }, 400); }
+      if (state.skipNextBotTurn) { state.skipNextBotTurn = false; state.isAnimating = false; showToast('🌊 L\'ennemi rate son tour !', 'success', 2200); addLog("L'ennemi est désorienté et rate son tour.", 'info', 'player'); state.isPlayerTurn = true; state.selectedWeapon = 'standard'; SHIPS.forEach(s => { if (state.abilityCooldowns[s.id] > 0) state.abilityCooldowns[s.id]--; }); document.getElementById('combat-subtitle').textContent = 'À vous de jouer, commandant.'; renderWeapons1P('weapons-list'); renderAbilities1P('abilities-list'); renderTacticalActions(); checkAchievementsDuringPlay(); startChrono(); return; }
+      const diff = state.difficulty; let action; if (diff === 'recrue') action = botRecrue(); else if (diff === 'tactique') action = botTactique(); else if (diff === 'stratege') action = botStratege(); else action = botAmiral(); if (!action) action = botRecrue(); const cells = getWeaponCells(action.target[0], action.target[1], action.type, action.orientation || 'h'); state.selectedWeapon = action.type; state.isAnimating = true; const targetCell = document.querySelector(`#player-grid .cell[data-row="${action.target[0]}"][data-col="${action.target[1]}"]`); if (targetCell) { targetCell.classList.add('cell-flash'); setTimeout(() => targetCell.classList.remove('cell-flash'), 400); } setTimeout(() => { executeWeapon1P(state.boards.player, cells, 'bot', action.type, 'standard', action.target); state.pa.bot -= WEAPONS[action.type].cost; updateBotMemory(action.target[0], action.target[1]); setTimeout(() => { state.isAnimating = false; if (checkVictory1P()) return; state.isPlayerTurn = true; state.selectedWeapon = 'standard'; SHIPS.forEach(s => { if (state.abilityCooldowns[s.id] > 0) state.abilityCooldowns[s.id]--; }); if (state.mode === '1p' && state.gameOptions.randomEvents && Math.random() < 0.18) triggerRandomEvent(); document.getElementById('combat-subtitle').textContent = 'À vous de jouer, commandant.'; renderWeapons1P('weapons-list'); renderAbilities1P('abilities-list'); renderTacticalActions(); checkAchievementsDuringPlay(); startChrono(); }, 800); }, 400); }
     function getValidShots(board) { const v = []; for (let r = 0; r < GRID_SIZE; r++) for (let c = 0; c < GRID_SIZE; c++) if (!board[r][c].hit && !board[r][c].miss) v.push([r, c]); return v; }
     function botRecrue() { const v = getValidShots(state.boards.player); return { type: 'standard', target: v[Math.floor(Math.random() * v.length)] }; }
     function botTactique() { const m = state.botMemory, board = state.boards.player; if (m.targets.length > 0) { const t = m.targets[0]; if (m.currentDirection) { const [dr, dc] = m.currentDirection; for (const [r, c] of [[t[0] + dr, t[1] + dc], [t[0] - dr, t[1] - dc]]) if (inBounds(r, c) && !board[r][c].hit && !board[r][c].miss) return { type: 'standard', target: [r, c] }; m.currentDirection = null; } for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) { const r = t[0] + dr, c = t[1] + dc; if (inBounds(r, c) && !board[r][c].hit && !board[r][c].miss) return { type: 'standard', target: [r, c] }; } m.targets.shift(); m.currentDirection = null; } let valid = getValidShots(board).filter(([r, c]) => (r + c) % 2 === 0); if (valid.length === 0) valid = getValidShots(board); return { type: 'standard', target: valid[Math.floor(Math.random() * valid.length)] }; }
