@@ -1,9 +1,3 @@
-Voici une version mise à jour du `README.md`, avec un belle section dédiée au soutien sur Ko-fi en bas de page, tout en gardant le thème naval du jeu !
-
-Vous pouvez copier tout ce bloc et remplacer l'ancien contenu de votre fichier `README.md` :
-
-***
-
 ```markdown
 # 🚢 Bataille Navale — Opération Tempête
 
