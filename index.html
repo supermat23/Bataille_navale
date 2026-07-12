@@ -545,21 +545,16 @@ function renderThemes() {
   });
 }
 function renderGameOptions() { 
-  const grid = document.getElementById('game-options-grid'); if (!grid) return; grid.innerHTML = ''; 
-  
-  // Options de base (toujours débloquées)
+  const grid = document.getElementById('game-options-grid'); 
+  if (!grid) return; 
+  grid.innerHTML = ''; 
+
+  // 1. Options de base (toujours débloquées)
   const opts = [ 
     { key: 'randomEvents', icon: '⛈️', name: 'Événements aléatoires', desc: 'Effets surprises pendant la partie' }, 
     { key: 'chrono', icon: '⏱️', name: 'Mode chrono', desc: 'Sinon tir automatique' }
   ]; 
   
-  // Ajout du Brouillard de Guerre si Rang 7 débloqué
-  if (isFeatureUnlocked(7)) {
-    opts.push({ key: 'fogOfWar', icon: '🌫️', name: 'Brouillard de Guerre', desc: 'Les ratés ne s\'affichent plus' });
-  } else {
-    state.gameOptions.fogOfWar = false; // Force la désactivation si non débloqué
-  }
-
   opts.forEach(o => { 
     const enabled = !!state.gameOptions[o.key]; 
     const el = document.createElement('div'); 
@@ -582,16 +577,7 @@ function renderGameOptions() {
     } 
   });
 
-  // Bloc verrouillé pour le Brouillard (Rang 7)
-  if (!isFeatureUnlocked(7)) {
-    const lockedFogEl = document.createElement('div'); 
-    lockedFogEl.className = 'weapon-toggle disabled flex items-center justify-center p-2 text-center'; 
-    lockedFogEl.style.cursor = 'default'; 
-    lockedFogEl.innerHTML = `<div class="text-xs font-bold text-slate-500">🔒 Débloqué au Rang 7</div>`; 
-    grid.appendChild(lockedFogEl);
-  }
-
-  // Bloc verrouillé pour l'Océan et Obstacles (Rang 4)
+  // 2. Options Rang 4 (Océan et Obstacles)
   if (!isFeatureUnlocked(4)) {
     const lockedEl = document.createElement('div'); 
     lockedEl.className = 'weapon-toggle disabled flex items-center justify-center p-2 text-center'; 
@@ -621,6 +607,24 @@ function renderGameOptions() {
     grid.appendChild(obsEl);
     const helpBtn = obsEl.querySelector('#obstacles-help-btn'); 
     if (helpBtn) helpBtn.addEventListener('click', e => { e.stopPropagation(); openObstaclesHelpModal(); });
+  }
+
+  // 3. Option Rang 7 (Brouillard de Guerre)
+  if (!isFeatureUnlocked(7)) {
+    state.gameOptions.fogOfWar = false; // Force la désactivation si non débloqué
+    const lockedFogEl = document.createElement('div'); 
+    lockedFogEl.className = 'weapon-toggle disabled flex items-center justify-center p-2 text-center'; 
+    lockedFogEl.style.cursor = 'default'; 
+    lockedFogEl.innerHTML = `<div class="text-xs font-bold text-slate-500">🔒 Débloqué au Rang 7</div>`; 
+    grid.appendChild(lockedFogEl);
+  } else {
+    const fogEnabled = !!state.gameOptions.fogOfWar; 
+    const fogEl = document.createElement('div'); 
+    fogEl.className = 'weapon-toggle ' + (fogEnabled ? 'enabled' : 'disabled') + ' flex items-center gap-2 p-2 text-left'; 
+    fogEl.style.cursor = 'pointer'; 
+    fogEl.innerHTML = `<div class="text-xl">🌫️</div><div class="flex-1 min-w-0"><div class="text-xs font-bold text-white">Brouillard de Guerre + Téléportation</div><div class="text-[10px] text-slate-400 leading-tight">Les ratés ne s'affichent plus</div></div>`;
+    fogEl.addEventListener('click', () => { state.gameOptions.fogOfWar = !state.gameOptions.fogOfWar; saveSettings(state.gameOptions); renderGameOptions(); });
+    grid.appendChild(fogEl);
   }
 }
 function getWeaponIcon(type) { const icons = { standard: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3" fill="currentColor"/><circle cx="12" cy="12" r="9"/></svg>', line: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="10" width="18" height="4" rx="1"/></svg>', cross: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="10" y="3" width="4" height="18" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/></svg>', diagonal: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="2" width="4" height="4" rx="1"/><rect x="9" y="9" width="4" height="4" rx="1"/><rect x="16" y="16" width="4" height="4" rx="1"/></svg>', sonar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3" fill="currentColor"/><circle cx="12" cy="12" r="7" opacity="0.6"/><circle cx="12" cy="12" r="11" opacity="0.3"/></svg>' }; return icons[type] || icons.standard; }
