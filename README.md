@@ -88,10 +88,6 @@ Si vous souhaitez héberger le jeu sur votre propre serveur ou GitHub Pages :
 
 ---
 
-*Bon vent, Commandant ! ⚓*
-
----
-
 ##⭐ Contribuer ou aider
 
 Vous pouvez aider le projet en :
@@ -107,3 +103,7 @@ Vous pouvez aider le projet en :
 ## 📜 Licence
 
 Projet personnel — utilisation libre pour le jeu personnel.
+
+---
+
+*Bon vent, Commandant ! ⚓*
