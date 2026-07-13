@@ -344,11 +344,17 @@ function scatterObstacles(board) {
   }
 }
 function createBotMemory() { return { mode: 'hunt', targets: [], currentDirection: null, lastShot: null }; }
-function resetTracking() { return { consecutiveHits: 0, maxConsecutiveHits: 0, firstShotHit: null, weaponsUsed: ['standard'], sonarUses: 0, shipAbilitiesUsed: [], shipsLostByPlayer: 0, playerHitsReceived: 0, maxShipsSunkInOneTurn: 0, specialKill: false, shipsHit: new Set(), carrierHits: 0, firstShipSunkId: null, lastShipSunkId: null, usedSpecialWeapon: false, usedAbility: false, maxMultiHit: 0, sonarMaxShips: 0, eventTypesTriggered: [], chronoTimeoutOccurred: false, teleportUsed: false, teleportWasClutch: false, teleportedShipId: null, botShieldUsed: false }; }
+function resetTracking() { return { consecutiveHits: 0, maxConsecutiveHits: 0, firstShotHit: null, weaponsUsed: ['standard'], sonarUses: 0, shipAbilitiesUsed: [], shipsLostByPlayer: 0, playerHitsReceived: 0, maxShipsSunkInOneTurn: 0, specialKill: false, shipsHit: new Set(), carrierHits: 0, firstShipSunkId: null, lastShipSunkId: null, usedSpecialWeapon: false, usedAbility: false, maxMultiHit: 0, sonarMaxShips: 0, eventTypesTriggered: [], chronoTimeoutOccurred: false, teleportUsed: false, teleportWasClutch: false, teleportedShipId: null, botShieldUsed: false, minesTriggered: 0, sunkEnemyIds: [], halfHitsReceived: 0 }; }
 const STORAGE_KEY = 'bataille_navale_v23';
 function loadData() { try { const d = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); return { scores: d.scores || [], achievements: d.achievements || [], stats: d.stats || { gamesPlayed: 0, gamesWon: 0, totalShots: 0, onlineGamesWon: 0, local2pGamesWon: 0, difficultiesBeaten: [], careerScore: 0 }, lastName: d.lastName || '', settings: Object.assign({ randomEvents: false, chrono: false, chronoDuration: 20, gridSize: 10, obstaclesEnabled: false, fogOfWar: false }, d.settings || {}), dailyChallenge: d.dailyChallenge || null, weeklyChallenge: d.weeklyChallenge || null, dailyStreak: d.dailyStreak || null, preferences: d.preferences || { difficulty: 'tactique', enabledWeapons: { standard: true, line: true, cross: true, diagonal: true, sonar: true }, abilitiesEnabled: true } }; } catch { return { scores: [], achievements: [], stats: { gamesPlayed: 0, gamesWon: 0, totalShots: 0, onlineGamesWon: 0, local2pGamesWon: 0, difficultiesBeaten: [], careerScore: 0 }, lastName: '', settings: { randomEvents: false, chrono: false, chronoDuration: 20, gridSize: 10, obstaclesEnabled: false, fogOfWar: false }, dailyChallenge: null, weeklyChallenge: null, dailyStreak: null, preferences: { difficulty: 'tactique', enabledWeapons: { standard: true, line: true, cross: true, diagonal: true, sonar: true }, abilitiesEnabled: true } }; } }
 function saveData(data) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {} }
-function addScore(entry) { const d = loadData(); d.scores.unshift(entry); d.scores = d.scores.slice(0, 50); d.stats.careerScore = (d.stats.careerScore || 0) + entry.score; saveData(d); }
+function addScore(entry) { 
+  const d = loadData(); 
+  d.scores.unshift(entry); 
+  d.scores = d.scores.slice(0, 50); 
+  d.stats.careerScore = (d.stats.careerScore || 0) + entry.score; 
+  saveData(d); 
+}
 function getScores() { return loadData().scores; }
 function getSettings() { return loadData().settings; }
 function saveSettings(s) { const d = loadData(); d.settings = s; saveData(d); }
@@ -415,7 +421,20 @@ function renderMenu() {
   const p2Input = document.getElementById('p2-name-input'); if (p2Input) p2Input.value = state.p2Name;
 }
 function renderWeaponToggles() { const grid = document.getElementById('weapon-toggle-grid'); grid.innerHTML = ''; Object.entries(WEAPONS).forEach(([key, w]) => { if (key === 'standard') return; const enabled = state.enabledWeapons[key]; const el = document.createElement('div'); el.className = 'weapon-toggle ' + (enabled ? 'enabled' : 'disabled'); el.innerHTML = `<div class="weapon-icon mx-auto mb-1">${getWeaponIcon(w.icon)}</div><div class="text-sm font-semibold text-white">${w.name}</div><div class="text-xs text-slate-400">${w.cost} PA</div>`; el.addEventListener('click', () => { state.enabledWeapons[key] = !state.enabledWeapons[key]; saveCurrentPreferences(); renderWeaponToggles(); }); grid.appendChild(el); }); }
-function renderAbilityInfo() { const grid = document.getElementById('ability-info-grid'); grid.innerHTML = ''; grid.className = `grid grid-cols-${Math.min(SHIPS.length, 5)} gap-2 max-w-3xl mx-auto`; const on = state.shipAbilitiesEnabled; SHIPS.forEach(s => { const ab = SHIP_ABILITIES[s.id]; const el = document.createElement('div'); el.className = 'weapon-toggle ' + (on ? 'enabled' : 'disabled') + ' pointer-events-none flex flex-col items-center justify-center p-2 h-full'; el.innerHTML = `<div class="text-2xl mb-1" style="color: ${on ? 'var(--accent)' : 'var(--text-dim)'};">${ab.icon}</div><div class="text-xs font-bold ${on ? 'text-white' : 'text-slate-500'} text-center leading-tight">${ab.name}</div><div class="text-[10px] text-slate-400 text-center leading-tight mt-1">${s.name}</div><div class="text-[10px] ${on ? 'text-amber-400' : 'text-slate-500'} text-center leading-tight mt-1 break-words">${ab.desc}</div>`; grid.appendChild(el); }); }
+function renderAbilityInfo() { 
+  const grid = document.getElementById('ability-info-grid'); 
+  grid.innerHTML = ''; 
+  grid.className = `grid grid-cols-${Math.min(SHIPS.length, 5)} gap-2 max-w-3xl mx-auto`; 
+  const on = state.shipAbilitiesEnabled; 
+  SHIPS.forEach(s => { 
+    const ab = SHIP_ABILITIES[s.id]; 
+    const el = document.createElement('div'); 
+    // On remplace justify-center par justify-start et on ajoute un peu de padding en haut (p-3)
+    el.className = 'weapon-toggle ' + (on ? 'enabled' : 'disabled') + ' pointer-events-none flex flex-col items-center justify-start p-3 h-full'; 
+    el.innerHTML = `<div class="text-2xl mb-1" style="color: ${on ? 'var(--accent)' : 'var(--text-dim)'};">${ab.icon}</div><div class="text-xs font-bold ${on ? 'text-white' : 'text-slate-500'} text-center leading-tight">${ab.name}</div><div class="text-[10px] text-slate-400 text-center leading-tight mt-1">${s.name}</div><div class="text-[10px] ${on ? 'text-amber-400' : 'text-slate-500'} text-center leading-tight mt-1 break-words">${ab.desc}</div>`; 
+    grid.appendChild(el); 
+  }); 
+}
 
 const GRADES = [
   { num: 1, min: 0, name: 'Recrue', icon: '🎖️' },
@@ -462,6 +481,7 @@ function renderChallengeStats() { const el = document.getElementById('challenge-
 
 function isPalindrome(n) { const s = String(n); return s.length >= 2 && s === s.split('').reverse().join(''); }
 const DAILY_CHALLENGES = [
+  // --- DÉFIS DE BASE (Tous Rangs) ---
   { id: 'no_sonar', text: 'Gagnez sans utiliser le sonar', icon: '📡', check: (t, ctx) => t.sonarUses === 0 },
   { id: 'no_loss', text: 'Gagnez sans perdre un seul navire', icon: '🛡️', check: (t, ctx) => t.shipsLostByPlayer === 0 },
   { id: 'fast', text: 'Gagnez en moins de 25 tirs', icon: '💨', check: (t, ctx) => ctx.shots < 25 },
@@ -505,7 +525,6 @@ const DAILY_CHALLENGES = [
   { id: 'flawless_defense', text: 'Gagnez sans perdre de navire ni subir la moindre touche', icon: '🛡️', check: (t, ctx) => t.shipsLostByPlayer === 0 && t.playerHitsReceived === 0 },
   { id: 'tactique_win', text: 'Battez le Tactique', icon: '⚔️', check: (t, ctx) => ctx.difficulty === 'tactique' },
   { id: 'stratege_win', text: 'Battez le Stratège', icon: '⚔️', check: (t, ctx) => ctx.difficulty === 'stratege' },
-  { id: 'amiral_win', text: 'Battez l\'Amiral', icon: '👑', check: (t, ctx) => ctx.difficulty === 'amiral' },
   { id: 'saturday_win', text: 'Gagnez un samedi', icon: '🎉', check: (t, ctx) => new Date().getDay() === 6 },
   { id: 'morning_win', text: 'Gagnez entre 7h et 9h du matin', icon: '🌄', check: (t, ctx) => { const h = new Date().getHours(); return h >= 7 && h < 9; } },
   { id: 'evening_win', text: 'Gagnez entre 18h et 20h', icon: '🌆', check: (t, ctx) => { const h = new Date().getHours(); return h >= 18 && h < 20; } },
@@ -513,10 +532,45 @@ const DAILY_CHALLENGES = [
   { id: 'round_number', text: 'Terminez avec un nombre de tirs multiple de 10 (10, 20, 30...)', icon: '🔟', check: (t, ctx) => ctx.shots > 0 && ctx.shots % 10 === 0 },
   { id: 'perfect_short', text: 'Gagnez avec 100% de précision en moins de 20 tirs', icon: '💎', check: (t, ctx) => ctx.acc === 1 && ctx.shots < 20 },
   { id: 'free_sonar_used', text: 'Profitez d\'un sonar gratuit offert par un événement', icon: '📡', check: (t, ctx) => t.eventTypesTriggered.includes('free_sonar') },
-  { id: 'storm_survivor', text: 'Bénéficiez d\'un tour où l\'ennemi rate son attaque', icon: '🌊', check: (t, ctx) => t.eventTypesTriggered.includes('skip_bot') }
+  { id: 'storm_survivor', text: 'Bénéficiez d\'un tour où l\'ennemi rate son attaque', icon: '🌊', check: (t, ctx) => t.eventTypesTriggered.includes('skip_bot') },
+
+  // --- NOUVEAUX DÉFIS JOUR (Rang 4) ---
+  { id: 'd_r4_win18', text: 'Gagnez une partie sur l\'océan 18x18', icon: '🐋', minRank: 4, check: (t, ctx) => ctx.gridSize === 18 },
+  { id: 'd_r4_win6_flawless', text: 'Gagnez sur l\'océan 6x6 sans perdre le moindre navire', icon: '🛡️', minRank: 4, check: (t, ctx) => ctx.gridSize === 6 && t.shipsLostByPlayer === 0 },
+  { id: 'd_r4_speed18', text: 'Gagnez sur l\'océan 18x18 en moins de 60 tirs', icon: '⚡', minRank: 4, check: (t, ctx) => ctx.gridSize === 18 && ctx.shots < 60 },
+  { id: 'd_r4_mines2', text: 'Déclenchez au moins 2 mines dans la même partie', icon: '💥', minRank: 4, check: (t, ctx) => t.minesTriggered >= 2 },
+  { id: 'd_r4_no_mines_win', text: 'Gagnez une partie avec obstacles sans déclencher la moindre mine', icon: '🧭', minRank: 4, check: (t, ctx) => ctx.obstaclesEnabled === true && t.minesTriggered === 0 },
+  { id: 'd_r4_sink_leviathan', text: 'Coulez le Léviathan ennemi (Océan 18x18)', icon: '🐋', minRank: 4, check: (t, ctx) => t.sunkEnemyIds.includes('leviathan') },
+  { id: 'd_r4_sink_flanker', text: 'Coulez l\'Éclaireur lourd ennemi (Océan 18x18)', icon: '🚁', minRank: 4, check: (t, ctx) => t.sunkEnemyIds.includes('flanker') },
+  { id: 'd_r4_leviathan_survivor', text: 'Gagnez sur 18x18 sans que votre Léviathan ne soit touché', icon: '⚓', minRank: 4, check: (t, ctx) => ctx.gridSize === 18 && ctx.leviathanIntact },
+  { id: 'd_r4_half_hit_win', text: 'Gagnez une partie où un de vos navires a subi un "demi-tir"', icon: '🪨', minRank: 4, check: (t, ctx) => t.halfHitsReceived > 0 },
+  { id: 'd_r4_sniper18', text: 'Gagnez sur l\'océan 18x18 avec au moins 50% de précision', icon: '🎯', minRank: 4, check: (t, ctx) => ctx.gridSize === 18 && ctx.acc >= 0.5 },
+
+  // --- NOUVEAUX DÉFIS JOUR (Rang 7) ---
+  { id: 'd_r7_fog_win', text: 'Gagnez une partie en mode Brouillard de Guerre', icon: '🌫️', minRank: 7, check: (t, ctx) => ctx.fogOfWar === true },
+  { id: 'd_r7_teleport_win', text: 'Gagnez après avoir utilisé la Téléportation Tactique', icon: '🚀', minRank: 7, check: (t, ctx) => t.teleportUsed === true },
+  { id: 'd_r7_beat_fantome', text: 'Battez le Fantôme', icon: '🔦', minRank: 7, check: (t, ctx) => ctx.difficulty === 'fantome' },
+  { id: 'd_r7_beat_fantome_flawless', text: 'Battez le Fantôme sans perdre de navire', icon: '🛡️', minRank: 7, check: (t, ctx) => ctx.difficulty === 'fantome' && t.shipsLostByPlayer === 0 },
+  { id: 'd_r7_theme_volcano', text: 'Gagnez une partie avec le thème Volcan', icon: '🌋', minRank: 7, check: (t, ctx) => ctx.theme === 'volcano' },
+  { id: 'd_r7_theme_arctic', text: 'Gagnez une partie avec le thème Arctique', icon: '❄️', minRank: 7, check: (t, ctx) => ctx.theme === 'arctic' },
+  { id: 'd_r7_theme_night', text: 'Gagnez une partie avec le thème Nuit', icon: '🌙', minRank: 7, check: (t, ctx) => ctx.theme === 'night' },
+  { id: 'd_r7_fog_no_sonar', text: 'Gagnez en Brouillard sans utiliser le Sonar', icon: '🧠', minRank: 7, check: (t, ctx) => ctx.fogOfWar === true && t.sonarUses === 0 },
+  { id: 'd_r7_teleport_clutch', text: 'Téléportez un navire qui n\'avait plus qu\'1 PV', icon: '⏳', minRank: 7, check: (t, ctx) => t.teleportWasClutch === true },
+  { id: 'd_r7_fantome_fog', text: 'Battez le Fantôme en mode Brouillard de Guerre', icon: '🕷️', minRank: 7, check: (t, ctx) => ctx.difficulty === 'fantome' && ctx.fogOfWar === true }
 ];
 function getDailyKey() { return new Date().toISOString().slice(0, 10); }
-function getDailyChallenges() { const d = new Date(); const start = new Date(d.getFullYear(), 0, 0); const doy = Math.floor((d - start) / 86400000); const n = DAILY_CHALLENGES.length; const i1 = doy % n; let i2 = (doy * 7 + 13) % n; if (i2 === i1) i2 = (i2 + 1) % n; return [DAILY_CHALLENGES[i1], DAILY_CHALLENGES[i2]]; }
+function getDailyChallenges() { 
+  const d = new Date(); 
+  const start = new Date(d.getFullYear(), 0, 0); 
+  const doy = Math.floor((d - start) / 86400000); 
+  const eligible = DAILY_CHALLENGES.filter(c => !c.minRank || isFeatureUnlocked(c.minRank));
+  const n = eligible.length; 
+  if (n === 0) return []; 
+  const i1 = doy % n; 
+  let i2 = (doy * 7 + 13) % n; 
+  if (i2 === i1) i2 = (i2 + 1) % n; 
+  return [eligible[i1], eligible[i2]]; 
+}
 function isDailyDone(id) { const d = loadData(); return !!(d.dailyChallenge && d.dailyChallenge.date === getDailyKey() && (d.dailyChallenge.done || []).includes(id)); }
 function dailyBothDoneToday() { const d = loadData(); return !!(d.dailyChallenge && d.dailyChallenge.date === getDailyKey() && (d.dailyChallenge.done || []).length >= 2); }
 function markDailyDone(id) {
@@ -531,16 +585,49 @@ function markDailyDone(id) {
   saveData(d);
 }
 const WEEKLY_CHALLENGES = [
+  // --- DÉFIS DE BASE (Tous Rangs) ---
   { id: 'w_flawless_amiral', text: 'Battre l\'Amiral sans perdre un seul navire', icon: '👑', check: (t, ctx, extra) => ctx.difficulty === 'amiral' && t.shipsLostByPlayer === 0 },
   { id: 'w_streak3', text: 'Enchaîner 3 victoires consécutives', icon: '🔥', check: (t, ctx, extra) => (extra.winStreak || 0) >= 3 },
   { id: 'w_weekly_score', text: 'Cumuler 30 000 points de score en une semaine', icon: '💰', check: (t, ctx, extra) => (extra.weeklyScoreSum || 0) >= 30000 },
   { id: 'w_speed_amiral', text: 'Battre l\'Amiral en moins de 20 tirs', icon: '⚡', check: (t, ctx, extra) => ctx.difficulty === 'amiral' && ctx.shots < 20 },
   { id: 'w_untouched_hard', text: 'Gagner contre le Stratège ou l\'Amiral sans être touché', icon: '✨', check: (t, ctx, extra) => (ctx.difficulty === 'stratege' || ctx.difficulty === 'amiral') && t.playerHitsReceived === 0 },
-  { id: 'w_all_diff', text: 'Battre les 4 difficultés dans la même semaine', icon: '🎖️', check: (t, ctx, extra) => (extra.weeklyDiffsBeaten || []).length >= 4 }
+  { id: 'w_all_diff', text: 'Battre les 4 difficultés dans la même semaine', icon: '🎖️', check: (t, ctx, extra) => (extra.weeklyDiffsBeaten || []).length >= 4 },
+
+  // --- NOUVEAUX DÉFIS SEMAINE (Rang 4) ---
+  { id: 'w_r4_all_oceans', text: 'Gagnez sur les 4 tailles d\'océan (6, 10, 13, 18) cette semaine', icon: '🌊', minRank: 4, check: (t, ctx, extra) => (extra.weeklyGridSizes || []).length >= 4 },
+  { id: 'w_r4_sink_5_leviathans', text: 'Coulez 5 Léviathans cette semaine', icon: '⚔️', minRank: 4, check: (t, ctx, extra) => (extra.weeklyLeviathansSunk || 0) >= 5 },
+  { id: 'w_r4_3_obstacles_wins', text: 'Gagnez 3 parties avec les obstacles activés cette semaine', icon: '💣', minRank: 4, check: (t, ctx, extra) => (extra.weeklyObstacleWins || 0) >= 3 },
+  { id: 'w_r4_3_wins_18', text: 'Remportez 3 victoires sur l\'océan 18x18 cette semaine', icon: '🗺️', minRank: 4, check: (t, ctx, extra) => (extra.weeklyWins18 || 0) >= 3 },
+
+  // --- NOUVEAUX DÉFIS SEMAINE (Rang 7) ---
+  { id: 'w_r7_3_fog_wins', text: 'Gagnez 3 parties en Brouillard de Guerre cette semaine', icon: '🌫️', minRank: 7, check: (t, ctx, extra) => (extra.weeklyFogWins || 0) >= 3 },
+  { id: 'w_r7_beat_fantome_2', text: 'Battez le Fantôme 2 fois cette semaine', icon: '👻', minRank: 7, check: (t, ctx, extra) => (extra.weeklyFantomeWins || 0) >= 2 },
+  { id: 'w_r7_all_themes', text: 'Gagnez avec les 3 thèmes spéciaux (Volcan, Arctique, Nuit) cette semaine', icon: '🌈', minRank: 7, check: (t, ctx, extra) => (extra.weeklyThemesWon || []).length >= 3 },
+  { id: 'w_r7_3_teleports', text: 'Utilisez la Téléportation avec succès 3 fois cette semaine', icon: '🚀', minRank: 7, check: (t, ctx, extra) => (extra.weeklyTeleportsUsed || 0) >= 3 }
 ];
 function getISOWeekKey(d) { const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); const dayNum = date.getUTCDay() || 7; date.setUTCDate(date.getUTCDate() + 4 - dayNum); const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1)); const weekNo = Math.ceil((((date - yearStart) / 86400000) + 1) / 7); return `${date.getUTCFullYear()}-W${weekNo}`; }
-function getWeeklyChallenge() { const key = getISOWeekKey(new Date()); const weekNum = parseInt(key.split('-W')[1], 10) || 0; return WEEKLY_CHALLENGES[weekNum % WEEKLY_CHALLENGES.length]; }
-function getWeeklyStats() { const key = getISOWeekKey(new Date()); const scores = getScores().filter(s => s.date && getISOWeekKey(new Date(s.date)) === key); const weeklyScoreSum = scores.reduce((a, s) => a + s.score, 0); const weeklyDiffsBeaten = [...new Set(scores.map(s => s.difficulty))]; return { weeklyScoreSum, weeklyDiffsBeaten }; }
+function getWeeklyChallenge() { 
+  const key = getISOWeekKey(new Date()); 
+  const weekNum = parseInt(key.split('-W')[1], 10) || 0; 
+  const eligible = WEEKLY_CHALLENGES.filter(c => !c.minRank || isFeatureUnlocked(c.minRank));
+  if (eligible.length === 0) return null; 
+  return eligible[weekNum % eligible.length]; 
+}
+function getWeeklyStats() { 
+  const key = getISOWeekKey(new Date()); 
+  const scores = getScores().filter(s => s.date && getISOWeekKey(new Date(s.date)) === key); 
+  const weeklyScoreSum = scores.reduce((a, s) => a + s.score, 0); 
+  const weeklyDiffsBeaten = [...new Set(scores.map(s => s.difficulty))];
+  const weeklyGridSizes = [...new Set(scores.map(s => s.gridSize))];
+  const weeklyLeviathansSunk = scores.reduce((a, s) => a + (s.leviathansSunk || 0), 0);
+  const weeklyObstacleWins = scores.filter(s => s.options && s.options.obstaclesEnabled).length;
+  const weeklyWins18 = scores.filter(s => s.gridSize === 18).length;
+  const weeklyFogWins = scores.filter(s => s.options && s.options.fogOfWar).length;
+  const weeklyFantomeWins = scores.filter(s => s.difficulty === 'fantome').length;
+  const weeklyThemesWon = [...new Set(scores.map(s => s.theme).filter(t => ['volcano', 'arctic', 'night'].includes(t)))];
+  const weeklyTeleportsUsed = scores.reduce((a, s) => a + (s.teleportsUsed || 0), 0);
+  return { weeklyScoreSum, weeklyDiffsBeaten, weeklyGridSizes, weeklyLeviathansSunk, weeklyObstacleWins, weeklyWins18, weeklyFogWins, weeklyFantomeWins, weeklyThemesWon, weeklyTeleportsUsed }; 
+}
 function isWeeklyDone() { const d = loadData(); return !!(d.weeklyChallenge && d.weeklyChallenge.week === getISOWeekKey(new Date()) && d.weeklyChallenge.done); }
 function markWeeklyDone() { const d = loadData(); d.weeklyChallenge = { week: getISOWeekKey(new Date()), done: true }; d.stats.weeklyCompletions = (d.stats.weeklyCompletions || 0) + 1; saveData(d); }
 function renderDailyChallenge() {
@@ -1632,9 +1719,10 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
         if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
         showToast('Tir dévié par contre-mesures !', 'success'); addLog('Tir dévié par contre-mesures.', 'miss', 'bot'); return; 
       }
-            if (cd.mine && !cd.mineTriggered) {
-        cd.mineTriggered = true; cd.miss = true;
-        if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); }
+                    if (cd.mine && !cd.mineTriggered) {
+              cd.mineTriggered = true; cd.miss = true;
+              if (owner === 'player') state.tracking.minesTriggered++; // <-- AJOUTEZ CETTE LIGNE
+              if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); }
         const gridId = owner === 'player' ? 'enemy-grid' : 'player-grid';
         const result = triggerMineExplosion(board, r, c, gridId);
         hits += result.hits; sunkShips = sunkShips.concat(result.sunkShips);
@@ -1649,10 +1737,23 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
         }
         return;
       }
-      if (cd.ship) {
-        if (cd.nearRock && !cd.halfHit) { cd.halfHit = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } return; }
-        cd.hit = true; hits++; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); } if (!cd.ship.sunk && isShipSunk(board, cd.ship)) { cd.ship.sunk = true; sunkShips.push(cd.ship); }
-      } else { cd.miss = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } }
+                 if (cd.ship) {
+              if (cd.nearRock && !cd.halfHit) { 
+                cd.halfHit = true; 
+                if (owner === 'bot') state.tracking.halfHitsReceived++; // <-- AJOUTEZ CETTE LIGNE
+                if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
+                return; 
+              }
+              cd.hit = true; hits++; 
+              if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
+              if (!cd.ship.sunk && isShipSunk(board, cd.ship)) { 
+                cd.ship.sunk = true; sunkShips.push(cd.ship); 
+                if (owner === 'player') state.tracking.sunkEnemyIds.push(cd.ship.id); // <-- AJOUTEZ CETTE LIGNE
+              }
+            } else { 
+        cd.miss = true; 
+        if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
+      }
     });
   }
   if (hits > 0) { playSound('hit'); if (sunkShips.length > 0) setTimeout(() => playSound('sunk'), 300); } else playSound('miss');
@@ -1706,17 +1807,25 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
             const finalUnlocked = getUnlockedAchievements(); if (finalUnlocked.length >= ACHIEVEMENTS.length - 1 && !finalUnlocked.includes('ach_all')) { if (unlockAchievement('ach_all')) state.newlyUnlocked.push('ach_all'); } 
             const score = calculateScore(playerWon); state.lastScore = score; 
             if (playerWon) {
-                            addScore({ 
-                score, difficulty: state.difficulty, date: new Date().toISOString(), 
-                shots: state.shots.player, hits: state.hits.player, 
+                                          addScore({ 
+                score, 
+                difficulty: state.difficulty, 
+                date: new Date().toISOString(), 
+                shots: state.shots.player, 
+                hits: state.hits.player, 
                 accuracy: state.shots.player > 0 ? Math.round((state.hits.player / state.shots.player) * 100) : 0, 
-                sunk: state.sunk.player, playerName: state.playerName || 'Anonyme', 
+                sunk: state.sunk.player, 
+                playerName: state.playerName || 'Anonyme', 
                 gridSize: GRID_SIZE, 
                 options: { 
                   randomEvents: state.gameOptions.randomEvents, 
                   chrono: state.gameOptions.chrono, 
-                  obstaclesEnabled: state.gameOptions.obstaclesEnabled 
-                } 
+                  obstaclesEnabled: state.gameOptions.obstaclesEnabled,
+                  fogOfWar: state.gameOptions.fogOfWar
+                },
+                theme: state.theme,
+                teleportsUsed: state.tracking.teleportUsed ? 1 : 0,
+                leviathansSunk: state.tracking.sunkEnemyIds.includes('leviathan') ? 1 : 0
               });
               const todayKey = getDailyKey(); const todayScores = getScores().filter(s => s.date && s.date.slice(0, 10) === todayKey); const bestToday = todayScores.length ? Math.max(...todayScores.map(s => s.score)) : score;
               const remainingAch = ACHIEVEMENTS.length - getUnlockedAchievements().length;
@@ -1737,7 +1846,18 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
               }
             }
 
-            const ctx = { shots: state.shots.player, acc: state.shots.player > 0 ? state.hits.player / state.shots.player : 0, difficulty: state.difficulty, paSpent: state.paSpent, paLeft: state.pa.player };
+                        const ctx = { 
+              shots: state.shots.player, 
+              acc: state.shots.player > 0 ? state.hits.player / state.shots.player : 0, 
+              difficulty: state.difficulty, 
+              paSpent: state.paSpent, 
+              paLeft: state.pa.player,
+              gridSize: GRID_SIZE,
+              obstaclesEnabled: state.gameOptions.obstaclesEnabled,
+              fogOfWar: state.gameOptions.fogOfWar,
+              theme: state.theme,
+              leviathanIntact: GRID_SIZE === 18 && state.ships.player.find(s => s.id === 'leviathan') && state.ships.player.find(s => s.id === 'leviathan').cells.every(c => !state.boards.player[c[0]][c[1]].hit)
+            };
             // ... (le reste du code reste identique)
 let completedNames = [];
             getDailyChallenges().forEach(ch => { if (!isDailyDone(ch.id) && ch.check(state.tracking, ctx)) { markDailyDone(ch.id); completedNames.push(ch.text); } });
