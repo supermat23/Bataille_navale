@@ -892,7 +892,7 @@ function renderScores() {
     return; 
   } 
   list.innerHTML = '<div class="score-row header"><div>#</div><div>Joueur / Difficulté</div><div>Score</div><div>Tirs</div><div>Précis.</div></div>'; 
-  [...scores].sort((a, b) => b.score - a.score).slice(0, 20).forEach((s, i) => { 
+  [...scores].sort((a, b) => b.score - a.score).forEach((s, i) => { 
     
     // Gestion des noms de difficulté pour les modes multijoueurs
     let diffName = s.difficulty || 'Inconnu';
@@ -2260,7 +2260,11 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
                    if (state.mode === '1p' || state.mode === 'online') { 
             const stats = getStats(); const gradeBeforeNum = getGrade(stats.careerScore || 0).cur.num; 
             if (playerWon) { 
-              updateStats({ gamesWon: stats.gamesWon + 1, winStreak: (stats.winStreak || 0) + 1 }); 
+              if (state.mode === 'online') {
+                updateStats({ gamesWon: stats.gamesWon + 1, winStreak: (stats.winStreak || 0) + 1, onlineGamesWon: (stats.onlineGamesWon || 0) + 1 });
+              } else {
+                updateStats({ gamesWon: stats.gamesWon + 1, winStreak: (stats.winStreak || 0) + 1 });
+              }
               let diffs = stats.difficultiesBeaten || []; 
               if (state.difficulty && !diffs.includes(state.difficulty)) diffs.push(state.difficulty); 
               updateStats({ difficultiesBeaten: diffs }); 
