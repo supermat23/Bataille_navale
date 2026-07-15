@@ -893,7 +893,28 @@ function renderScores() {
   } 
   list.innerHTML = '<div class="score-row header"><div>#</div><div>Joueur / Difficulté</div><div>Score</div><div>Tirs</div><div>Précis.</div></div>'; 
   [...scores].sort((a, b) => b.score - a.score).slice(0, 20).forEach((s, i) => { 
-    const diff = DIFFICULTIES.find(d => d.id === s.difficulty); 
+    
+    // Gestion des noms de difficulté pour les modes multijoueurs
+    let diffName = s.difficulty || 'Inconnu';
+    let diffColor = '#64748b'; // Gris par défaut
+
+    if (s.difficulty === 'Online') {
+      diffName = 'En Ligne';
+      diffColor = '#38bdf8'; // Cyan
+    } else if (s.difficulty === '2P Local') {
+      diffName = '2 Joueurs';
+      diffColor = '#f471b5'; // Rose
+    } else if (s.difficulty === 'kraken') {
+      diffName = 'Kraken';
+      diffColor = '#c084fc'; // Violet
+    } else {
+      const diff = DIFFICULTIES.find(d => d.id === s.difficulty); 
+      if (diff) { 
+        diffName = diff.name; 
+        diffColor = diff.color; 
+      }
+    }
+    
     const row = document.createElement('div'); 
     row.className = 'score-row'; 
     let optIcons = '';
@@ -903,7 +924,7 @@ function renderScores() {
       if (s.options.chrono) optIcons += `<span class="ml-1" title="Mode chrono">⏱️</span>`;
       if (s.options.randomEvents) optIcons += `<span class="ml-1" title="Événements aléatoires">⛈️</span>`;
     }
-    row.innerHTML = `<div class="font-bold text-amber-400">${i + 1}</div><div><div class="font-semibold text-white truncate">${s.playerName || 'Anonyme'}</div><div class="mt-1 flex items-center flex-nowrap gap-1"><span class="diff-badge" style="background:${diff.color}20;color:${diff.color};">${diff.name}</span>${optIcons}</div></div><div class="font-bold text-lg text-white">${s.score}</div><div class="text-slate-300">${s.shots}</div><div class="text-slate-300">${s.accuracy}%</div>`;
+    row.innerHTML = `<div class="font-bold text-amber-400">${i + 1}</div><div><div class="font-semibold text-white truncate">${s.playerName || 'Anonyme'}</div><div class="mt-1 flex items-center flex-nowrap gap-1"><span class="diff-badge" style="background:${diffColor}20;color:${diffColor};">${diffName}</span>${optIcons}</div></div><div class="font-bold text-lg text-white">${s.score}</div><div class="text-slate-300">${s.shots}</div><div class="text-slate-300">${s.accuracy}%</div>`;
     list.appendChild(row); 
   }); 
 }
