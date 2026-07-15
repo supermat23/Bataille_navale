@@ -206,26 +206,41 @@
     <a href="https://ko-fi.com/supermatv2" target="_blank" rel="noopener noreferrer" class="inline-block px-4 py-1 rounded-full border border-red-500/30 bg-red-500/10 text-red-400 text-xs font-bold tracking-widest uppercase hover:bg-red-500/20 transition-colors">♥️ Supporter</a>
     <button id="pwa-install-btn" class="hidden btn btn-secondary text-xs mx-auto items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Installer l'application</button>
   </div>
-  <h1 id="game-title" class="font-display text-4xl md:text-7xl title-pulse mb-3" style="color: var(--text); cursor: default;">BATAILLE <span style="color: var(--accent);">NAVALE</span></h1><p class="text-lg md:text-xl text-slate-400 font-light tracking-wider uppercase">Opération Tempête</p><div id="commander-name-display" class="mt-4 text-base font-semibold" style="color: var(--text);"></div><div id="rank-badge" class="mt-2"></div><div id="ach-counter-badge" class="mt-3 text-sm"></div><div id="best-today-badge" class="mt-3 text-sm"></div><div id="challenge-stats-badge" class="mt-2 text-sm"></div></div><div class="flex gap-2 justify-center mb-6 flex-wrap"><button class="tab-btn active" data-tab="play">Jouer</button><button class="tab-btn" data-tab="scores">Scores</button><button class="tab-btn" data-tab="achievements">Succès</button></div><div id="tab-play" class="tab-content"><div class="mb-6 flex justify-center gap-2 flex-wrap"><button class="btn btn-primary mode-btn active" data-mode="1p">Solo</button><button class="btn btn-secondary mode-btn" data-mode="2p">2P Local</button><button class="btn btn-secondary mode-btn" data-mode="online">2P En Ligne</button></div><div id="1p-setup"><div class="max-w-2xl mx-auto mb-3 bg-slate-900/40 border border-amber-500/15 rounded-xl p-3 backdrop-blur-sm" id="daily-challenge-panel"></div><div class="max-w-2xl mx-auto mb-6 bg-slate-900/40 border rounded-xl p-3 backdrop-blur-sm" style="border-color:var(--r-legend);opacity:0.95;" id="weekly-challenge-panel"></div><div class="mb-6"><h2 class="text-center text-sm font-bold tracking-widest uppercase text-slate-400 mb-3">Nom du commandant</h2><div class="max-w-xs mx-auto"><input type="text" id="player-name-input" class="name-input text-center" placeholder="Votre nom..." maxlength="20" value=""></div></div><div class="mb-6"><h2 class="text-center text-sm font-bold tracking-widest uppercase text-slate-400 mb-4">Choisissez votre adversaire</h2><div class="grid grid-cols-5 gap-2 sm:gap-3" id="difficulty-grid"></div></div></div><div id="2p-setup" class="hidden mb-6"><div class="grid grid-cols-2 gap-4 max-w-md mx-auto"><div><label class="block text-xs text-cyan-400 font-bold uppercase mb-2">Joueur 1</label><input type="text" id="p1-name-input" class="name-input text-center" placeholder="Nom..." maxlength="20" value="Amiral Cyan"></div><div><label class="block text-xs text-pink-400 font-bold uppercase mb-2">Joueur 2</label><input type="text" id="p2-name-input" class="name-input text-center" placeholder="Nom..." maxlength="20" value="Capitaine Magenta"></div></div></div><div id="online-setup" class="hidden mb-6"><div id="online-menu" class="max-w-md mx-auto text-center"><p class="text-slate-400 mb-4 text-sm">Affrontez un ami à distance via une connexion directe entre vos deux appareils.</p><div class="flex gap-3 justify-center"><button id="online-host-btn" class="btn btn-primary">Héberger une partie</button><button id="online-join-btn" class="btn btn-secondary">Rejoindre une partie</button></div></div><div id="online-host-view" class="hidden max-w-md mx-auto text-center bg-slate-900/40 border border-amber-500/15 rounded-xl p-6 backdrop-blur-sm"><h3 class="font-display text-xl text-amber-400 mb-4">En attente de l'adversaire...</h3><div class="online-spinner mb-4"></div><p class="text-slate-400 text-sm mb-2">Code de partie :</p><div class="font-display text-4xl text-white tracking-widest mb-4" id="online-code-display">----</div><p class="text-slate-500 text-xs">Communiquez ce code à votre adversaire.</p><button id="online-cancel-host-btn" class="btn btn-danger text-xs mt-4">Annuler</button></div><div id="online-join-view" class="hidden max-w-md mx-auto text-center bg-slate-900/40 border border-amber-500/15 rounded-xl p-6 backdrop-blur-sm"><h3 class="font-display text-xl text-amber-400 mb-4">Rejoindre une partie</h3><p class="text-slate-400 text-sm mb-2">Entrez le code de partie :</p><input type="text" id="online-code-input" class="name-input text-center text-2xl tracking-widest font-bold uppercase" placeholder="XXXX" maxlength="4"><button id="online-connect-btn" class="btn btn-primary w-full mt-4">Se connecter</button><div id="online-connecting" class="hidden"><div class="online-spinner mt-4"></div><p class="text-slate-400 text-sm mt-2">Connexion en cours...</p></div><button id="online-cancel-join-btn" class="btn btn-danger text-xs mt-4">Annuler</button></div></div><div class="mb-6"><h2 class="text-center text-sm font-bold tracking-widest uppercase text-slate-400 mb-3">Arsenal — armes activées</h2><div class="grid grid-cols-4 gap-2" id="weapon-toggle-grid"></div></div><div class="mb-6"><div class="flex items-center justify-between mb-3 max-w-3xl mx-auto"><h2 class="text-sm font-bold tracking-widest uppercase text-slate-400">Capacités des navires</h2><label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="abilities-toggle" checked class="w-4 h-4 accent-amber-500"><span class="text-sm text-slate-300">Activées</span></label></div><div class="grid grid-cols-5 gap-2 max-w-3xl mx-auto" id="ability-info-grid"></div></div><div class="mb-6"><h2 class="text-center text-sm font-bold tracking-widest uppercase text-slate-400 mb-3">Options de partie</h2><div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto" id="game-options-grid"></div></div><div class="mb-6">
+  <h1 id="game-title" class="font-display text-4xl md:text-7xl title-pulse mb-3" style="color: var(--text); cursor: default;">BATAILLE <span style="color: var(--accent);">NAVALE</span></h1><p class="text-lg md:text-xl text-slate-400 font-light tracking-wider uppercase">Opération Tempête</p><div id="commander-name-display" class="mt-4 text-base font-semibold" style="color: var(--text);"></div><div id="rank-badge" class="mt-2"></div><div id="ach-counter-badge" class="mt-3 text-sm"></div><div id="best-today-badge" class="mt-3 text-sm"></div><div id="challenge-stats-badge" class="mt-2 text-sm"></div></div><div class="flex gap-2 justify-center mb-6 flex-wrap"><button class="tab-btn active" data-tab="play">Jouer</button><button class="tab-btn" data-tab="scores">Scores</button><button class="tab-btn" data-tab="campaign-scores">Campagne</button><button class="tab-btn" data-tab="achievements">Succès</button></div><div id="tab-play" class="tab-content"><div class="mb-6 flex justify-center gap-2 flex-wrap"><button class="btn btn-primary mode-btn active" data-mode="1p">Solo</button><button class="btn btn-secondary mode-btn" data-mode="2p">2P Local</button><button class="btn btn-secondary mode-btn" data-mode="online">2P En Ligne</button></div><div id="1p-setup"><div class="max-w-2xl mx-auto mb-3 bg-slate-900/40 border border-amber-500/15 rounded-xl p-3 backdrop-blur-sm" id="daily-challenge-panel"></div><div class="max-w-2xl mx-auto mb-6 bg-slate-900/40 border rounded-xl p-3 backdrop-blur-sm" style="border-color:var(--r-legend);opacity:0.95;" id="weekly-challenge-panel"></div><div class="mb-6"><h2 class="text-center text-sm font-bold tracking-widest uppercase text-slate-400 mb-3">Nom du commandant</h2><div class="max-w-xs mx-auto"><input type="text" id="player-name-input" class="name-input text-center" placeholder="Votre nom..." maxlength="20" value=""></div></div><div class="mb-6"><h2 class="text-center text-sm font-bold tracking-widest uppercase text-slate-400 mb-4">Choisissez votre adversaire</h2><div class="grid grid-cols-5 gap-2 sm:gap-3" id="difficulty-grid"></div></div></div><div id="2p-setup" class="hidden mb-6"><div class="grid grid-cols-2 gap-4 max-w-md mx-auto"><div><label class="block text-xs text-cyan-400 font-bold uppercase mb-2">Joueur 1</label><input type="text" id="p1-name-input" class="name-input text-center" placeholder="Nom..." maxlength="20" value="Amiral Cyan"></div><div><label class="block text-xs text-pink-400 font-bold uppercase mb-2">Joueur 2</label><input type="text" id="p2-name-input" class="name-input text-center" placeholder="Nom..." maxlength="20" value="Capitaine Magenta"></div></div></div><div id="online-setup" class="hidden mb-6"><div id="online-menu" class="max-w-md mx-auto text-center"><p class="text-slate-400 mb-4 text-sm">Affrontez un ami à distance via une connexion directe entre vos deux appareils.</p><div class="flex gap-3 justify-center"><button id="online-host-btn" class="btn btn-primary">Héberger une partie</button><button id="online-join-btn" class="btn btn-secondary">Rejoindre une partie</button></div></div><div id="online-host-view" class="hidden max-w-md mx-auto text-center bg-slate-900/40 border border-amber-500/15 rounded-xl p-6 backdrop-blur-sm"><h3 class="font-display text-xl text-amber-400 mb-4">En attente de l'adversaire...</h3><div class="online-spinner mb-4"></div><p class="text-slate-400 text-sm mb-2">Code de partie :</p><div class="font-display text-4xl text-white tracking-widest mb-4" id="online-code-display">----</div><p class="text-slate-500 text-xs">Communiquez ce code à votre adversaire.</p><button id="online-cancel-host-btn" class="btn btn-danger text-xs mt-4">Annuler</button></div><div id="online-join-view" class="hidden max-w-md mx-auto text-center bg-slate-900/40 border border-amber-500/15 rounded-xl p-6 backdrop-blur-sm"><h3 class="font-display text-xl text-amber-400 mb-4">Rejoindre une partie</h3><p class="text-slate-400 text-sm mb-2">Entrez le code de partie :</p><input type="text" id="online-code-input" class="name-input text-center text-2xl tracking-widest font-bold uppercase" placeholder="XXXX" maxlength="4"><button id="online-connect-btn" class="btn btn-primary w-full mt-4">Se connecter</button><div id="online-connecting" class="hidden"><div class="online-spinner mt-4"></div><p class="text-slate-400 text-sm mt-2">Connexion en cours...</p></div><button id="online-cancel-join-btn" class="btn btn-danger text-xs mt-4">Annuler</button></div></div><div class="mb-6"><h2 class="text-center text-sm font-bold tracking-widest uppercase text-slate-400 mb-3">Arsenal — armes activées</h2><div class="grid grid-cols-4 gap-2" id="weapon-toggle-grid"></div></div><div class="mb-6"><div class="flex items-center justify-between mb-3 max-w-3xl mx-auto"><h2 class="text-sm font-bold tracking-widest uppercase text-slate-400">Capacités des navires</h2><label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="abilities-toggle" checked class="w-4 h-4 accent-amber-500"><span class="text-sm text-slate-300">Activées</span></label></div><div class="grid grid-cols-5 gap-2 max-w-3xl mx-auto" id="ability-info-grid"></div></div><div class="mb-6"><h2 class="text-center text-sm font-bold tracking-widest uppercase text-slate-400 mb-3">Options de partie</h2><div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto" id="game-options-grid"></div></div><div class="mb-6">
   <div class="flex items-center justify-between mb-3 max-w-3xl mx-auto">
     <h2 class="text-sm font-bold tracking-widest uppercase text-slate-400">Thèmes de Carte <span id="theme-lock-msg" class="text-[10px] text-amber-400 ml-2 hidden">Débloqué au Rang 7</span></h2>
   </div>
   <div class="grid grid-cols-4 gap-2 max-w-2xl mx-auto" id="theme-grid"></div>
-</div><div class="text-center" id="start-game-btn-container"><button id="start-btn" class="btn btn-primary text-lg py-4 px-8"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 3l14 9-14 9V3z"/></svg>Lancer la mission</button></div></div><div id="tab-scores" class="tab-content hidden"><div class="bg-slate-900/40 border border-amber-500/15 rounded-xl p-4 md:p-6 backdrop-blur-sm"><div class="flex items-center justify-between mb-4 flex-wrap gap-2">
-  <h2 class="font-display text-2xl text-amber-400">Tableau des scores</h2>
-  <div class="flex gap-2 flex-wrap">
-    <button id="export-data-btn" class="btn btn-secondary text-xs">Exporter</button>
-    <button id="import-data-btn" class="btn btn-secondary text-xs">Importer</button>
-    <input type="file" id="import-file-input" accept=".json" style="display:none;">
-    <button id="clear-scores-btn" class="btn btn-danger text-xs">Effacer</button>
+</div><div class="text-center" id="start-game-btn-container">
+  <button id="start-btn" class="btn btn-primary text-lg py-4 px-8"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 3l14 9-14 9V3z"/></svg>Lancer la mission</button>
+  <button id="start-campaign-btn" class="hidden btn btn-danger text-sm mt-4 py-3 px-6">🦑 Lancer la Campagne (Rang 10)</button>
+</div></div><div id="tab-scores" class="tab-content hidden">
+  <div class="bg-slate-900/40 border border-amber-500/15 rounded-xl p-4 md:p-6 backdrop-blur-sm">
+    <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+      <h2 class="font-display text-2xl text-amber-400">Tableau des scores</h2>
+      <div class="flex gap-2 flex-wrap">
+        <button id="export-data-btn" class="btn btn-secondary text-xs">Exporter</button>
+        <button id="import-data-btn" class="btn btn-secondary text-xs">Importer</button>
+        <input type="file" id="import-file-input" accept=".json" style="display:none;">
+        <button id="clear-scores-btn" class="btn btn-danger text-xs">Effacer</button>
+      </div>
+    </div>
+    <div id="scores-list"></div>
   </div>
-</div><div id="scores-list"></div></div></div><div id="tab-achievements" class="tab-content hidden"><div class="bg-slate-900/40 border border-amber-500/15 rounded-xl p-4 md:p-6 backdrop-blur-sm"><div class="flex items-center justify-between mb-4 flex-wrap gap-2"><h2 class="font-display text-2xl text-amber-400">Succès</h2><div class="text-sm text-slate-400"><span id="ach-progress" class="text-amber-400 font-bold">0</span> / <span id="ach-total">220</span> débloqués</div></div><div class="w-full h-2 bg-slate-800 rounded-full mb-4 overflow-hidden"><div id="ach-bar" class="h-full bg-gradient-to-r from-cyan-500 via-amber-500 to-purple-500 transition-all duration-500" style="width: 0%"></div></div><div class="flex gap-2 mb-4 flex-wrap"><button class="ach-filter tab-btn active" data-filter="all">Tous</button><button class="ach-filter tab-btn" data-filter="common">Communs</button><button class="ach-filter tab-btn" data-filter="rare">Rares</button><button class="ach-filter tab-btn" data-filter="epic">Épiques</button><button class="ach-filter tab-btn" data-filter="legend">Légendaires</button><button class="ach-filter tab-btn" data-filter="ultimate">Ultimes</button></div><div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="achievements-grid"></div></div></div></div></div>
+</div>
+
+<div id="tab-campaign-scores" class="tab-content hidden">
+  <div class="bg-slate-900/40 border border-amber-500/15 rounded-xl p-4 md:p-6 backdrop-blur-sm">
+    <h2 class="font-display text-2xl text-amber-400 mb-4">Scores de Campagne</h2>
+    <div id="campaign-scores-list"></div>
+  </div>
+</div><div id="tab-achievements" class="tab-content hidden"><div class="bg-slate-900/40 border border-amber-500/15 rounded-xl p-4 md:p-6 backdrop-blur-sm"><div class="flex items-center justify-between mb-4 flex-wrap gap-2"><h2 class="font-display text-2xl text-amber-400">Succès</h2><div class="text-sm text-slate-400"><span id="ach-progress" class="text-amber-400 font-bold">0</span> / <span id="ach-total">220</span> débloqués</div></div><div class="w-full h-2 bg-slate-800 rounded-full mb-4 overflow-hidden"><div id="ach-bar" class="h-full bg-gradient-to-r from-cyan-500 via-amber-500 to-purple-500 transition-all duration-500" style="width: 0%"></div></div><div class="flex gap-2 mb-4 flex-wrap"><button class="ach-filter tab-btn active" data-filter="all">Tous</button><button class="ach-filter tab-btn" data-filter="common">Communs</button><button class="ach-filter tab-btn" data-filter="rare">Rares</button><button class="ach-filter tab-btn" data-filter="epic">Épiques</button><button class="ach-filter tab-btn" data-filter="legend">Légendaires</button><button class="ach-filter tab-btn" data-filter="ultimate">Ultimes</button></div><div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="achievements-grid"></div></div></div></div></div>
 <div id="grades-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background: rgba(0,0,0,0.75);"><div class="bg-slate-900 border rounded-xl p-5 max-w-md w-full max-h-[80vh] overflow-y-auto" style="border-color: var(--border-strong);"><div class="flex items-center justify-between mb-4"><h3 class="font-display text-xl" style="color: var(--accent);">Grades de la flotte</h3><button id="grades-modal-close" class="text-slate-400 text-2xl leading-none px-2">&times;</button></div><div id="grades-modal-list" class="space-y-2"></div></div></div>
 <div id="promotion-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background: rgba(0,0,0,0.8);"><div class="bg-slate-900 border-2 rounded-2xl flex flex-col items-center justify-center text-center p-6" style="border-color: var(--accent); box-shadow: 0 0 40px var(--accent-glow); width: 300px; height: 300px;"><div class="text-xs uppercase tracking-widest font-bold mb-2" style="color: var(--accent);">🎉 Promotion !</div><p class="text-white font-semibold text-sm mb-4 leading-snug">Félicitations, commandant !<br>Vous avez été promu.</p><div class="text-6xl mb-2" id="promotion-icon"></div><div class="font-display text-xl font-bold" id="promotion-name" style="color: var(--accent);"></div><div class="text-xs text-slate-400 mt-1" id="promotion-grade-num"></div><button id="promotion-close-btn" class="btn btn-primary text-xs mt-5 py-2 px-5">Continuer</button></div></div>
 <div id="obstacles-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background: rgba(0,0,0,0.75);"><div class="bg-slate-900 border rounded-xl p-5 max-w-md w-full max-h-[80vh] overflow-y-auto text-left" style="border-color: var(--border-strong);"><div class="flex items-center justify-between mb-4"><h3 class="font-display text-xl" style="color: var(--accent);">🪨 Rochers &amp; Mines</h3><button id="obstacles-modal-close" class="text-slate-400 text-2xl leading-none px-2">&times;</button></div><div class="space-y-3 text-sm text-slate-300 leading-relaxed"><p><strong class="text-white">🪨 Rocher :</strong> un tir dessus ne fait rien à part le révéler (case grisée distincte). Il consomme quand même votre tir.</p><p><strong class="text-white">💣 Mine :</strong> un tir dessus déclenche une explosion sur les 8 cases autour — chacune est testée comme un tir normal.</p><p><strong class="text-white">🛡️ Case navire près d'un rocher :</strong> si un navire occupe une case adjacente à un rocher (une des 8 cases autour), le premier tir ne fait que la moitié des dégâts — il faut toucher cette case 2 fois pour la couler complètement.</p><p><strong class="text-white">📡 Sonar :</strong> détecte aussi les rochers et mines dans sa zone, mais le nombre affiché ne précise pas si ce sont des navires ou des obstacles.</p><p><strong class="text-white">🎯 Tir à plusieurs cases :</strong> s'il touche un rocher en chemin, il s'arrête net (les cases plus loin ne sont pas résolues). Si la case visée est directement un rocher, le tir entier est annulé.</p><p class="text-slate-400 text-xs pt-2 border-t border-slate-800">Nombre d'obstacles selon la taille de l'océan :<br>6×6 → 4 rochers, 2 mines · 10×10 → 8 rochers, 4 mines · 13×13 → 16 rochers, 8 mines · 18×18 → 20 rochers, 12 mines.</p></div></div></div>
-<div id="placement-screen" class="screen min-h-screen p-4 md:p-8 hidden"><div class="max-w-6xl mx-auto"><div class="flex flex-wrap items-center justify-between gap-4 mb-6"><div><h2 class="font-display text-2xl md:text-3xl text-white">Déploiement de la flotte</h2><p class="text-slate-400 text-sm">Cliquez un navire puis sur la grille. <span class="text-amber-400 font-bold">R</span> ou bouton pour pivoter.</p></div><div class="flex gap-2 flex-wrap"><button id="rotate-btn" class="btn btn-secondary text-xs md:text-sm"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 4v5h5"/></svg>Pivoter</button><button id="random-place-btn" class="btn btn-secondary text-xs md:text-sm">Aléatoire</button><button id="clear-btn" class="btn btn-danger text-xs md:text-sm">Effacer</button></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400 mb-3">Navires à déployer</h3><div id="ships-list"></div><button id="confirm-placement-btn" class="btn btn-primary w-full mt-6 py-4 justify-center" disabled><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Confirmer le déploiement</button></div><div class="flex flex-col items-center"><div class="text-sm font-bold tracking-widest uppercase text-amber-400 mb-3 self-start">Votre grille</div><div id="placement-grid" class="grid-board"></div></div></div></div></div>
+<div id="placement-screen" class="screen min-h-screen p-4 md:p-8 hidden"><div class="max-w-6xl mx-auto"><div class="flex flex-wrap items-center justify-between gap-4 mb-6"><div><h2 class="font-display text-2xl md:text-3xl text-white">Déploiement de la flotte</h2><p class="text-slate-400 text-sm">Clic droit ou appui long pour pivoter votre navire.</p></div><div class="flex gap-2 flex-wrap"><button id="rotate-btn" class="btn btn-secondary text-xs md:text-sm"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 4v5h5"/></svg>Pivoter</button><button id="random-place-btn" class="btn btn-secondary text-xs md:text-sm">Aléatoire</button><button id="clear-btn" class="btn btn-danger text-xs md:text-sm">Effacer</button></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400 mb-3">Navires à déployer</h3><div id="ships-list"></div><button id="confirm-placement-btn" class="btn btn-primary w-full mt-6 py-4 justify-center" disabled><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Confirmer le déploiement</button></div><div class="flex flex-col items-center"><div class="text-sm font-bold tracking-widest uppercase text-amber-400 mb-3 self-start">Votre grille</div><div id="placement-grid" class="grid-board"></div></div></div></div></div>
 
-<div id="combat-screen" class="screen min-h-screen p-2 md:p-8 hidden"><div class="max-w-7xl mx-auto"><div class="flex flex-wrap items-center justify-between gap-3 mb-4"><div><h2 class="font-display text-xl md:text-3xl text-white">Engagement</h2><p class="text-slate-400 text-xs md:text-sm" id="combat-subtitle">À vous de jouer, commandant.</p></div><div class="flex items-center gap-2 flex-wrap"><div class="pa-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="color: var(--accent);"><path d="M13 2L3 14h7v8l10-12h-7V2z"/></svg><span class="text-sm">PA :</span><span class="text-lg font-bold text-amber-400" id="player-pa">3</span></div><div class="pa-badge hidden" id="chrono-badge"><span class="text-sm">⏱</span><span class="text-lg font-bold text-white" id="chrono-display">20</span></div><button id="orientation-combat-btn" class="btn btn-secondary text-xs" title="Changer l'orientation des tirs spéciaux"><span id="orient-display">↔ H</span></button><button id="surrender-btn" class="btn btn-danger text-xs">Abandonner</button></div></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-4"><div class="lg:col-span-8"><div class="flex flex-col items-center"><div class="flex items-center justify-between w-full max-w-xl mb-2"><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400">Grille ennemie</h3><span class="text-xs text-slate-400" id="enemy-ships-info">5 navires</span></div><div id="enemy-grid" class="grid-board"></div></div><div class="mt-4"><div class="flex items-center justify-between mb-2"><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400">Arsenal</h3></div><div id="weapons-list" class="weapons-grid"></div>
+<div id="combat-screen" class="screen min-h-screen p-2 md:p-8 hidden"><div class="max-w-7xl mx-auto"><div class="flex flex-wrap items-center justify-between gap-3 mb-4"><div><h2 class="font-display text-xl md:text-3xl text-white">Engagement</h2><p class="text-slate-400 text-xs md:text-sm" id="combat-subtitle">À vous de jouer, commandant.</p><div id="campaign-zone-info" class="flex gap-1 flex-wrap mt-1"></div></div><div class="pa-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="color: var(--accent);"><path d="M13 2L3 14h7v8l10-12h-7V2z"/></svg><span class="text-sm">PA :</span><span class="text-lg font-bold text-amber-400" id="player-pa">3</span></div><div class="pa-badge hidden" id="chrono-badge"><span class="text-sm">⏱</span><span class="text-lg font-bold text-white" id="chrono-display">20</span></div><button id="orientation-combat-btn" class="btn btn-secondary text-xs" title="Changer l'orientation des tirs spéciaux"><span id="orient-display">↔ H</span></button><button id="surrender-btn" class="btn btn-danger text-xs">Abandonner</button></div></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-4"><div class="lg:col-span-8"><div class="flex flex-col items-center"><div class="flex items-center justify-between w-full max-w-xl mb-2"><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400">Grille ennemie</h3><span class="text-xs text-slate-400" id="enemy-ships-info">5 navires</span></div><div id="enemy-grid" class="grid-board"></div></div><div class="mt-4"><div class="flex items-center justify-between mb-2"><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400">Arsenal</h3></div><div id="weapons-list" class="weapons-grid"></div>
 <div id="tactical-actions" class="mt-2"></div><div class="mt-4"><div class="flex items-center justify-between mb-2"><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400">Capacités</h3></div><div id="abilities-list" class="grid grid-cols-5 gap-1"></div></div></div></div><div class="lg:col-span-4 space-y-4"><div class="flex flex-col items-center"><div class="flex items-center justify-between w-full mb-2"><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400">Votre flotte</h3><span class="text-xs text-slate-400" id="player-ships-info">5 navires</span></div><div id="player-grid" class="grid-board" style="max-width: 100%;"></div></div><div class="grid grid-cols-3 gap-2"><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Tirs</div><div class="text-xl font-bold text-white" id="stat-shots">0</div></div><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Touchés</div><div class="text-xl font-bold" style="color: var(--hit);" id="stat-hits">0</div></div><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Précis.</div><div class="text-xl font-bold text-amber-400" id="stat-acc">—</div></div></div><div><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400 mb-2">Journal</h3><div id="log-container" class="space-y-1 max-h-48 overflow-y-auto pr-1"></div></div></div></div></div></div>
 
 <div id="combat-screen-2p" class="screen min-h-screen p-2 md:p-8 hidden"><div class="max-w-xl mx-auto"><div class="flex items-center justify-between gap-3 mb-4"><div><h2 class="font-display text-xl md:text-2xl" id="p2p-title" style="color: var(--accent);">Joueur 1</h2><p class="text-slate-400 text-xs md:text-sm" id="p2p-subtitle">Grille de tir</p></div><div class="flex items-center gap-2 flex-wrap"><div class="pa-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="color: var(--accent);"><path d="M13 2L3 14h7v8l10-12h-7V2z"/></svg><span class="text-sm">PA :</span><span class="text-lg font-bold" id="p2p-pa" style="color: var(--accent);">3</span></div><button id="p2p-peek-btn" class="btn btn-secondary text-xs">Vision Flotte</button></div></div><div id="p2p-grid-container" class="mb-4"></div><div class="grid grid-cols-2 gap-4 mt-4"><div><h3 class="text-sm font-bold tracking-widest uppercase mb-2" style="color: var(--accent);">Arsenal</h3><div id="p2p-weapons-list" class="weapons-grid"></div>
@@ -311,6 +326,7 @@ const state = {
   isPlayerTurn: true, isAnimating: false,
   abilitiesUsed: {}, abilityCooldowns: {}, activeAbility: null, counterMeasure: false,
   tracking: resetTracking(),
+  campaign: { active: false, zone: 1, buffs: [] },
   lastScore: 0, newlyUnlocked: [], turnCount: 0, achFilter: 'all',
   paGained: 0, paSpent: 0,
   activePlayer: 'p1', placementPhase: 'p1', peeking: false,
@@ -346,8 +362,46 @@ function scatterObstacles(board) {
 function createBotMemory() { return { mode: 'hunt', targets: [], currentDirection: null, lastShot: null }; }
 function resetTracking() { return { consecutiveHits: 0, maxConsecutiveHits: 0, firstShotHit: null, weaponsUsed: ['standard'], sonarUses: 0, shipAbilitiesUsed: [], shipsLostByPlayer: 0, playerHitsReceived: 0, maxShipsSunkInOneTurn: 0, specialKill: false, shipsHit: new Set(), carrierHits: 0, firstShipSunkId: null, lastShipSunkId: null, usedSpecialWeapon: false, usedAbility: false, maxMultiHit: 0, sonarMaxShips: 0, eventTypesTriggered: [], chronoTimeoutOccurred: false, teleportUsed: false, teleportWasClutch: false, teleportedShipId: null, botShieldUsed: false, minesTriggered: 0, sunkEnemyIds: [], halfHitsReceived: 0 }; }
 const STORAGE_KEY = 'bataille_navale_v23';
-function loadData() { try { const d = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); return { scores: d.scores || [], achievements: d.achievements || [], stats: d.stats || { gamesPlayed: 0, gamesWon: 0, totalShots: 0, onlineGamesWon: 0, local2pGamesWon: 0, difficultiesBeaten: [], careerScore: 0 }, lastName: d.lastName || '', settings: Object.assign({ randomEvents: false, chrono: false, chronoDuration: 20, gridSize: 10, obstaclesEnabled: false, fogOfWar: false }, d.settings || {}), dailyChallenge: d.dailyChallenge || null, weeklyChallenge: d.weeklyChallenge || null, dailyStreak: d.dailyStreak || null, preferences: d.preferences || { difficulty: 'tactique', enabledWeapons: { standard: true, line: true, cross: true, diagonal: true, sonar: true }, abilitiesEnabled: true } }; } catch { return { scores: [], achievements: [], stats: { gamesPlayed: 0, gamesWon: 0, totalShots: 0, onlineGamesWon: 0, local2pGamesWon: 0, difficultiesBeaten: [], careerScore: 0 }, lastName: '', settings: { randomEvents: false, chrono: false, chronoDuration: 20, gridSize: 10, obstaclesEnabled: false, fogOfWar: false }, dailyChallenge: null, weeklyChallenge: null, dailyStreak: null, preferences: { difficulty: 'tactique', enabledWeapons: { standard: true, line: true, cross: true, diagonal: true, sonar: true }, abilitiesEnabled: true } }; } }
-function saveData(data) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {} }
+function loadData() { 
+  try { 
+    const d = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); 
+    return { 
+      scores: d.scores || [], 
+      campaignScores: d.campaignScores || [], // <-- LIGNE AJOUTÉE POUR LES SCORES DE CAMPAGNE
+      achievements: d.achievements || [], 
+      stats: d.stats || { 
+        gamesPlayed: 0, gamesWon: 0, totalShots: 0, onlineGamesWon: 0, 
+        local2pGamesWon: 0, difficultiesBeaten: [], careerScore: 0,
+        dailyCompletions: 0, weeklyCompletions: 0, dailyCompletedIds: [], 
+        themesWon: [], eventsSeenIds: [] // <-- LIGNE AJOUTÉE POUR LES THÈMES ET ÉVÉNEMENTS
+      }, 
+      lastName: d.lastName || '', 
+      settings: Object.assign({ randomEvents: false, chrono: false, chronoDuration: 20, gridSize: 10, obstaclesEnabled: false, fogOfWar: false }, d.settings || {}), 
+      dailyChallenge: d.dailyChallenge || null, 
+      weeklyChallenge: d.weeklyChallenge || null, 
+      dailyStreak: d.dailyStreak || null, 
+      preferences: d.preferences || { difficulty: 'tactique', enabledWeapons: { standard: true, line: true, cross: true, diagonal: true, sonar: true }, abilitiesEnabled: true, theme: 'default' } 
+    }; 
+  } catch { 
+    return { 
+      scores: [], 
+      campaignScores: [], 
+      achievements: [], 
+      stats: { 
+        gamesPlayed: 0, gamesWon: 0, totalShots: 0, onlineGamesWon: 0, 
+        local2pGamesWon: 0, difficultiesBeaten: [], careerScore: 0,
+        dailyCompletions: 0, weeklyCompletions: 0, dailyCompletedIds: [], 
+        themesWon: [], eventsSeenIds: []
+      }, 
+      lastName: '', 
+      settings: { randomEvents: false, chrono: false, chronoDuration: 20, gridSize: 10, obstaclesEnabled: false, fogOfWar: false }, 
+      dailyChallenge: null, 
+      weeklyChallenge: null, 
+      dailyStreak: null, 
+      preferences: { difficulty: 'tactique', enabledWeapons: { standard: true, line: true, cross: true, diagonal: true, sonar: true }, abilitiesEnabled: true, theme: 'default' } 
+    }; 
+  } 
+}function saveData(data) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {} }
 function addScore(entry) { 
   const d = loadData(); 
   d.scores.unshift(entry); 
@@ -367,9 +421,53 @@ function getStats() { return loadData().stats; }
 function updateStats(updates) { const d = loadData(); d.stats = { ...d.stats, ...updates }; saveData(d); }
 
 function inBounds(r, c) { return r >= 0 && r < GRID_SIZE && c >= 0 && c < GRID_SIZE; }
-function canPlaceShip(board, row, col, shipDef, orientation) { const shape = getShipShape(shipDef, orientation); for (const [dr, dc] of shape) { const r = row + dr, c = col + dc; if (!inBounds(r, c) || board[r][c].ship) return false; } return true; }
-function placeShip(board, ship, row, col, orientation) { const shape = getShipShape(ship, orientation); const cells = shape.map(([dr, dc]) => [row + dr, col + dc]); const shipObj = { ...ship, cells, orientation, row, col, sunk: false }; for (const [r, c] of cells) board[r][c].ship = shipObj; return shipObj; }
-function randomPlacement(board) { for (let r = 0; r < GRID_SIZE; r++) for (let c = 0; c < GRID_SIZE; c++) board[r][c].ship = null; const placed = []; for (const shipDef of SHIPS) { let done = false, attempts = 0; while (!done && attempts < 300) { attempts++; const o = Math.random() < 0.5 ? 'h' : 'v'; const r = Math.floor(Math.random() * GRID_SIZE), c = Math.floor(Math.random() * GRID_SIZE); if (canPlaceShip(board, r, c, shipDef, o)) { placed.push(placeShip(board, shipDef, r, c, o)); done = true; } } if (!done) for (let r = 0; r < GRID_SIZE && !done; r++) for (let c = 0; c < GRID_SIZE && !done; c++) for (const o of ['h', 'v']) if (canPlaceShip(board, r, c, shipDef, o)) { placed.push(placeShip(board, shipDef, r, c, o)); done = true; } } return placed; }
+function canPlaceShip(board, row, col, shipDef, orientation) { 
+  const shape = getShipShape(shipDef, orientation); 
+  for (const [dr, dc] of shape) { 
+    const r = row + dr, c = col + dc; 
+    // On ajoute la vérification pour les mines !
+    if (!inBounds(r, c) || board[r][c].ship || board[r][c].rock || board[r][c].mine) return false; 
+  } 
+  return true; 
+}
+function placeShip(board, ship, row, col, orientation) { 
+  const shape = getShipShape(ship, orientation); 
+  const cells = shape.map(([dr, dc]) => [row + dr, col + dc]); 
+  const shipObj = { ...ship, cells, orientation, row, col, sunk: false }; 
+  for (const [r, c] of cells) {
+    board[r][c].ship = shipObj; 
+    
+    // On vérifie les rochers autour pour appliquer la protection (halfHit)
+    for (let dr = -1; dr <= 1; dr++) {
+      for (let dc = -1; dc <= 1; dc++) {
+        if (dr === 0 && dc === 0) continue;
+        const nr = r + dr, nc = c + dc;
+        if (inBounds(nr, nc) && board[nr][nc].rock) {
+          board[r][c].nearRock = true;
+        }
+      }
+    }
+  } 
+  return shipObj; 
+}function randomPlacement(board) { 
+  for (let r = 0; r < GRID_SIZE; r++) for (let c = 0; c < GRID_SIZE; c++) board[r][c].ship = null; 
+  const placed = []; 
+  const fleet = SHIPS; // <-- ICI : On utilise SHIPS au lieu de getShipsForSize(GRID_SIZE)
+  for (const shipDef of fleet) { 
+    let done = false, attempts = 0; 
+    while (!done && attempts < 300) { 
+      attempts++; 
+      const o = Math.random() < 0.5 ? 'h' : 'v'; 
+      const r = Math.floor(Math.random() * GRID_SIZE), c = Math.floor(Math.random() * GRID_SIZE); 
+      if (canPlaceShip(board, r, c, shipDef, o)) { 
+        placed.push(placeShip(board, shipDef, r, c, o)); 
+        done = true; 
+      } 
+    } 
+    if (!done) for (let r = 0; r < GRID_SIZE && !done; r++) for (let c = 0; c < GRID_SIZE && !done; c++) for (const o of ['h', 'v']) if (canPlaceShip(board, r, c, shipDef, o)) { placed.push(placeShip(board, shipDef, r, c, o)); done = true; } 
+  } 
+  return placed; 
+}
 function hasAdjacentShip() { return false; }
 function getCoord(cell) { return `${String.fromCharCode(65 + cell[1])}${cell[0] + 1}`; }
 function isShipSunk(board, ship) { return ship.cells.every(([r, c]) => board[r][c].hit); }
@@ -414,11 +512,13 @@ function renderMenu() {
     grid.appendChild(card); 
   });
   // Les lignes suivantes avaient été supprimées par erreur :
-  renderWeaponToggles(); renderAbilityInfo(); renderAchievements(); renderScores(); renderCommanderName(); renderRank(); renderAchCounter(); renderBestToday(); renderChallengeStats(); renderDailyChallenge(); renderGameOptions(); renderThemes();
-  const nameInput = document.getElementById('player-name-input'); if (nameInput && document.activeElement !== nameInput) nameInput.value = state.playerName;
+  renderWeaponToggles(); renderAbilityInfo(); renderAchievements(); renderScores(); renderCommanderName(); renderRank(); renderAchCounter(); renderBestToday(); renderChallengeStats(); renderDailyChallenge(); renderGameOptions(); renderThemes(); renderCampaignScores();  const nameInput = document.getElementById('player-name-input'); if (nameInput && document.activeElement !== nameInput) nameInput.value = state.playerName;
   const abToggle = document.getElementById('abilities-toggle'); if (abToggle) abToggle.checked = state.shipAbilitiesEnabled;
   const p1Input = document.getElementById('p1-name-input'); if (p1Input) p1Input.value = state.p1Name;
   const p2Input = document.getElementById('p2-name-input'); if (p2Input) p2Input.value = state.p2Name;
+  // Affiche le bouton campagne si Rang 10 débloqué
+  const campBtn = document.getElementById('start-campaign-btn');
+  if (campBtn) campBtn.classList.toggle('hidden', !isFeatureUnlocked(10));
 }
 function renderWeaponToggles() { const grid = document.getElementById('weapon-toggle-grid'); grid.innerHTML = ''; Object.entries(WEAPONS).forEach(([key, w]) => { if (key === 'standard') return; const enabled = state.enabledWeapons[key]; const el = document.createElement('div'); el.className = 'weapon-toggle ' + (enabled ? 'enabled' : 'disabled'); el.innerHTML = `<div class="weapon-icon mx-auto mb-1">${getWeaponIcon(w.icon)}</div><div class="text-sm font-semibold text-white">${w.name}</div><div class="text-xs text-slate-400">${w.cost} PA</div>`; el.addEventListener('click', () => { state.enabledWeapons[key] = !state.enabledWeapons[key]; saveCurrentPreferences(); renderWeaponToggles(); }); grid.appendChild(el); }); }
 function renderAbilityInfo() { 
@@ -631,8 +731,30 @@ function getWeeklyStats() {
 function isWeeklyDone() { const d = loadData(); return !!(d.weeklyChallenge && d.weeklyChallenge.week === getISOWeekKey(new Date()) && d.weeklyChallenge.done); }
 function markWeeklyDone() { const d = loadData(); d.weeklyChallenge = { week: getISOWeekKey(new Date()), done: true }; d.stats.weeklyCompletions = (d.stats.weeklyCompletions || 0) + 1; saveData(d); }
 function renderDailyChallenge() {
-  const el = document.getElementById('daily-challenge-panel'); if (el) { const chs = getDailyChallenges(); const rows = chs.map(ch => { const done = isDailyDone(ch.id); return `<div class="flex items-center gap-3 py-1"><div class="text-xl">${ch.icon}</div><div class="flex-1 text-left"><div class="text-sm font-semibold text-white">${ch.text}</div></div><div class="text-xs font-bold ${done ? 'text-emerald-400' : 'text-slate-500'}">${done ? '✓ Fait' : 'En attente'}</div></div>`; }).join('<div class="border-t border-slate-800/60 my-1"></div>'); el.innerHTML = `<div class="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Défis du jour</div>${rows}`; }
-  const wEl = document.getElementById('weekly-challenge-panel'); if (wEl) { const wc = getWeeklyChallenge(); const wDone = isWeeklyDone(); wEl.innerHTML = `<div class="flex items-center gap-3"><div class="text-xl">${wc.icon}</div><div class="flex-1 text-left"><div class="text-[10px] uppercase tracking-widest font-bold" style="color:var(--r-legend);">Succès de la semaine</div><div class="text-sm font-semibold text-white">${wc.text}</div></div><div class="text-xs font-bold ${wDone ? 'text-emerald-400' : 'text-slate-500'}">${wDone ? '✓ Fait' : 'En attente'}</div></div>`; }
+  const el = document.getElementById('daily-challenge-panel'); 
+  if (el) { 
+    const chs = getDailyChallenges(); 
+    if (chs.length === 0) {
+      el.innerHTML = '';
+    } else {
+      const rows = chs.map(ch => { 
+        const done = isDailyDone(ch.id); 
+        return `<div class="flex items-center gap-3 py-1"><div class="text-xl">${ch.icon}</div><div class="flex-1 text-left"><div class="text-sm font-semibold text-white">${ch.text}</div></div><div class="text-xs font-bold ${done ? 'text-emerald-400' : 'text-slate-500'}">${done ? '✓ Fait' : 'En attente'}</div></div>`; 
+      }).join('<div class="border-t border-slate-800/60 my-1"></div>'); 
+      el.innerHTML = `<div class="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Défis du jour</div>${rows}`; 
+    }
+  }
+  
+  const wEl = document.getElementById('weekly-challenge-panel'); 
+  if (wEl) { 
+    const wc = getWeeklyChallenge(); 
+    if (!wc) {
+      wEl.innerHTML = '';
+    } else {
+      const wDone = isWeeklyDone(); 
+      wEl.innerHTML = `<div class="flex items-center gap-3"><div class="text-xl">${wc.icon}</div><div class="flex-1 text-left"><div class="text-[10px] uppercase tracking-widest font-bold" style="color:var(--r-legend);">Succès de la semaine</div><div class="text-sm font-semibold text-white">${wc.text}</div></div><div class="text-xs font-bold ${wDone ? 'text-emerald-400' : 'text-slate-500'}">${wDone ? '✓ Fait' : 'En attente'}</div></div>`; 
+    }
+  }
 }
 function applyTheme(theme) {
   document.body.classList.remove('theme-volcano', 'theme-arctic', 'theme-night');
@@ -785,6 +907,23 @@ function renderScores() {
     list.appendChild(row); 
   }); 
 }
+function renderCampaignScores() {
+  const list = document.getElementById('campaign-scores-list');
+  if (!list) return;
+  const d = loadData();
+  const scores = d.campaignScores || [];
+  if (scores.length === 0) {
+    list.innerHTML = '<div class="text-center text-slate-500 py-8">Aucune campagne terminée. Bravez le Kraken !</div>';
+    return;
+  }
+  list.innerHTML = '<div class="score-row header"><div>#</div><div>Commandant</div><div>Score</div><div>Navires</div><div>PA</div></div>';
+  scores.forEach((s, i) => {
+    const row = document.createElement('div');
+    row.className = 'score-row';
+    row.innerHTML = `<div class="font-bold text-amber-400">${i + 1}</div><div class="font-semibold text-white truncate">${s.playerName || 'Anonyme'}</div><div class="font-bold text-lg text-white">${s.score.toLocaleString('fr-FR')}</div><div class="text-slate-300">${s.shipsAlive}</div><div class="text-slate-300">${s.paLeft}</div>`;
+    list.appendChild(row);
+  });
+}
 function renderAchievements() { const grid = document.getElementById('achievements-grid'); const unlocked = getUnlockedAchievements(); const filter = state.achFilter; grid.innerHTML = ''; ACHIEVEMENTS.filter(a => filter === 'all' || a.rarity === filter).forEach(a => { const isUnlocked = unlocked.includes(a.id); const el = document.createElement('div'); el.className = 'achievement-card ' + (isUnlocked ? 'unlocked' : 'locked'); const rarityLabels = { common: 'Commun', rare: 'Rare', epic: 'Épique', legend: 'Légendaire', ultimate: 'Ultime' }; el.innerHTML = `<div class="achievement-icon rarity-${a.rarity}">${isUnlocked ? a.icon : '🔒'}</div><div class="flex-1 min-w-0"><div class="flex items-center gap-2 mb-1"><span class="font-bold text-sm ${isUnlocked ? 'text-white' : 'text-slate-500'}">${a.name}</span><span class="rarity-badge rarity-${a.rarity}">${rarityLabels[a.rarity]}</span></div><div class="text-xs text-slate-400">${a.desc}</div></div>`; grid.appendChild(el); }); document.getElementById('ach-progress').textContent = unlocked.length; document.getElementById('ach-total').textContent = ACHIEVEMENTS.length; document.getElementById('ach-bar').style.width = (unlocked.length / ACHIEVEMENTS.length * 100) + '%'; }
 
 document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('.tab-btn[data-tab]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden')); document.getElementById('tab-' + btn.dataset.tab).classList.remove('hidden'); state.menuTab = btn.dataset.tab; }));
@@ -796,6 +935,18 @@ document.getElementById('p2-name-input').addEventListener('input', e => state.p2
 document.getElementById('player-name-input').addEventListener('change', e => saveData({ ...loadData(), lastName: state.playerName }));
 document.getElementById('abilities-toggle').addEventListener('change', e => { state.shipAbilitiesEnabled = e.target.checked; saveCurrentPreferences(); renderAbilityInfo(); });
 document.getElementById('start-btn').addEventListener('click', () => { initAudio(); saveData({ ...loadData(), lastName: state.playerName }); if (state.mode === '1p') startPlacement1P(); else if (state.mode === '2p') startPlacement2P(); });
+document.getElementById('start-campaign-btn').addEventListener('click', () => {
+  initAudio();
+  state.campaign.active = true;
+  state.campaign.zone = 1;
+  state.campaign.buffs = [];
+  state.difficulty = 'recrue'; // Zone 1
+  state.gameOptions.gridSize = 10;
+  state.gameOptions.fogOfWar = false;
+  state.gameOptions.obstaclesEnabled = false;
+  SHIPS = getShipsForSize(10);
+  startPlacement1P();
+});
 function exportData() {
   const dataStr = localStorage.getItem(STORAGE_KEY);
   if (!dataStr) { showToast('Aucune donnée à exporter.', 'danger'); return; }
@@ -840,15 +991,24 @@ function generateGameCode() { const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; 
 document.getElementById('online-host-btn').addEventListener('click', () => {
   if (!navigator.onLine) { showToast('✈️ Mode Avion actif : Le mode en ligne est indisponible.', 'danger', 3000); return; }
   initAudio(); state.net.isHost = true; state.net.code = generateGameCode();
-  // ... (le reste du code reste identique)
-  document.getElementById('online-menu').classList.add('hidden'); document.getElementById('online-host-view').classList.remove('hidden'); document.getElementById('online-code-display').textContent = state.net.code;
-  state.net.peer = new Peer(`battlenavale-${state.net.code}`);
-  state.net.peer.on('open', (id) => { console.log('Peer ID:', id); });
+  
+  document.getElementById('online-menu').classList.add('hidden'); 
+  document.getElementById('online-host-view').classList.remove('hidden'); 
+  document.getElementById('online-code-display').textContent = state.net.code;
+  
+  // On utilise un ID 100% alphanumérique (sans tiret) pour éviter les erreurs PeerJS
+  const peerId = `bn${state.net.code}`;
+  state.net.peer = new Peer(peerId);
+  
+  state.net.peer.on('open', (id) => { 
+    console.log('Hôte enregistré sur le serveur :', id);
+  });
+  
   state.net.peer.on('connection', (conn) => { 
     state.net.conn = conn; 
     conn.on('open', () => { 
       state.net.connected = true; 
-      state.mode = 'online'; // Mis ici pour être sûr que le mode est bien défini avant de lancer
+      state.mode = 'online'; 
       state.difficulty = null;
       conn.send({ type: 'handshake', hostName: state.playerName || 'Hôte', gridSize: state.gameOptions.gridSize || 10, obstaclesEnabled: state.gameOptions.obstaclesEnabled || false }); 
       startPlacement1P(); 
@@ -856,27 +1016,51 @@ document.getElementById('online-host-btn').addEventListener('click', () => {
     conn.on('data', (data) => handleNetData(data)); 
     conn.on('close', () => { showToast('Adversaire déconnecté.', 'danger'); resetOnlineMode(); }); 
   });
-  state.net.peer.on('error', (err) => { showToast('Erreur réseau: ' + err.type, 'danger'); resetOnlineMode(); });
+  
+  state.net.peer.on('error', (err) => { 
+    showToast('Erreur réseau: ' + err.type, 'danger'); 
+    resetOnlineMode(); 
+  });
 });
 document.getElementById('online-cancel-host-btn').addEventListener('click', () => resetOnlineMode());
 document.getElementById('online-join-btn').addEventListener('click', () => { initAudio(); state.net.isHost = false; document.getElementById('online-menu').classList.add('hidden'); document.getElementById('online-join-view').classList.remove('hidden'); });
 document.getElementById('online-connect-btn').addEventListener('click', () => {
   if (!navigator.onLine) { showToast('✈️ Mode Avion actif : Le mode en ligne est indisponible.', 'danger', 3000); return; }
   const code = document.getElementById('online-code-input').value.toUpperCase();
-  // ... (le reste du code reste identique)
-  document.getElementById('online-code-input').disabled = true; document.getElementById('online-connect-btn').disabled = true; document.getElementById('online-connecting').classList.remove('hidden');
+  
+  document.getElementById('online-code-input').disabled = true; 
+  document.getElementById('online-connect-btn').disabled = true; 
+  document.getElementById('online-connecting').classList.remove('hidden');
+  
   state.net.peer = new Peer();
+  
   state.net.peer.on('open', (id) => { 
-    state.net.conn = state.net.peer.connect(`battlenavale-${state.net.code}`); 
+    // On utilise le même format d'ID alphanumérique
+    const targetPeerId = `bn${code}`;
+    state.net.conn = state.net.peer.connect(targetPeerId, { reliable: true }); 
+    
     state.net.conn.on('open', () => { 
       state.net.connected = true; 
-      state.mode = 'online'; // Mis ici aussi
+      state.mode = 'online';
+      state.net.code = code;
       state.difficulty = null; 
     }); 
+    
     state.net.conn.on('data', (data) => handleNetData(data)); 
     state.net.conn.on('close', () => { showToast('Adversaire déconnecté.', 'danger'); resetOnlineMode(); }); 
   });
-  state.net.peer.on('error', (err) => { showToast('Erreur réseau: ' + err.type, 'danger'); resetOnlineMode(); });
+  
+  state.net.peer.on('error', (err) => { 
+    if (err.type === 'peer-unavailable') {
+      showToast('Adversaire introuvable. Vérifiez le code ou demandez à l\'hôte de relancer.', 'danger', 4000);
+    } else {
+      showToast('Erreur réseau: ' + err.type, 'danger', 4000);
+    }
+    // On débloque l'interface pour pouvoir réessayer
+    document.getElementById('online-code-input').disabled = false; 
+    document.getElementById('online-connect-btn').disabled = false; 
+    document.getElementById('online-connecting').classList.add('hidden');
+  });
 });
 document.getElementById('online-cancel-join-btn').addEventListener('click', () => resetOnlineMode());
 function resetOnlineMode() { if (state.net.conn) state.net.conn.close(); if (state.net.peer) state.net.peer.destroy(); state.net = { peer: null, conn: null, isHost: false, code: '', connected: false }; document.getElementById('online-menu').classList.remove('hidden'); document.getElementById('online-host-view').classList.add('hidden'); document.getElementById('online-join-view').classList.add('hidden'); document.getElementById('online-code-input').disabled = false; document.getElementById('online-code-input').value = ''; document.getElementById('online-connect-btn').disabled = false; document.getElementById('online-connecting').classList.add('hidden'); }
@@ -1165,16 +1349,54 @@ function handleNetTeleportSync(data) {
   }
 }
 function startPlacement1P() {
-  GRID_SIZE = parseInt(state.gameOptions.gridSize, 10) || 10; 
-  SHIPS = getShipsForSize(GRID_SIZE);
+  if (state.campaign.active) {
+    applyCampaignMapShape(state.campaign.zone); // Crée la grille avec les rochers atypiques
+    if (state.campaign.zone > 1 && state.campaign.survivingShips && state.campaign.survivingShips.length > 0) {
+      SHIPS = state.campaign.survivingShips; // Le joueur récupère ses navires survivants
+    } else {
+      SHIPS = getShipsForSize(GRID_SIZE); // Zone 1 : flotte complète
+    }
+  } else {
+    GRID_SIZE = parseInt(state.gameOptions.gridSize, 10) || 10; 
+    SHIPS = getShipsForSize(GRID_SIZE);
+    state.boards.player = createEmptyBoard();
+    state.boards.enemy = createEmptyBoard();
+  }
+  
   state.phase = 'placement'; resetBodyTheme();
-  state.boards.player = createEmptyBoard(); state.boards.enemy = createEmptyBoard(); 
-  state.ships.player = []; state.ships.enemy = [];
+  
+  state.ships.enemy = [];
   state.selectedShipToPlace = null; state.placementOrientation = 'h';
   state.isRandomPlacement = false;
-  if (state.mode === '1p') state.ships.enemy = randomPlacement(state.boards.enemy);
-  if (state.mode === 'online') state.ships.enemy = SHIPS.map(s => ({ ...s, sunk: false, cells: [] }));
+  
+  if (state.campaign.active && state.campaign.zone === 6) {
+    state.ships.enemy = generateKraken();
+  } else if (state.mode === '1p') {
+    state.ships.enemy = randomPlacement(state.boards.enemy); // L'ennemi utilise la fonction corrigée
+  } else if (state.mode === 'online') {
+    state.ships.enemy = SHIPS.map(s => ({ ...s, sunk: false, cells: [] }));
+  }
   state.playerReady = false; state.enemyReady = false;
+  
+  if (state.campaign.active && state.campaign.zone > 1) {
+    // On garde les rochers de applyCampaignMapShape, mais on nettoie les anciens navires
+    for (let r = 0; r < GRID_SIZE; r++) {
+      for (let c = 0; c < GRID_SIZE; c++) {
+        state.boards.player[r][c].ship = null;
+        state.boards.player[r][c].hit = false;
+        state.boards.player[r][c].miss = false;
+        state.boards.player[r][c].halfHit = false;
+      }
+    }
+    state.ships.player = SHIPS.map(s => ({ ...s, cells: [], sunk: false }));
+  } else if (!state.campaign.active) {
+    state.boards.player = createEmptyBoard();
+    state.ships.player = [];
+  } else {
+    // Zone 1 de la campagne
+    state.ships.player = [];
+  }
+  
   showScreen('placement-screen'); renderPlacementScreen();
 }
 function startPlacement2P() {
@@ -1198,7 +1420,7 @@ function renderPlacementScreen() {
   const row3 = document.createElement('div'); row3.className = 'grid grid-cols-2 gap-2';
   
   SHIPS.forEach((shipDef, idx) => { 
-    const placed = shipsData.find(s => s.id === shipDef.id);
+        const placed = shipsData.find(s => s.id === shipDef.id && s.cells.length > 0);
     const card = document.createElement('div');
     card.className = 'ship-card flex-col items-center text-center' + (state.selectedShipToPlace === shipDef.id ? ' active' : '') + (placed ? ' placed' : '');
     
@@ -1246,14 +1468,20 @@ function renderPlacementScreen() {
   list.appendChild(row2); 
   if (row3.hasChildNodes()) list.appendChild(row3);
   
-  const btn = document.getElementById('confirm-placement-btn');
+    const btn = document.getElementById('confirm-placement-btn');
+  // On compte uniquement les navires qui ont des cases placées sur la grille
+  const placedShipsCount = shipsData.filter(s => s.cells.length > 0).length;
+  
   if (state.mode === '2p') {
-    if (state.placementPhase === 'p1') { btn.textContent = 'Confirmer et passer à ' + state.p2.name; btn.disabled = state.p1.ships.length !== SHIPS.length; }
-    else { btn.textContent = 'Lancer la bataille'; btn.disabled = state.p2.ships.length !== SHIPS.length; }
+    if (state.placementPhase === 'p1') { btn.textContent = 'Confirmer et passer à ' + state.p2.name; btn.disabled = placedShipsCount !== SHIPS.length; }
+    else { btn.textContent = 'Lancer la bataille'; btn.disabled = placedShipsCount !== SHIPS.length; }
   } else if (state.mode === 'online') {
     btn.textContent = state.playerReady ? 'En attente de l\'adversaire...' : 'Confirmer le déploiement';
-    btn.disabled = state.ships.player.length !== SHIPS.length || state.playerReady;
-  } else { btn.textContent = 'Confirmer le déploiement'; btn.disabled = state.ships.player.length !== SHIPS.length; }
+    btn.disabled = placedShipsCount !== SHIPS.length || state.playerReady;
+  } else { 
+    btn.textContent = 'Confirmer le déploiement'; 
+    btn.disabled = placedShipsCount !== SHIPS.length; 
+  }
   renderPlacementGrid();
 }
 function renderPlacementGrid() {
@@ -1268,6 +1496,7 @@ function renderPlacementGrid() {
     for (let c = 0; c < GRID_SIZE; c++) {
       const cell = document.createElement('div'); cell.className = 'cell'; cell.dataset.row = r; cell.dataset.col = c;
       if (boardData[r][c].ship) cell.classList.add('cell-ship');
+	        if (boardData[r][c].rock) cell.classList.add('cell-rock');
       cell.addEventListener('click', () => handlePlacementClick(r, c));
       cell.addEventListener('mouseenter', () => showPlacementPreview(r, c));
       cell.addEventListener('mouseleave', () => clearPlacementPreview());
@@ -1293,25 +1522,62 @@ function handlePlacementClick(row, col) {
   const shipsData = state.mode === '1p' || state.mode === 'online' ? state.ships.player : state[target].ships;
   const shipDef = SHIPS.find(s => s.id === state.selectedShipToPlace);
   if (!shipDef || !canPlaceShip(boardData, row, col, shipDef, state.placementOrientation)) { showToast('Placement invalide.', 'danger'); return; }
-  shipsData.push(placeShip(boardData, shipDef, row, col, state.placementOrientation));
+  
+  const placedShip = placeShip(boardData, shipDef, row, col, state.placementOrientation);
+  const idx = shipsData.findIndex(s => s.id === shipDef.id);
+  if (idx !== -1) {
+    shipsData[idx] = placedShip; // Met à jour le navire existant
+  } else {
+    shipsData.push(placedShip); // Sinon l'ajoute (mode normal)
+  }
   state.selectedShipToPlace = null; state.isRandomPlacement = false; playSound('place'); renderPlacementScreen();
 }
 document.getElementById('rotate-btn').addEventListener('click', () => state.placementOrientation = state.placementOrientation === 'h' ? 'v' : 'h');
 document.addEventListener('keydown', e => { if (state.phase === 'placement' && (e.key === 'r' || e.key === 'R')) state.placementOrientation = state.placementOrientation === 'h' ? 'v' : 'h'; if (state.phase === 'combat' && (e.key === 'r' || e.key === 'R')) { state.weaponOrientation = state.weaponOrientation === 'h' ? 'v' : 'h'; updateOrientationDisplay(); } });
 document.getElementById('random-place-btn').addEventListener('click', () => { 
   const target = state.mode === '1p' || state.mode === 'online' ? 'player' : state.placementPhase; 
-  if (state.mode === '1p' || state.mode === 'online') { state.boards.player = createEmptyBoard(); state.ships.player = randomPlacement(state.boards.player); } 
-  else { state[target].board = createEmptyBoard(); state[target].ships = randomPlacement(state[target].board); } 
+  if (state.mode === '1p' || state.mode === 'online') { 
+    if (state.campaign.active) { for (let r = 0; r < GRID_SIZE; r++) for (let c = 0; c < GRID_SIZE; c++) state.boards.player[r][c].ship = null; }
+    else { state.boards.player = createEmptyBoard(); }
+    state.ships.player = randomPlacement(state.boards.player); 
+  } 
+  else { 
+    if (state.campaign.active) { for (let r = 0; r < GRID_SIZE; r++) for (let c = 0; c < GRID_SIZE; c++) state[target].board[r][c].ship = null; }
+    else { state[target].board = createEmptyBoard(); }
+    state[target].ships = randomPlacement(state[target].board); 
+  } 
   state.selectedShipToPlace = null; state.isRandomPlacement = true; playSound('place'); renderPlacementScreen(); 
 });
 document.getElementById('clear-btn').addEventListener('click', () => { 
   const target = state.mode === '1p' || state.mode === 'online' ? 'player' : state.placementPhase; 
-  if (state.mode === '1p' || state.mode === 'online') { state.boards.player = createEmptyBoard(); state.ships.player = []; } 
-  else { state[target].board = createEmptyBoard(); state[target].ships = []; } 
+  if (state.mode === '1p' || state.mode === 'online') { 
+    if (state.campaign.active) { for (let r = 0; r < GRID_SIZE; r++) for (let c = 0; c < GRID_SIZE; c++) state.boards.player[r][c].ship = null; }
+    else { state.boards.player = createEmptyBoard(); }
+    state.ships.player = []; 
+  } 
+  else { 
+    if (state.campaign.active) { for (let r = 0; r < GRID_SIZE; r++) for (let c = 0; c < GRID_SIZE; c++) state[target].board[r][c].ship = null; }
+    else { state[target].board = createEmptyBoard(); }
+    state[target].ships = []; 
+  } 
   state.selectedShipToPlace = null; state.isRandomPlacement = false; renderPlacementScreen(); 
 });
 document.getElementById('confirm-placement-btn').addEventListener('click', () => { 
-  if (state.mode === '1p' && state.ships.player.length === SHIPS.length) startCombat1P(); 
+  if (state.mode === '1p' && state.ships.player.length === SHIPS.length) {
+    // Appliquer les dégâts conservés en campagne
+    if (state.campaign.active && state.campaign.zone > 1 && state.campaign.shipDamage) {
+      state.ships.player.forEach((ship, i) => {
+        let damage = state.campaign.shipDamage[i] || 0;
+        // On applique les dégâts sur les dernières cases du navire
+        for (let j = ship.cells.length - 1; j >= 0 && damage > 0; j--) {
+          const [r, c] = ship.cells[j];
+          state.boards.player[r][c].hit = true;
+          damage--;
+        }
+      });
+    }
+    startCombat1P(); 
+  } 
   else if (state.mode === 'online' && state.ships.player.length === SHIPS.length && !state.playerReady) { 
     if (state.gameOptions.obstaclesEnabled) scatterObstacles(state.boards.player);
     state.playerReady = true; sendNetData({ type: 'placement_done' }); renderPlacementScreen(); checkOnlineCombatStart(); 
@@ -1356,24 +1622,94 @@ document.getElementById('pass-reveal-btn').addEventListener('click', () => {
 });
 
 function startCombat1P() {
-  GRID_SIZE = parseInt(state.gameOptions.gridSize, 10) || 10; 
-  SHIPS = getShipsForSize(GRID_SIZE);
-  state.phase = 'combat'; state.pa = { player: 3, bot: 3 }; state.paGained = 0; state.paSpent = 0;
+  if (!state.campaign.active) {
+    GRID_SIZE = parseInt(state.gameOptions.gridSize, 10) || 10; 
+    SHIPS = getShipsForSize(GRID_SIZE);
+  }
+  state.phase = 'combat'; 
+  if (!state.campaign.active) {
+    state.pa = { player: 3, bot: 3 }; 
+  } else {
+    state.pa.bot = 3; 
+    if (state.campaign.enemyPaMalus) {
+      state.pa.bot = Math.max(0, state.pa.bot - state.campaign.enemyPaMalus);
+      state.campaign.enemyPaMalus = 0; // On l'applique une seule fois au début de la zone
+    }
+  }
+  
+  if (state.campaign.active) {
+    state.campaign.buffs.forEach(buffId => {
+      const buff = CAMPAIGN_BUFFS.find(b => b.id === buffId);
+      if (buff && buff.apply) {
+        // Les améliorations de Boss ne s'activent QUE si on est dans la Zone 6 (Kraken)
+        if (buff.bossOnly && !state.campaign.isKraken) return;
+        buff.apply();
+      }
+    });
+  }
+
+  state.paGained = 0; state.paSpent = 0;
   state.selectedWeapon = 'standard'; state.isPlayerTurn = state.mode === 'online' ? state.net.isHost : true; state.botMemory = createBotMemory();
   state.shots = { player: 0, bot: 0 }; state.hits = { player: 0, bot: 0 }; state.sunk = { player: 0, bot: 0 };
   state.abilitiesUsed = {}; state.abilityCooldowns = {}; state.activeAbility = null; state.counterMeasure = false;
   state.teleportUsed = false;
-state.tracking = resetTracking(); state.newlyUnlocked = []; state.turnCount = 0;
+  state.tracking = resetTracking(); state.newlyUnlocked = []; state.turnCount = 0;
   SHIPS.forEach(s => state.abilityCooldowns[s.id] = SHIP_ABILITIES[s.id].cooldown); 
-  if (state.mode === '1p' && state.gameOptions.obstaclesEnabled) { scatterObstacles(state.boards.player); scatterObstacles(state.boards.enemy); }
+  
+  // On NE génère PAS d'obstacles aléatoires si c'est une campagne (la map spéciale a déjà ses rochers)
+  if (state.mode === '1p' && state.gameOptions.obstaclesEnabled && !state.campaign.active) { 
+    scatterObstacles(state.boards.player); scatterObstacles(state.boards.enemy); 
+  }
   const logC = document.getElementById('log-container'); if (logC) logC.innerHTML = '';
   if (state.mode === '1p') { const stats = getStats(); updateStats({ gamesPlayed: stats.gamesPlayed + 1 }); }
   showScreen('combat-screen'); renderCombat1P(); addLog('Engagement initié. À vous de jouer.', 'info', 'player');
   if (state.mode === '1p') checkAchievementsDuringPlay();
   if (state.mode === '1p' && state.isPlayerTurn) startChrono();
 }
-function renderCombat1P() { renderGrid1P('enemy-grid', 'enemy', false); renderGrid1P('player-grid', 'player', true); renderWeapons1P('weapons-list'); renderAbilities1P('abilities-list'); updateStatsUI1P(); updatePA1P(); updateOrientationDisplay(); document.getElementById('enemy-ships-info').textContent = `${state.ships.enemy.filter(s => !s.sunk).length} navires`; document.getElementById('player-ships-info').textContent = `${state.ships.player.filter(s => !s.sunk).length} navires`; }
-function renderGrid1P(gridId, target, isPlayerGrid) { 
+function renderCombat1P() { 
+  renderGrid1P('enemy-grid', 'enemy', false); 
+  renderGrid1P('player-grid', 'player', true); 
+  renderWeapons1P('weapons-list'); 
+  renderAbilities1P('abilities-list'); 
+  updateStatsUI1P(); 
+  updatePA1P(); 
+  updateOrientationDisplay(); 
+  document.getElementById('enemy-ships-info').textContent = `${state.ships.enemy.filter(s => !s.sunk).length} navires`; 
+  document.getElementById('player-ships-info').textContent = `${state.ships.player.filter(s => !s.sunk).length} navires`; 
+  
+  // Affichage des modificateurs de zone (Campagne)
+  const zoneInfoEl = document.getElementById('campaign-zone-info');
+  if (zoneInfoEl) {
+    if (state.campaign.active) {
+      let infos = [`Zone ${state.campaign.zone}`];
+      if (state.campaign.isKraken) {
+        infos.push('🦑 Boss: Kraken');
+      } else if (state.campaign.currentMod) {
+        infos.push(state.campaign.currentMod.name);
+        if (state.campaign.currentMod.rocks) infos.push(`🪨 ${state.campaign.currentMod.rocks === 'circular' ? 'Atoll' : state.campaign.currentMod.rocks}`);
+        if (state.campaign.currentMod.mines) infos.push(`💣 ${state.campaign.currentMod.mines}`);
+      }
+      if (state.gameOptions.fogOfWar) infos.push('🌫️ Brouillard');
+      
+      // Affichage des buffs de campagne actifs
+      if (state.campaign.heavyShells) infos.push('💥 Obus Lourds');
+      if (state.campaign.incendiary) infos.push('🔥 Incendie');
+      if (state.campaign.superSonar) infos.push('📡 Sonar 5x5');
+      if (state.campaign.vampirism) infos.push('🧛 Vampirisme');
+      if (state.campaign.dodgeCharges > 0) infos.push('🛡️ Esquive');
+      if (state.campaign.costReduction) infos.push('⚡ Surcharge');
+      if (state.campaign.toxin) infos.push('🦠 Toxine');
+      if (state.campaign.antiAcid) infos.push('🧪 Anti-Acide');
+      if (state.campaign.doubleDmgBoss) infos.push('⚓ Dmg x2 Boss');
+
+      zoneInfoEl.innerHTML = infos.map(i => `<span class="px-2 py-0.5 bg-slate-800 border border-slate-600 rounded text-[10px] uppercase tracking-wide text-amber-400 font-bold">${i}</span>`).join('');
+      zoneInfoEl.classList.remove('hidden');
+    } else {
+      zoneInfoEl.innerHTML = '';
+      zoneInfoEl.classList.add('hidden');
+    }
+  }
+}function renderGrid1P(gridId, target, isPlayerGrid) { 
   const grid = document.getElementById(gridId); if (!grid) return; 
   grid.innerHTML = ''; grid.style.gridTemplateColumns = `20px repeat(${GRID_SIZE}, 1fr)`; grid.style.gridTemplateRows = `20px repeat(${GRID_SIZE}, 1fr)`;
   grid.appendChild(document.createElement('div')); 
@@ -1589,15 +1925,28 @@ function activateAbility1P(shipId) {
     document.getElementById('orientation-combat-btn').addEventListener('click', () => { state.weaponOrientation = state.weaponOrientation === 'h' ? 'v' : 'h'; updateOrientationDisplay(); });
     document.getElementById('surrender-btn').addEventListener('click', () => { if (state.mode === 'online') sendNetData({ type: 'surrender' }); showToast('<strong>Abandon</strong>', 'danger', 2000); setTimeout(() => endGame1P(false), 800); });
 
-    function handleEnemyClick1P(row, col) {
+        function handleEnemyClick1P(row, col) {
   if (!state.isPlayerTurn || state.isAnimating) { showToast('Patientez...', 'info', 1200); return; }
   stopChrono();
   const w = WEAPONS[state.selectedWeapon]; let cost = state.activeAbility ? 0 : w.cost;
+  
+  // Gestion de la Surcharge (costReduction)
+  if (state.campaign.active && state.campaign.costReduction) {
+    cost = Math.max(0, cost - state.campaign.costReduction);
+  }
   if (state.selectedWeapon === 'sonar' && state.freeSonarNext && !state.activeAbility) cost = 0;
+  
   if (state.pa.player < cost) { showToast(`Pas assez de PA`, 'danger'); return; }
   let cells; let weaponType = state.selectedWeapon; let pattern = null;
   if (state.activeAbility) { const ab = SHIP_ABILITIES[state.activeAbility]; cells = getAbilityCells(row, col, ab.pattern); weaponType = 'standard'; pattern = ab.pattern; } 
-  else { cells = getWeaponCells(row, col, state.selectedWeapon, state.weaponOrientation); }
+  else { 
+    cells = getWeaponCells(row, col, state.selectedWeapon, state.weaponOrientation); 
+    // Obus Lourds : transforme le tir standard en croix
+    if (state.campaign.heavyShells && state.selectedWeapon === 'standard') {
+      cells = getWeaponCells(row, col, 'cross', 'h');
+      weaponType = 'cross'; 
+    }
+  }
     const valid = cells.filter(([r, c]) => inBounds(r, c) && !state.boards.enemy[r][c].hit && (!state.boards.enemy[r][c].miss || state.gameOptions.fogOfWar));
   if (valid.length === 0) { showToast('Cases déjà ciblées.', 'info', 1200); return; }
   state.pa.player -= cost; state.paSpent += cost;
@@ -1618,7 +1967,7 @@ function activateAbility1P(shipId) {
   setTimeout(() => botTurn(), 800);
 }
 
-    function triggerMineExplosion(board, initialR, initialC, gridId) {
+function triggerMineExplosion(board, initialR, initialC, gridId) {
   let hits = 0; const sunkShips = []; const hitShipIds = []; const affectedCells = [];
   const queue = [[initialR, initialC]];
   const processedMines = new Set();
@@ -1706,7 +2055,20 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
       });
     }
     cells.forEach(([r, c]) => {
-            if (!inBounds(r, c)) return; const cd = board[r][c]; if (cd.hit) return; if (cd.miss && !state.gameOptions.fogOfWar) return;
+      if (!inBounds(r, c)) return; const cd = board[r][c]; if (cd.hit) return; if (cd.miss && !state.gameOptions.fogOfWar) return;
+      
+      const cellEl = document.querySelector(owner === 'player' ? `#enemy-grid .cell[data-row="${r}"][data-col="${c}"]` : `#player-grid .cell[data-row="${r}"][data-col="${c}"]`);
+      
+      // --- BOUCLIER THERMIQUE CAMPAGNE ---
+      if (owner === 'bot' && state.campaign.active && state.campaign.shieldActive && cd.ship) {
+        state.campaign.shieldActive = false;
+        cd.miss = true;
+        if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); }
+        addLog('🛡️ Bouclier Thermique a dévié le tir !', 'info', 'player');
+        return;
+      }
+      // ------------------------------------
+
       let dirKey = '0,0';
       if (primaryTarget && pattern !== 'star' && pattern !== 'salvo') {
         const dr = Math.sign(r - primaryTarget[0]);
@@ -1714,7 +2076,6 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
         dirKey = `${dr},${dc}`;
         if (blockedDirs.has(dirKey)) return;
       }
-      const cellEl = document.querySelector(owner === 'player' ? `#enemy-grid .cell[data-row="${r}"][data-col="${c}"]` : `#player-grid .cell[data-row="${r}"][data-col="${c}"]`);
       if (cd.rock) {
         cd.rockRevealed = true; cd.miss = true;
         if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); }
@@ -1729,10 +2090,10 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
         if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
         showToast('Tir dévié par contre-mesures !', 'success'); addLog('Tir dévié par contre-mesures.', 'miss', 'bot'); return; 
       }
-                    if (cd.mine && !cd.mineTriggered) {
-              cd.mineTriggered = true; cd.miss = true;
-              if (owner === 'player') state.tracking.minesTriggered++; // <-- AJOUTEZ CETTE LIGNE
-              if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); }
+      if (cd.mine && !cd.mineTriggered) {
+        cd.mineTriggered = true; cd.miss = true;
+        if (owner === 'player') state.tracking.minesTriggered++; 
+        if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); }
         const gridId = owner === 'player' ? 'enemy-grid' : 'player-grid';
         const result = triggerMineExplosion(board, r, c, gridId);
         hits += result.hits; sunkShips = sunkShips.concat(result.sunkShips);
@@ -1747,20 +2108,63 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
         }
         return;
       }
-                 if (cd.ship) {
-              if (cd.nearRock && !cd.halfHit) { 
-                cd.halfHit = true; 
-                if (owner === 'bot') state.tracking.halfHitsReceived++; // <-- AJOUTEZ CETTE LIGNE
-                if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
-                return; 
+      if (cd.ship) {
+        if (cd.nearRock && !cd.halfHit && !state.campaign.ignoreHalfHit) { 
+          cd.halfHit = true; 
+          if (owner === 'bot') state.tracking.halfHitsReceived++; 
+          if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
+          return; 
+        }
+        cd.hit = true; hits++; 
+        
+        // Armement Lourd Anti-Boss
+        if (owner === 'player' && state.campaign.doubleDmgBoss && cd.ship.id === 'kraken_body') {
+           hits++; 
+           addLog('⚓ Armement Lourd inflige des dégâts massifs !', 'hit', 'player');
+        }
+        
+        // --- INCENDIE ---
+        if (owner === 'player' && state.campaign.incendiary && !cd.ship.sunk) {
+          const adj = [[-1,0],[1,0],[0,-1],[0,1]];
+          const targets = [];
+          for (const [dr2, dc2] of adj) {
+            const nr = r + dr2, nc = c + dc2;
+            if (inBounds(nr, nc) && board[nr][nc].ship === cd.ship && !board[nr][nc].hit) targets.push([nr, nc]);
+          }
+          if (targets.length > 0) {
+            const [fr, fc] = targets[Math.floor(Math.random()*targets.length)];
+            board[fr][fc].hit = true; hits++;
+            const fCellEl = document.querySelector(owner === 'player' ? `#enemy-grid .cell[data-row="${fr}"][data-col="${fc}"]` : `#player-grid .cell[data-row="${fr}"][data-col="${fc}"]`);
+            if (fCellEl) { const rect = fCellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); }
+            addLog('🔥 Le feu se propage !', 'hit', 'player');
+            if (!board[fr][fc].ship.sunk && isShipSunk(board, board[fr][fc].ship)) { 
+              board[fr][fc].ship.sunk = true; sunkShips.push(board[fr][fc].ship); 
+              if (owner === 'player') {
+                state.tracking.sunkEnemyIds.push(board[fr][fc].ship.id);
+                // Vampirisme
+                if (state.campaign.vampirism) {
+                  state.pa.player += 1; state.paGained += 1;
+                  addLog('🧛 Vampirisme : +1 PA !', 'success', 'player');
+                }
               }
-              cd.hit = true; hits++; 
-              if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
-              if (!cd.ship.sunk && isShipSunk(board, cd.ship)) { 
-                cd.ship.sunk = true; sunkShips.push(cd.ship); 
-                if (owner === 'player') state.tracking.sunkEnemyIds.push(cd.ship.id); // <-- AJOUTEZ CETTE LIGNE
-              }
-            } else { 
+            }
+          }
+        }
+        // -----------------
+        
+        if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
+        if (!cd.ship.sunk && isShipSunk(board, cd.ship)) { 
+          cd.ship.sunk = true; sunkShips.push(cd.ship); 
+          if (owner === 'player') {
+            state.tracking.sunkEnemyIds.push(cd.ship.id);
+            // Vampirisme
+            if (state.campaign.vampirism) {
+              state.pa.player += 1; state.paGained += 1;
+              addLog('🧛 Vampirisme : +1 PA !', 'success', 'player');
+            }
+          }
+        }
+      } else { 
         cd.miss = true; 
         if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
       }
@@ -1804,22 +2208,51 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
         }
       }, 1000);
     }
-    function endGame1P(playerWon) { 
+        function endGame1P(playerWon) { 
       stopChrono(); state.freeSonarNext = false; state.skipNextBotTurn = false;
-      state.phase = 'end'; showScreen('end-screen'); 
+      state.phase = 'end'; 
+      if (!state.campaign.active || !playerWon) showScreen('end-screen'); 
       setTimeout(() => { 
         try {
-          playSound(playerWon ? 'victory' : 'defeat'); checkAchievementsDuringPlay(); 
+                  playSound(playerWon ? 'victory' : 'defeat'); 
+        
+        // GESTION DU MODE CAMPAGNE
+                if (state.campaign.active) {
+          if (!playerWon) {
+            state.campaign.active = false;
+          } else {
+            if (state.campaign.zone === 6) {
+              // Campagne terminée !
+              state.campaign.active = false;
+              showCampaignEndScreen();
+              return;
+            } else {
+              document.getElementById('end-screen').classList.add('hidden');
+              showCampaignRewardScreen();
+              return;
+            }
+          }
+        }
+
+        checkAchievementsDuringPlay(); 
           state.lastExtraInfo = ''; state.lastShareText = '';
-          if (state.mode === '1p') { 
-            const stats = getStats(); const gradeBeforeNum = getGrade(stats.careerScore || 0).cur.num; if (playerWon) { updateStats({ gamesWon: stats.gamesWon + 1, winStreak: (stats.winStreak || 0) + 1 }); let diffs = stats.difficultiesBeaten || []; if (!diffs.includes(state.difficulty)) diffs.push(state.difficulty); updateStats({ difficultiesBeaten: diffs }); } else { updateStats({ winStreak: 0 }); }
+                   if (state.mode === '1p' || state.mode === 'online') { 
+            const stats = getStats(); const gradeBeforeNum = getGrade(stats.careerScore || 0).cur.num; 
+            if (playerWon) { 
+              updateStats({ gamesWon: stats.gamesWon + 1, winStreak: (stats.winStreak || 0) + 1 }); 
+              let diffs = stats.difficultiesBeaten || []; 
+              if (state.difficulty && !diffs.includes(state.difficulty)) diffs.push(state.difficulty); 
+              updateStats({ difficultiesBeaten: diffs }); 
+            } else { 
+              updateStats({ winStreak: 0 }); 
+            }
             checkEndAchievements(playerWon); 
             const finalUnlocked = getUnlockedAchievements(); if (finalUnlocked.length >= ACHIEVEMENTS.length - 1 && !finalUnlocked.includes('ach_all')) { if (unlockAchievement('ach_all')) state.newlyUnlocked.push('ach_all'); } 
             const score = calculateScore(playerWon); state.lastScore = score; 
             if (playerWon) {
-                                          addScore({ 
+              addScore({ 
                 score, 
-                difficulty: state.difficulty, 
+                difficulty: state.mode === 'online' ? 'Online' : state.difficulty, 
                 date: new Date().toISOString(), 
                 shots: state.shots.player, 
                 hits: state.hits.player, 
@@ -1839,12 +2272,12 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
               });
               const todayKey = getDailyKey(); const todayScores = getScores().filter(s => s.date && s.date.slice(0, 10) === todayKey); const bestToday = todayScores.length ? Math.max(...todayScores.map(s => s.score)) : score;
               const remainingAch = ACHIEVEMENTS.length - getUnlockedAchievements().length;
-              const diffName = (DIFFICULTIES.find(d => d.id === state.difficulty) || {}).name || state.difficulty;
+              const diffName = (DIFFICULTIES.find(d => d.id === state.difficulty) || {}).name || (state.mode === 'online' ? 'En Ligne' : state.difficulty);
               state.lastExtraInfo = `🏆 Meilleur score du jour : <strong class="text-amber-400">${bestToday}</strong> pts · 🔓 <strong class="text-amber-400">${remainingAch}</strong> succès restants`;
               state.lastShareText = `⚓ Bataille Navale — ${state.playerName || 'Anonyme'}\nVictoire (${diffName}) : ${score} pts\nPrécision : ${state.shots.player > 0 ? Math.round(state.hits.player / state.shots.player * 100) : 0}% — ${state.shots.player} tirs\nMeilleur score du jour : ${bestToday} pts`;
               const newGrade = getGrade(getStats().careerScore || 0).cur; if (newGrade.num > gradeBeforeNum) { state.pendingPromotion = newGrade; }
             }
-          } 
+          }  
                     if (playerWon && (state.mode === '1p' || state.mode === 'online')) {
             // Sauvegarde des thèmes pour le succès "Maître des Éléments"
             if (['volcano', 'arctic', 'night'].includes(state.theme)) {
@@ -1879,7 +2312,12 @@ let completedNames = [];
           if (playerWon) { 
             icon.innerHTML = `<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ffb627" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#ffb627" fill-opacity="0.2"/></svg>`; 
             title.textContent = 'VICTOIRE'; title.className = 'font-display text-4xl md:text-6xl mb-4 victory-text'; title.style.color = 'var(--accent)'; subtitle.textContent = `Flotte ennemie anéantie.`; 
-            if (state.mode === '1p') { scoreDisplay.classList.remove('hidden'); document.getElementById('end-score').textContent = state.lastScore; } else { scoreDisplay.classList.add('hidden'); } 
+                      if (state.mode === '1p' || state.mode === 'online') { 
+            scoreDisplay.classList.remove('hidden'); 
+            document.getElementById('end-score').textContent = state.lastScore; 
+          } else { 
+            scoreDisplay.classList.add('hidden'); 
+          } 
           } else { 
             icon.innerHTML = `<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ff3d2e" stroke-width="2"><path d="M12 2L2 22h20L12 2z" fill="#ff3d2e" fill-opacity="0.2"/><path d="M12 9v4M12 17h.01" stroke="#ff3d2e" stroke-width="2.5"/></svg>`; 
             title.textContent = 'DÉFAITE'; title.className = 'font-display text-4xl md:text-6xl mb-4 defeat-text'; title.style.color = 'var(--hit)'; subtitle.textContent = 'Votre flotte a été détruite.'; scoreDisplay.classList.add('hidden'); 
@@ -1896,8 +2334,30 @@ let completedNames = [];
         if (state.pendingPromotion) { const grade = state.pendingPromotion; state.pendingPromotion = null; setTimeout(() => showPromotionModal(grade), 1000); }
       }, 800); 
     }
-    function calculateScore(playerWon) { if (!playerWon) return 0; const diff = DIFFICULTIES.find(d => d.id === state.difficulty) || { mult: 1 }; const acc = state.shots.player > 0 ? state.hits.player / state.shots.player : 0; const shipsLost = state.tracking.shipsLostByPlayer; const fleetSize = SHIPS.length; const shipsRemaining = fleetSize - shipsLost; let score = 800; score += (shipsRemaining / fleetSize) * 5 * 220; score += Math.round(acc * 600); score += state.paSpent * 20; score += Math.max(0, 30 - state.shots.player) * 20; if (state.tracking.playerHitsReceived === 0) score += 400; if (shipsRemaining === fleetSize) score = Math.round(score * 1.3); return Math.max(0, Math.round(score * diff.mult)); }
+function calculateScore(playerWon) { 
+  if (!playerWon) return 0; 
+  
+  let mult = 1;
+  if (state.mode === 'online') mult = 2; 
+  else if (state.mode === '2p') mult = 1.5; 
+  else if (state.difficulty) {
+    const diff = DIFFICULTIES.find(d => d.id === state.difficulty); 
+    if (diff) mult = diff.mult;
+  }
 
+  const acc = state.shots.player > 0 ? state.hits.player / state.shots.player : 0; 
+  const shipsLost = state.tracking.shipsLostByPlayer; 
+  const fleetSize = SHIPS.length; 
+  const shipsRemaining = fleetSize - shipsLost; 
+  let score = 800; 
+  score += (shipsRemaining / fleetSize) * 5 * 220; 
+  score += Math.round(acc * 600); 
+  score += state.paSpent * 20; 
+  score += Math.max(0, 30 - state.shots.player) * 20; 
+  if (state.tracking.playerHitsReceived === 0) score += 400; 
+  if (shipsRemaining === fleetSize) score = Math.round(score * 1.3); 
+  return Math.max(0, Math.round(score * mult)); 
+}
     const RANDOM_EVENTS = [
       { id: 'resupply', icon: '⛽', title: 'Ravitaillement surprise', run: () => { state.pa.player += 2; updatePA1P(); return '+2 PA offerts par la logistique de la flotte !'; } },
       { id: 'free_sonar', icon: '📡', title: 'Signal amplifié', run: () => { state.freeSonarNext = true; return 'Votre prochain sonar ne coûtera aucun PA.'; } },
@@ -1915,9 +2375,139 @@ let completedNames = [];
       showToast(`${ev.icon} <strong>${ev.title}</strong><br>${msg}`, 'info', 3500); addLog(`${ev.title} — ${msg}`, 'info', 'player');
     }
     function botTurn() {
-      if (state.skipNextBotTurn) { state.skipNextBotTurn = false; state.isAnimating = false; showToast('🌊 L\'ennemi rate son tour !', 'success', 2200); addLog("L'ennemi est désorienté et rate son tour.", 'info', 'player'); state.isPlayerTurn = true; state.selectedWeapon = 'standard'; SHIPS.forEach(s => { if (state.abilityCooldowns[s.id] > 0) state.abilityCooldowns[s.id]--; }); document.getElementById('combat-subtitle').textContent = 'À vous de jouer, commandant.'; renderWeapons1P('weapons-list'); renderAbilities1P('abilities-list'); renderTacticalActions(); checkAchievementsDuringPlay(); startChrono(); return; }
-            const diff = state.difficulty; let action; if (diff === 'recrue') action = botRecrue(); else if (diff === 'tactique') action = botTactique(); else if (diff === 'stratege') action = botStratege(); else if (diff === 'amiral') action = botAmiral(); else if (diff === 'fantome') action = botFantome(); if (!action) action = botRecrue(); const cells = getWeaponCells(action.target[0], action.target[1], action.type, action.orientation || 'h'); state.selectedWeapon = action.type; state.isAnimating = true; const targetCell = document.querySelector(`#player-grid .cell[data-row="${action.target[0]}"][data-col="${action.target[1]}"]`); if (targetCell) { targetCell.classList.add('cell-flash'); setTimeout(() => targetCell.classList.remove('cell-flash'), 400); } setTimeout(() => { executeWeapon1P(state.boards.player, cells, 'bot', action.type, 'standard', action.target); state.pa.bot -= WEAPONS[action.type].cost; updateBotMemory(action.target[0], action.target[1]); setTimeout(() => { state.isAnimating = false; if (checkVictory1P()) return; state.isPlayerTurn = true; state.selectedWeapon = 'standard'; SHIPS.forEach(s => { if (state.abilityCooldowns[s.id] > 0) state.abilityCooldowns[s.id]--; }); if (state.mode === '1p' && state.gameOptions.randomEvents && Math.random() < 0.18) triggerRandomEvent(); document.getElementById('combat-subtitle').textContent = 'À vous de jouer, commandant.'; renderWeapons1P('weapons-list'); renderAbilities1P('abilities-list'); renderTacticalActions(); checkAchievementsDuringPlay(); startChrono(); }, 800); }, 400); }
-    function getValidShots(board) { const v = []; for (let r = 0; r < GRID_SIZE; r++) for (let c = 0; c < GRID_SIZE; c++) if (!board[r][c].hit && !board[r][c].miss) v.push([r, c]); return v; }
+  if (state.skipNextBotTurn) { 
+    state.skipNextBotTurn = false; state.isAnimating = false; 
+    showToast('🌊 L\'ennemi rate son tour !', 'success', 2200); 
+    addLog("L'ennemi est désorienté et rate son tour.", 'info', 'player'); 
+    state.isPlayerTurn = true; state.selectedWeapon = 'standard'; 
+    SHIPS.forEach(s => { if (state.abilityCooldowns[s.id] > 0) state.abilityCooldowns[s.id]--; }); 
+    document.getElementById('combat-subtitle').textContent = 'À vous de jouer, commandant.'; 
+    renderWeapons1P('weapons-list'); renderAbilities1P('abilities-list'); renderTacticalActions(); checkAchievementsDuringPlay(); startChrono(); return; 
+  }
+  
+    if (state.campaign.isKraken) {
+    // 1. Dégâts d'Acide au début du tour du Kraken
+    state.ships.player.forEach(s => {
+      if (s.sunk) return;
+      s.cells.forEach(([r,c]) => {
+        if (state.boards.player[r][c].acid && !state.campaign.antiAcid) {
+          state.boards.player[r][c].acid = false;
+          if (!state.boards.player[r][c].hit) {
+            state.boards.player[r][c].hit = true;
+            addLog(`🧪 L'acide endommage votre ${s.name} !`, 'hit', 'bot');
+          }
+        }
+      });
+    });
+
+    // 2. Régénération du Corps
+    state.campaign.krakenTurnCount = (state.campaign.krakenTurnCount || 0) + 1;
+    if (state.campaign.krakenTurnCount % 3 === 0 && !state.ships.enemy.find(s => s.id === 'kraken_body').sunk) {
+      const sunkTentacles = state.ships.enemy.filter(s => s.id.startsWith('tentacle') && s.sunk);
+      if (sunkTentacles.length > 0) {
+        const t = sunkTentacles[0];
+        t.sunk = false;
+        t.cells.forEach(([r,c]) => state.boards.enemy[r][c].hit = false); 
+        showToast("🦑 Le Kraken régénère un tentacule !", "danger", 3000);
+        renderGrid1P('enemy-grid', 'enemy', false);
+      }
+    }
+
+    // 3. Encre Noire
+    if (!state.campaign.inkUsed && state.ships.enemy.filter(s => s.id.startsWith('tentacle') && !s.sunk).length <= 2) {
+      state.campaign.inkUsed = true;
+      state.campaign.inkTurnsLeft = 2;
+      state.gameOptions.fogOfWar = true; 
+      showToast("🖤 Le Kraken plonge la carte dans l'encre noire !", "danger", 4000);
+      renderGrid1P('enemy-grid', 'enemy', false);
+    }
+
+    const aliveTentacles = state.ships.enemy.filter(s => s.id.startsWith('tentacle') && !s.sunk).length;
+    const numAttacks = aliveTentacles >= 3 ? 3 : 2;
+    let attacksLeft = state.campaign.enemySlow > 0 ? 1 : numAttacks;
+    
+    document.getElementById('combat-subtitle').textContent = `🦑 Le Kraken attaque (${attacksLeft} fois)...`;
+    
+    const krakenAttack = () => {
+      if (attacksLeft <= 0) {
+        state.isAnimating = false;
+        if (checkVictory1P()) return;
+        state.isPlayerTurn = true; state.selectedWeapon = 'standard';
+        SHIPS.forEach(s => { if (state.abilityCooldowns[s.id] > 0) state.abilityCooldowns[s.id]--; });
+        document.getElementById('combat-subtitle').textContent = 'À vous de jouer, commandant.';
+        renderWeapons1P('weapons-list'); renderAbilities1P('abilities-list'); renderTacticalActions(); checkAchievementsDuringPlay(); startChrono();
+        return;
+      }
+      attacksLeft--;
+      
+      let action;
+      if (state.campaign.enemyPanic > 0) action = botRecrue(); 
+      else action = botAmiral(); 
+      
+      const cells = getWeaponCells(action.target[0], action.target[1], action.type, action.orientation || 'h');
+      state.selectedWeapon = action.type; state.isAnimating = true;
+      const targetCell = document.querySelector(`#player-grid .cell[data-row="${action.target[0]}"][data-col="${action.target[1]}"]`);
+      if (targetCell) { targetCell.classList.add('cell-flash'); setTimeout(() => targetCell.classList.remove('cell-flash'), 400); }
+      
+      setTimeout(() => {
+        executeWeapon1P(state.boards.player, cells, 'bot', action.type, 'standard', action.target);
+        
+        // Appliquer l'Acide si touché
+        if (state.boards.player[action.target[0]][action.target[1]].hit && !state.campaign.antiAcid) {
+          state.boards.player[action.target[0]][action.target[1]].acid = true;
+        }
+        
+        // Toxine
+        if (state.campaign.toxin && state.boards.player[action.target[0]][action.target[1]].hit) {
+          const body = state.ships.enemy.find(s => s.id === 'kraken_body');
+          if (body && !body.sunk) {
+            const cell = body.cells.find(c => !state.boards.enemy[c[0]][c[1]].hit);
+            if (cell) {
+              state.boards.enemy[cell[0]][cell[1]].hit = true;
+              addLog('🦠 La toxine endommage le Kraken !', 'hit', 'player');
+              renderGrid1P('enemy-grid', 'enemy', false);
+            }
+          }
+        }
+
+        state.pa.bot -= WEAPONS[action.type].cost;
+        updateBotMemory(action.target[0], action.target[1]);
+        setTimeout(krakenAttack, 800);
+      }, 400);
+    };
+    krakenAttack();
+    
+    if (state.campaign.enemyPanic > 0) state.campaign.enemyPanic--;
+    if (state.campaign.enemySlow > 0) state.campaign.enemySlow--;
+    return;
+  }
+
+  const diff = state.difficulty; let action; 
+  if (diff === 'recrue') action = botRecrue(); 
+  else if (diff === 'tactique') action = botTactique(); 
+  else if (diff === 'stratege') action = botStratege(); 
+  else if (diff === 'amiral') action = botAmiral(); 
+  else if (diff === 'fantome') action = botFantome(); 
+  if (!action) action = botRecrue(); 
+  
+  const cells = getWeaponCells(action.target[0], action.target[1], action.type, action.orientation || 'h'); 
+  state.selectedWeapon = action.type; state.isAnimating = true; 
+  const targetCell = document.querySelector(`#player-grid .cell[data-row="${action.target[0]}"][data-col="${action.target[1]}"]`); 
+  if (targetCell) { targetCell.classList.add('cell-flash'); setTimeout(() => targetCell.classList.remove('cell-flash'), 400); } 
+  setTimeout(() => { 
+    executeWeapon1P(state.boards.player, cells, 'bot', action.type, 'standard', action.target); 
+    state.pa.bot -= WEAPONS[action.type].cost; updateBotMemory(action.target[0], action.target[1]); 
+    setTimeout(() => { 
+      state.isAnimating = false; if (checkVictory1P()) return; 
+      state.isPlayerTurn = true; state.selectedWeapon = 'standard'; 
+      SHIPS.forEach(s => { if (state.abilityCooldowns[s.id] > 0) state.abilityCooldowns[s.id]--; }); 
+      if (state.mode === '1p' && state.gameOptions.randomEvents && Math.random() < 0.18) triggerRandomEvent(); 
+      document.getElementById('combat-subtitle').textContent = 'À vous de jouer, commandant.'; 
+      renderWeapons1P('weapons-list'); renderAbilities1P('abilities-list'); renderTacticalActions(); checkAchievementsDuringPlay(); startChrono(); 
+    }, 800); 
+  }, 400); 
+}
+function getValidShots(board) { const v = []; for (let r = 0; r < GRID_SIZE; r++) for (let c = 0; c < GRID_SIZE; c++) if (!board[r][c].hit && !board[r][c].miss) v.push([r, c]); return v; }
     function botRecrue() { const v = getValidShots(state.boards.player); return { type: 'standard', target: v[Math.floor(Math.random() * v.length)] }; }
     function botTactique() { const m = state.botMemory, board = state.boards.player; if (m.targets.length > 0) { const t = m.targets[0]; if (m.currentDirection) { const [dr, dc] = m.currentDirection; for (const [r, c] of [[t[0] + dr, t[1] + dc], [t[0] - dr, t[1] - dc]]) if (inBounds(r, c) && !board[r][c].hit && !board[r][c].miss) return { type: 'standard', target: [r, c] }; m.currentDirection = null; } for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) { const r = t[0] + dr, c = t[1] + dc; if (inBounds(r, c) && !board[r][c].hit && !board[r][c].miss) return { type: 'standard', target: [r, c] }; } m.targets.shift(); m.currentDirection = null; } let valid = getValidShots(board).filter(([r, c]) => (r + c) % 2 === 0); if (valid.length === 0) valid = getValidShots(board); return { type: 'standard', target: valid[Math.floor(Math.random() * valid.length)] }; }
     function botStratege() { const m = state.botMemory, board = state.boards.player; if (m.targets.length > 0) { if (m.targets.length >= 2) { const t1 = m.targets[0], t2 = m.targets[1]; const dr = Math.sign(t2[0] - t1[0]), dc = Math.sign(t2[1] - t1[1]); m.currentDirection = [dr, dc]; const tries = []; let r = t2[0] + dr, c = t2[1] + dc; while (inBounds(r, c) && board[r][c].hit) { r += dr; c += dc; } if (inBounds(r, c) && !board[r][c].hit && !board[r][c].miss) tries.push([r, c]); r = t1[0] - dr; c = t1[1] - dc; while (inBounds(r, c) && board[r][c].hit) { r -= dr; c -= dc; } if (inBounds(r, c) && !board[r][c].hit && !board[r][c].miss) tries.push([r, c]); if (tries.length > 0) return { type: 'standard', target: tries[0] }; } const t = m.targets[0]; for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) { const r = t[0] + dr, c = t[1] + dc; if (inBounds(r, c) && !board[r][c].hit && !board[r][c].miss) return { type: 'standard', target: [r, c] }; } m.targets.shift(); } if (state.pa.bot >= 2 && Math.random() < 0.12) { const v = getValidShots(board); if (v.length > 15) return { type: 'sonar', target: v[Math.floor(Math.random() * v.length)] }; } let valid = getValidShots(board).filter(([r, c]) => (r + c) % 2 === 0); if (valid.length === 0) valid = getValidShots(board); return { type: 'standard', target: valid[Math.floor(Math.random() * valid.length)] }; }
@@ -1998,8 +2588,18 @@ function renderGrid2P(gridId, boardData, isPlayerGrid) {
     }
     function activateAbility2P(shipId) { const ap = state.activePlayer; const opp = ap === 'p1' ? 'p2' : 'p1'; const enemyBoard = state[opp].board; const ab = SHIP_ABILITIES[shipId]; if (ab.pattern === 'shield') { state[ap].counterMeasure = true; state[ap].abilityCooldowns[shipId] = ab.cooldown; showToast('<strong>Contre-mesures</strong> activées !', 'success'); playSound('sonar'); } else if (ab.pattern === 'reveal' || ab.pattern === 'mines') { const unrevealed = []; for (let r = 0; r < GRID_SIZE; r++) for (let c = 0; c < GRID_SIZE; c++) { const cd = enemyBoard[r][c]; const target = ab.pattern === 'mines' ? cd.mine : cd.ship; if (target && !cd.hit && !cd.sonarRevealed) unrevealed.push([r, c]); } if (unrevealed.length > 0) { const [r, c] = unrevealed[Math.floor(Math.random() * unrevealed.length)]; enemyBoard[r][c].sonarRevealed = true; enemyBoard[r][c].sonarCount = ab.pattern === 'mines' ? -1 : 1; renderCombat2P(); const cellEl = document.querySelector(`#p2p-enemy-grid .cell[data-row="${r}"][data-col="${c}"]`); if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnSonar(rect.left + rect.width / 2, rect.top + rect.height / 2); } } state[ap].abilityCooldowns[shipId] = ab.cooldown; showToast(`<strong>${ab.name}</strong> !`, 'success'); playSound('sonar'); } else { state[ap].activeAbility = shipId; showToast(`<strong>${ab.name}</strong> activé !`, 'success'); } renderAbilities2P('p2p-abilities-list'); renderWeapons2P('p2p-weapons-list'); }
     function getAbilityCells(row, col, pattern) { const cells = []; if (pattern === 'star') { cells.push([row, col], [row-1, col-1], [row-1, col+1], [row+1, col-1], [row+1, col+1]); } else if (pattern === 'salvo') { const candidates = []; for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) candidates.push([row+dr, col+dc]); for (let i = candidates.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [candidates[i], candidates[j]] = [candidates[j], candidates[i]]; } cells.push(...candidates.slice(0, 3)); } else if (pattern === 'fan') { cells.push([row, col], [row, col-1], [row, col+1], [row, col-2], [row, col+2]); } else if (pattern === 'rocket') { for(let r=0; r<GRID_SIZE; r++) cells.push([r, col]); for(let c=0; c<GRID_SIZE; c++) if(c !== col) cells.push([row, c]); } return cells; }
-    function getWeaponCells(row, col, weapon, orientation) { const cells = []; if (weapon === 'standard') cells.push([row, col]); else if (weapon === 'line') { if (orientation === 'h') for (let dc = -1; dc <= 1; dc++) cells.push([row, col + dc]); else for (let dr = -1; dr <= 1; dr++) cells.push([row + dr, col]); } else if (weapon === 'cross') { cells.push([row, col], [row - 1, col], [row + 1, col], [row, col - 1], [row, col + 1]); } else if (weapon === 'diagonal') { if (orientation === 'h') for (let i = 0; i < 4; i++) cells.push([row - 1 + i, col - 1 + i]); else for (let i = 0; i < 4; i++) cells.push([row - 1 + i, col + 1 - i]); } else if (weapon === 'sonar') { for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) cells.push([row + dr, col + dc]); } return cells; }
-
+function getWeaponCells(row, col, weapon, orientation) { 
+  const cells = []; 
+  if (weapon === 'standard') cells.push([row, col]); 
+  else if (weapon === 'line') { if (orientation === 'h') for (let dc = -1; dc <= 1; dc++) cells.push([row, col + dc]); else for (let dr = -1; dr <= 1; dr++) cells.push([row + dr, col]); } 
+  else if (weapon === 'cross') { cells.push([row, col], [row - 1, col], [row + 1, col], [row, col - 1], [row, col + 1]); } 
+  else if (weapon === 'diagonal') { if (orientation === 'h') for (let i = 0; i < 4; i++) cells.push([row - 1 + i, col - 1 + i]); else for (let i = 0; i < 4; i++) cells.push([row - 1 + i, col + 1 - i]); } 
+  else if (weapon === 'sonar') { 
+    const range = state.campaign.superSonar ? 2 : 1; 
+    for (let dr = -range; dr <= range; dr++) for (let dc = -range; dc <= range; dc++) cells.push([row + dr, col + dc]); 
+  } 
+  return cells; 
+}
   function handleEnemyClick2P(row, col) { 
   if (state.peeking || !state.isPlayerTurn) return; 
   const ap = state.activePlayer; const opp = ap === 'p1' ? 'p2' : 'p1'; const enemyBoard = state[opp].board; 
@@ -2106,8 +2706,88 @@ function executeWeapon2P(cells, weaponType, actionSummary, primaryTarget = null,
   state.isPlayerTurn = false; setTimeout(() => { state.activePlayer = state.activePlayer === 'p1' ? 'p2' : 'p1'; state.isPlayerTurn = true; state.selectedWeapon = 'standard'; showPassScreen('combat'); }, 1500);
 }
     function checkVictory2P() { const ap = state.activePlayer; const opp = ap === 'p1' ? 'p2' : 'p1'; const enemyAlive = state[opp].ships.filter(s => !s.sunk).length; if (enemyAlive === 0) { endGame2P(ap); return true; } return false; }
-    function endGame2P(winner) { state.phase = 'end'; if (winner === 'p1') { const stats = getStats(); updateStats({ local2pGamesWon: (stats.local2pGamesWon || 0) + 1 }); } setTimeout(() => { playSound('victory'); const icon = document.getElementById('end-icon'); const title = document.getElementById('end-title'); const subtitle = document.getElementById('end-subtitle'); const scoreDisplay = document.getElementById('end-score-display'); const statsGrid = document.getElementById('end-stats-grid'); icon.innerHTML = `<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ffb627" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#ffb627" fill-opacity="0.2"/></svg>`; title.textContent = 'VICTOIRE'; title.className = 'font-display text-4xl md:text-6xl mb-4 victory-text'; title.style.color = 'var(--accent)'; subtitle.innerHTML = `<strong>${state[winner].name}</strong> domine les mers !`; scoreDisplay.classList.add('hidden'); statsGrid.classList.add('hidden'); document.getElementById('end-achievements').innerHTML = ''; showScreen('end-screen'); }, 1500); }
-    document.getElementById('p2p-surrender-btn').addEventListener('click', () => { const winner = state.activePlayer === 'p1' ? 'p2' : 'p1'; showToast('Abandon !', 'danger', 2000); setTimeout(() => endGame2P(winner), 800); });
+function endGame2P(winner) {
+  state.phase = 'end';
+  if (winner === 'p1' && state.mode === '2p') { 
+    const stats = getStats(); 
+    updateStats({ local2pGamesWon: (stats.local2pGamesWon || 0) + 1 }); 
+  } else if (winner === 'p1' && state.mode === 'online') {
+    const stats = getStats(); 
+    updateStats({ onlineGamesWon: (stats.onlineGamesWon || 0) + 1 }); 
+  }
+
+  // Récupération des stats du gagnant et du perdant
+  const w = state[winner];
+  const l = state[winner === 'p1' ? 'p2' : 'p1'];
+  const shots = w.shots;
+  const hits = w.hits;
+  const sunk = w.sunk;
+  const acc = shots > 0 ? Math.round((hits / shots) * 100) : 0;
+  const shipsLost = w.ships.filter(s => s.sunk).length;
+  const fleetSize = SHIPS.length;
+  const shipsRemaining = fleetSize - shipsLost;
+
+  // Calcul du score
+  let score = 800;
+  score += (shipsRemaining / fleetSize) * 5 * 220;
+  score += Math.round((acc / 100) * 600);
+  score += Math.max(0, 30 - shots) * 20;
+  if (shipsLost === 0) score += 400;
+  
+  // Multiplicateur selon le mode (x2 en ligne, x1.5 en local)
+  if (state.mode === 'online') score = Math.round(score * 2); 
+  else score = Math.round(score * 1.5); 
+  
+  score = Math.max(0, score);
+
+  // Sauvegarde du score pour le grade et l'expérience
+  addScore({ 
+    score, 
+    difficulty: state.mode === 'online' ? 'Online' : '2P Local', 
+    date: new Date().toISOString(), 
+    shots: shots, 
+    hits: hits, 
+    accuracy: acc, 
+    sunk: sunk, 
+    playerName: w.name, 
+    gridSize: GRID_SIZE, 
+    options: {}, 
+    theme: state.theme 
+  });
+
+  setTimeout(() => {
+    playSound('victory');
+    const icon = document.getElementById('end-icon');
+    const title = document.getElementById('end-title');
+    const subtitle = document.getElementById('end-subtitle');
+    const scoreDisplay = document.getElementById('end-score-display');
+    const statsGrid = document.getElementById('end-stats-grid');
+    const extraEl = document.getElementById('end-extra-info');
+    const achEl = document.getElementById('end-achievements');
+
+    icon.innerHTML = `<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ffb627" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#ffb627" fill-opacity="0.2"/></svg>`;
+    title.textContent = 'VICTOIRE';
+    title.className = 'font-display text-4xl md:text-6xl mb-4 victory-text';
+    title.style.color = 'var(--accent)';
+    subtitle.innerHTML = `<strong>${w.name}</strong> domine les mers !`;
+    
+    // Affichage du score et des stats
+    scoreDisplay.classList.remove('hidden');
+    document.getElementById('end-score').textContent = score.toLocaleString('fr-FR');
+    
+    statsGrid.classList.remove('hidden');
+    document.getElementById('end-shots').textContent = shots;
+    document.getElementById('end-hits').textContent = hits;
+    document.getElementById('end-acc').textContent = acc + '%';
+    document.getElementById('end-sunk').textContent = sunk;
+    
+    if (extraEl) extraEl.innerHTML = `+${score.toLocaleString('fr-FR')} pts ajoutés à votre carrière`;
+    if (achEl) achEl.innerHTML = '';
+    
+    showScreen('end-screen');
+  }, 1500);
+}
+document.getElementById('p2p-surrender-btn').addEventListener('click', () => { const winner = state.activePlayer === 'p1' ? 'p2' : 'p1'; showToast('Abandon !', 'danger', 2000); setTimeout(() => endGame2P(winner), 800); });
 const ACH_18_IDS = ['play_18', 'win_18', '18_rocket_kill', '18_mine_reveal', '18_sink_leviathan', '18_sink_flanker', '18_sink_all', '18_no_mines', '18_adjacent_win', '18_speed', '18_flawless', '18_accuracy', '18_beat_amiral', '18_leviathan_survivor', '18_all_mines'];
 const ACH_6_IDS = ['play_6', 'win_6'];
 function isStandardFleet() { return GRID_SIZE === 10 || GRID_SIZE === 13; }
@@ -2409,6 +3089,337 @@ addLog('L\'ennemi active des <strong>contre-mesures</strong> !', 'info', 'bot');
   }
   return { type: 'standard', target: best[Math.floor(Math.random() * best.length)] };
 }
+const CAMPAIGN_BUFFS = [
+  // --- RÉPARATIONS & DÉFENSE ---
+  { id: 'weld', name: 'Soudure Express', desc: 'Répare 1 case du navire le plus touché.', icon: '🛠️', apply: () => { let maxHits = 0, tc = null; state.ships.player.forEach(s => s.cells.forEach(cell => { if (state.boards.player[cell[0]][cell[1]].hit) { const h = s.cells.filter(c => state.boards.player[c[0]][c[1]].hit).length; if (h > maxHits) { maxHits = h; tc = cell; } } })); if (tc) { state.boards.player[tc[0]][tc[1]].hit = false; showToast('🛠️ 1 case réparée !', 'success', 3000); } }},
+  { id: 'thermal_shield', name: 'Bouclier Thermique', desc: 'Dévie le tout premier tir ennemi de la zone.', icon: '🛡️', apply: () => { state.campaign.dodgeCharges = 1; showToast('🛡️ Bouclier thermique actif !', 'info', 3000); }},
+  { id: 'hull_reinforce', name: 'Coque Renforcée', desc: 'Un navire aléatoire subit 50% de dégâts (halfHit sur toutes ses cases).', icon: '⚓', apply: () => { const t = state.ships.player[Math.floor(Math.random()*state.ships.player.length)]; if (t) { t.cells.forEach(([r,c]) => { state.boards.player[r][c].halfHit = true; }); } showToast('⚓ Coque renforcée !', 'success', 3000); }},
+  { id: 'decoys', name: 'Leurres', desc: 'L\'ennemi rate ses 2 prochains tirs.', icon: '🕵️', apply: () => { state.campaign.dodgeCharges = 2; showToast('🕵️ Leurres déployés !', 'info', 3000); }},
+  { id: 'protective_tide', name: 'Marée Protectrice', desc: '30% de chance d\'esquiver chaque tir ennemi.', icon: '🌊', apply: () => { state.campaign.dodgeChance = 0.3; showToast('🌊 Marée protectrice !', 'success', 3000); }},
+  
+  // --- ÉCONOMIE & ARMES ---
+  { id: 'ammo_crate', name: 'Caisse de Munitions', desc: 'Gagnez 5 PA immédiatement.', icon: '💰', apply: () => { state.pa.player += 5; showToast('💰 +5 PA !', 'success', 3000); }},
+  { id: 'piercing_shells', name: 'Obus Perforants', desc: 'Votre Canon ignore les rochers et les demi-tirs.', icon: '🎯', apply: () => { state.campaign.ignoreRock = true; state.campaign.ignoreHalfHit = true; showToast('🎯 Obus perforants !', 'success', 3000); }},
+  { id: 'incendiary', name: 'Munitions Enflammées', desc: 'Le feu se propage et inflige 1 dégât à une case adjacente du même navire.', icon: '🔥', apply: () => { state.campaign.incendiary = true; showToast('🔥 Munitions enflammées !', 'success', 3000); }},
+  { id: 'heavy_shells', name: 'Obus Lourds', desc: 'Votre Canon standard touche une croix (5 cases).', icon: '💥', apply: () => { state.campaign.heavyShells = true; showToast('💥 Obus lourds !', 'success', 3000); }},
+  { id: 'super_sonar', name: 'Sonar Surpuissant', desc: 'Le Sonar scanne une zone de 5x5 au lieu de 3x3.', icon: '📡', apply: () => { state.campaign.superSonar = true; showToast('📡 Sonar surpuissant !', 'success', 3000); }},
+  { id: 'free_rockets', name: 'Surcharge de Capacités', desc: 'Toutes vos armes et capacités coûtent 1 PA de moins.', icon: '🚀', apply: () => { state.campaign.costReduction = 1; showToast('🚀 Surcharge active !', 'success', 3000); }},
+  { id: 'overload', name: 'Polyvalence', desc: 'Vos armes spéciales coûtent 1 PA de moins.', icon: '⚡', apply: () => { state.campaign.costReduction = 1; showToast('⚡ Armes polyvalentes !', 'success', 3000); }},
+  
+  // --- CAPACITÉS SPÉCIALES ---
+  { id: 'orbital_strike', name: 'Frappe Orbitale Anticipée', desc: 'Détruisez 1 case ennemie au hasard avant le début de la zone.', icon: '🛰️', apply: () => { const v = []; for(let r=0; r<GRID_SIZE; r++) for(let c=0; c<GRID_SIZE; c++) { if(state.boards.enemy[r][c].ship && !state.boards.enemy[r][c].hit) v.push([r,c]); } if(v.length>0){ const [r,c] = v[Math.floor(Math.random()*v.length)]; state.boards.enemy[r][c].hit = true; } showToast('🛰️ Frappe orbitale réussie !', 'success', 3000); }},
+  { id: 'scramble', name: 'Brouillage', desc: 'L\'ennemi ne peut pas utiliser son Sonar pendant 3 tours.', icon: '🚨', apply: () => { state.campaign.enemyNoSonar = 3; showToast('🚨 Brouillage ennemi !', 'success', 3000); }},
+  { id: 'auto_repair', name: 'Réparation Automatique', desc: 'Répare 1 case de vos navires toutes les 3 phases ennemies.', icon: '🤖', apply: () => { state.campaign.autoRepair = 0; showToast('🤖 Réparation auto activée !', 'success', 3000); }},
+  { id: 'suppression', name: 'Tir de Suppression', desc: 'Sautez le tour de l\'ennemi une fois pendant la zone.', icon: '🕰️', apply: () => { state.campaign.skipBotTurn = true; showToast('🕰️ Tir de suppression prêt !', 'info', 3000); }},
+  { id: 'total_reveal', name: 'Révélation Totale', desc: 'Révèle la position exacte de 2 navires ennemis au début.', icon: '👁️', apply: () => { const a = state.ships.enemy.filter(s => !s.sunk && s.id !== 'kraken_body'); for(let i=0; i<2 && i<a.length; i++){ const t = a[Math.floor(Math.random()*a.length)]; t.cells.forEach(([r,c]) => { if(inBounds(r,c)) state.boards.enemy[r][c].sonarRevealed = true; }); } showToast('👁️ 2 navires révélés !', 'info', 3000); }},
+  { id: 'tactical_freeze', name: 'Gel Tactique', desc: 'L\'ennemi perd 2 PA au début de la prochaine zone.', icon: '🧊', apply: () => { state.campaign.enemyPaMalus = 2; showToast('🧊 Ennemi gelé !', 'success', 3000); }},
+  
+  // --- MODIFICATEURS DE CARTE & ENNEMIS ---
+  { id: 'demolition', name: 'Démolition', desc: 'Détruisez la moitié des rochers de la prochaine carte.', icon: '🪨', apply: () => { state.campaign.halfRocks = true; showToast('🪨 Démolition programmée !', 'success', 3000); }},
+  { id: 'minefield', name: 'Champ de Mines', desc: 'Placez 3 mines supplémentaires sur le côté ennemi.', icon: '💣', apply: () => { for(let i=0; i<3; i++) { let r = Math.floor(Math.random()*GRID_SIZE), c = Math.floor(GRID_SIZE/2) + Math.floor(Math.random()*(GRID_SIZE/2)); if(!state.boards.enemy[r][c].ship && !state.boards.enemy[r][c].rock) state.boards.enemy[r][c].mine = true; } showToast('💣 Champ de mines déployé !', 'success', 3000); }},
+  { id: 'cartography', name: 'Cartographie', desc: 'Révélez tous les rochers de la carte.', icon: '🕵️‍♂️', apply: () => { for(let r=0; r<GRID_SIZE; r++) for(let c=0; c<GRID_SIZE; c++) { if(state.boards.enemy[r][c].rock) state.boards.enemy[r][c].rockRevealed = true; } showToast('🕵️‍♂️ Cartographie terminée !', 'info', 3000); }},
+  { id: 'slow_enemy', name: 'Ennemi Lent', desc: 'L\'ennemi ne tire que 1 fois par tour pendant 3 tours.', icon: '🐌', apply: () => { state.campaign.enemySlow = 3; showToast('🐌 Ennemi ralenti !', 'success', 3000); }},
+  { id: 'panic_enemy', name: 'Ennemi en Panique', desc: 'L\'ennemi tire au hasard (comme la Recrue) pendant 2 tours.', icon: '🤯', apply: () => { state.campaign.enemyPanic = 2; showToast('🤯 Ennemi paniqué !', 'success', 3000); }},
+  { id: 'sabotage', name: 'Sabotage', desc: 'L\'ennemi commence avec 0 PA.', icon: '📉', apply: () => { state.campaign.enemyPaMalus = 99; showToast('📉 Sabotage réussi !', 'success', 3000); }},
+  { id: 'chain_reaction', name: 'Réaction en Chaîne', desc: 'Vos mines explosent en 5x5 au lieu de 3x3.', icon: '🔗', apply: () => { state.campaign.mineAoE = true; showToast('🔗 Réaction en chaîne active !', 'success', 3000); }},
+  { id: 'vampire', name: 'Vampirisme Naval', desc: 'Récupérez 1 PA à chaque navire ennemi coulé.', icon: '🧛', apply: () => { state.campaign.vampirism = true; showToast('🧛 Vampirisme naval !', 'success', 3000); }},
+  
+  // --- POUR LE BOSS (KRaken) ---
+  { id: 'anti_kraken_harpoon', name: 'Harpon Anti-Kraken', desc: 'Révèle 1 tentacule du Kraken instantanément.', icon: '🦑', bossOnly: true, apply: () => { const t = state.ships.enemy.find(s => s.id.startsWith('tentacle') && !s.sunk); if(t) t.cells.forEach(([r,c]) => state.boards.enemy[r][c].sonarRevealed = true); showToast('🦑 Tentacule révélé !', 'info', 3000); }},
+  { id: 'naval_flamethrower', name: 'Lance-flammes Naval', desc: 'Inflige des dégâts de zone élargis (idéal pour les tentacules).', icon: '🔥', bossOnly: true, apply: () => { state.campaign.incendiary = true; state.campaign.heavyShells = true; showToast('🔥 Lance-flammes armé !', 'success', 3000); }},
+  { id: 'anti_acid', name: 'Anti-Acidité', desc: 'Vos navires résistent à l\'acide du Kraken.', icon: '🛡️', bossOnly: true, apply: () => { state.campaign.antiAcid = true; showToast('🛡️ Protection anti-acide !', 'success', 3000); }},
+  { id: 'toxin', name: 'Toxine', desc: 'Le Kraken subit 1 dégât gratuit à chaque fois qu\'il vous touche.', icon: '🦠', bossOnly: true, apply: () => { state.campaign.toxin = true; showToast('🦠 Toxine injectée !', 'success', 3000); }},
+  { id: 'devastating_storm', name: 'Tempête Dévastatrice', desc: 'Inflige 3 dégâts aléatoires au Kraken au début du combat.', icon: '🌪️', bossOnly: true, apply: () => { for(let i=0; i<3; i++){ const t = state.ships.enemy.filter(s => !s.sunk && s.id !== 'kraken_body'); if(t.length>0){ const target = t[Math.floor(Math.random()*t.length)]; const cell = target.cells.find(c => !state.boards.enemy[c[0]][c[1]].hit); if(cell) state.boards.enemy[cell[0]][cell[1]].hit = true; } } showToast('🌪️ Tempête dévastatrice !', 'success', 3000); }},
+  { id: 'heavy_anti_boss', name: 'Armement Lourd Anti-Boss', desc: 'Vos tirs infligent des dégâts doublés contre le corps du Kraken.', icon: '⚓', bossOnly: true, apply: () => { state.campaign.doubleDmgBoss = true; showToast('⚓ Armement lourd prêt !', 'success', 3000); }}
+];
+
+const MERCHANT_ITEMS = [
+  { id: 'revive', name: 'Réparation Complète', desc: 'Réveille un navire coulé (100% PV).', icon: '🚢', cost: 10, apply: () => { const sunk = state.ships.player.find(s => s.sunk); if (sunk) { sunk.sunk = false; sunk.cells.forEach(([r,c]) => { state.boards.player[r][c].hit = false; state.boards.player[r][c].halfHit = false; }); } }},
+  { id: 'weld', name: 'Soudure Express', desc: 'Répare 1 case du navire le plus touché.', icon: '🛠️', cost: 5, apply: () => { let maxHits = 0, tc = null; state.ships.player.forEach(s => s.cells.forEach(cell => { if (state.boards.player[cell[0]][cell[1]].hit) { const h = s.cells.filter(c => state.boards.player[c[0]][c[1]].hit).length; if (h > maxHits) { maxHits = h; tc = cell; } } })); if (tc) state.boards.player[tc[0]][tc[1]].hit = false; }},
+  { id: 'heavy_shells_buy', name: 'Obus Lourds', desc: 'Canon en croix (5 cases) zone suivante.', icon: '💥', cost: 12, apply: () => { state.campaign.heavyShells = true; }},
+  { id: 'overload_buy', name: 'Surcharge', desc: 'Armes -1 PA zone suivante.', icon: '⚡', cost: 15, apply: () => { state.campaign.costReduction = 1; }}
+];
+
+function showCampaignRewardScreen() {
+  const modal = document.getElementById('campaign-reward-modal');
+  const title = document.getElementById('campaign-title');
+  title.textContent = `Zone ${state.campaign.zone} terminée`;
+  
+  const choicesEl = document.getElementById('campaign-choices');
+  choicesEl.innerHTML = '';
+  
+  // On génère les choix gratuits UNE SEULE FOIS par écran
+  if (!state.campaign.currentFreeChoices || state.campaign.currentFreeChoices.length === 0) {
+    let availableBuffs = CAMPAIGN_BUFFS.filter(b => !state.campaign.buffs.includes(b.id));
+    if (state.campaign.zone === 5) {
+      const bossBuffs = availableBuffs.filter(b => b.bossOnly);
+      if (bossBuffs.length > 0) availableBuffs = bossBuffs;
+    } else {
+      availableBuffs = availableBuffs.filter(b => !b.bossOnly);
+    }
+    availableBuffs = availableBuffs.sort(() => 0.5 - Math.random());
+    state.campaign.currentFreeChoices = availableBuffs.slice(0, 2);
+  }
+
+  // Affichage des PA actuels
+  const paDisplay = document.createElement('div');
+  paDisplay.className = 'col-span-2 text-sm text-amber-400 font-bold mb-2';
+  paDisplay.textContent = `Vos PA actuels : ${state.pa.player}`;
+  choicesEl.appendChild(paDisplay);
+
+  // Section Marchand
+  const shopTitle = document.createElement('div');
+  shopTitle.className = 'col-span-2 text-left text-xs uppercase tracking-widest text-slate-400 font-bold mt-2 mb-1';
+  shopTitle.textContent = '🛒 Marchand Noir (Achetable plusieurs fois)';
+  choicesEl.appendChild(shopTitle);
+
+  MERCHANT_ITEMS.forEach(item => {
+    const canAfford = state.pa.player >= item.cost;
+    const btn = document.createElement('div');
+    btn.className = `weapon-toggle flex flex-col items-center justify-center p-3 ${canAfford ? 'enabled cursor-pointer' : 'disabled opacity-50 pointer-events-none'}`;
+    btn.innerHTML = `<div class="text-2xl mb-1">${item.icon}</div><div class="text-xs font-bold text-white">${item.name}</div><div class="text-[10px] text-amber-400 mt-1">${item.cost} PA</div><div class="text-[9px] text-slate-400 text-center mt-1 leading-tight">${item.desc}</div>`;
+    if (canAfford) {
+      btn.addEventListener('click', () => {
+        state.pa.player -= item.cost;
+        item.apply();
+        showCampaignRewardScreen(); // Rafraîchit juste l'affichage sans reroll les choix
+      });
+    }
+    choicesEl.appendChild(btn);
+  });
+
+  // Section Choix Gratuit
+  const freeTitle = document.createElement('div');
+  freeTitle.className = 'col-span-2 text-left text-xs uppercase tracking-widest text-slate-400 font-bold mt-4 mb-1';
+  freeTitle.textContent = '🎁 Renfort Tactique (Choisir 1 gratuitement)';
+  choicesEl.appendChild(freeTitle);
+
+  if (state.campaign.currentFreeChoices.length === 0) {
+    const btn = document.createElement('div');
+    btn.className = 'weapon-toggle enabled flex flex-col items-center justify-center p-3 cursor-pointer';
+    btn.innerHTML = `<div class="text-3xl mb-2">💰</div><div class="text-sm font-bold text-white">+5 PA Bonus</div><div class="text-[10px] text-slate-400 mt-1 text-center">Continuer</div>`;
+    btn.addEventListener('click', () => { state.pa.player += 5; state.campaign.currentFreeChoices = []; modal.classList.add('hidden'); state.campaign.zone++; startNextCampaignZone(); });
+    choicesEl.appendChild(btn);
+  } else {
+    state.campaign.currentFreeChoices.forEach(buff => {
+      const btn = document.createElement('div');
+      btn.className = 'weapon-toggle enabled flex flex-col items-center justify-center p-3 cursor-pointer';
+      btn.innerHTML = `<div class="text-3xl mb-2">${buff.icon}</div><div class="text-sm font-bold text-white">${buff.name}</div><div class="text-[10px] text-slate-400 mt-1 text-center">${buff.desc}</div>`;
+      btn.addEventListener('click', () => {
+        state.campaign.buffs.push(buff.id);
+        state.campaign.currentFreeChoices = []; // On vide les choix
+        modal.classList.add('hidden');
+        state.campaign.zone++;
+        startNextCampaignZone();
+      });
+      choicesEl.appendChild(btn);
+    });
+  }
+  
+  modal.classList.remove('hidden');
+}
+
+function startNextCampaignZone() {
+  const zone = state.campaign.zone;
+  
+  state.campaign.survivingShips = state.ships.player
+    .filter(s => !s.sunk)
+    .map(s => ({ id: s.id, name: s.name, size: s.size, symbol: s.symbol, shape: s.shape }));
+    
+  state.campaign.shipDamage = state.ships.player
+    .filter(s => !s.sunk)
+    .map(s => s.cells.filter(cell => state.boards.player[cell[0]][cell[1]].hit).length);
+  
+  if (zone === 6) {
+    // ZONE BOSS
+    state.campaign.isKraken = true;
+    showToast("🦑 Le Kraken Abyssal approche !", "danger", 4000);
+    state.difficulty = 'kraken'; 
+    GRID_SIZE = 15; 
+    state.gameOptions.obstaclesEnabled = false;
+  } else {
+    // ZONES 1 À 5 AVEC GÉNÉRATION ALÉATOIRE
+    state.campaign.isKraken = false;
+    const diffs = ['recrue', 'tactique', 'stratege', 'amiral', 'fantome'];
+    state.difficulty = diffs[Math.min(zone-1, diffs.length-1)];
+
+    const modifiers = [
+      { name: 'Classique', size: 10, rocks: 8, mines: 4, fog: false },
+      { name: 'Géant', size: 13, rocks: 16, mines: 8, fog: false },
+      { name: 'Atoll Circulaire', size: 13, rocks: 'circular', mines: 4, fog: false },
+      { name: 'Cimetière Naval', size: 12, rocks: 30, mines: 4, fog: false },
+      { name: 'Champ de Bataille', size: 12, rocks: 8, mines: 15, fog: false },
+      { name: 'Eaux Troubles', size: 11, rocks: 8, mines: 4, fog: true }
+    ];
+    const mod = modifiers[Math.floor(Math.random() * modifiers.length)];
+    state.campaign.currentMod = mod;
+    
+    GRID_SIZE = mod.size;
+    state.gameOptions.fogOfWar = mod.fog && isFeatureUnlocked(7);
+    state.gameOptions.obstaclesEnabled = true;
+    
+    showToast(`Zone ${zone}: ${mod.name} (${state.difficulty})`, 'info', 3000);
+  }
+  
+  state.teleportUsed = false;
+  startPlacement1P();
+}
+
+function applyCampaignMapShape(zone) {
+  if (zone === 6) { GRID_SIZE = 15; }
+  else if (state.campaign.currentMod) {
+    GRID_SIZE = state.campaign.currentMod.size;
+  } else {
+    GRID_SIZE = 10; 
+  }
+  
+  state.boards.player = createEmptyBoard();
+  state.boards.enemy = createEmptyBoard();
+  
+  if (zone < 6 && state.campaign.currentMod) {
+    const mod = state.campaign.currentMod;
+    
+    if (mod.rocks === 'circular') {
+      for (let r = 0; r < GRID_SIZE; r++) for (let c = 0; c < GRID_SIZE; c++) {
+        if (r < 2 || r > GRID_SIZE - 3 || c < 2 || c > GRID_SIZE - 3) {
+          state.boards.player[r][c].rock = true; state.boards.enemy[r][c].rock = true;
+        }
+      }
+    } else {
+      let rockCount = state.campaign.halfRocks ? Math.floor(mod.rocks / 2) : mod.rocks;
+      for (let i = 0; i < rockCount; i++) {
+        let r = Math.floor(Math.random() * GRID_SIZE), c = Math.floor(Math.random() * GRID_SIZE);
+        if (!state.boards.player[r][c].ship) { 
+          state.boards.player[r][c].rock = true; 
+          state.boards.enemy[r][c].rock = true; 
+        }
+      }
+    }
+    
+    for (let i = 0; i < mod.mines; i++) {
+      let r = Math.floor(Math.random() * GRID_SIZE), c = Math.floor(Math.random() * GRID_SIZE);
+      if (!state.boards.player[r][c].ship && !state.boards.player[r][c].rock) { 
+        state.boards.player[r][c].mine = true; 
+        state.boards.enemy[r][c].mine = true; 
+      }
+    }
+    
+    // On force la révélation des rochers sur la grille du joueur pour qu'ils soient visibles en combat
+    for (let r = 0; r < GRID_SIZE; r++) {
+      for (let c = 0; c < GRID_SIZE; c++) {
+        if (state.boards.player[r][c].rock) state.boards.player[r][c].rockRevealed = true;
+      }
+    }
+  }
+}
+function showCampaignEndScreen() {
+  const shipsAlive = state.ships.player.filter(s => !s.sunk).length;
+  const paLeft = state.pa.player;
+  const baseScore = 10000;
+  const shipBonus = shipsAlive * 2000;
+  const paBonus = paLeft * 100;
+  const campaignScore = baseScore + shipBonus + paBonus;
+  
+  // Sauvegarde du score de campagne
+  const d = loadData();
+  d.campaignScores = d.campaignScores || [];
+  d.campaignScores.push({ score: campaignScore, date: new Date().toISOString(), playerName: state.playerName || 'Anonyme', shipsAlive, paLeft });
+  d.campaignScores.sort((a, b) => b.score - a.score);
+  d.campaignScores = d.campaignScores.slice(0, 10); // Top 10
+  saveData(d);
+  
+  state.phase = 'end';
+  showScreen('end-screen');
+  
+  const icon = document.getElementById('end-icon');
+  const title = document.getElementById('end-title');
+  const subtitle = document.getElementById('end-subtitle');
+  const scoreDisplay = document.getElementById('end-score-display');
+  const statsGrid = document.getElementById('end-stats-grid');
+  const achEl = document.getElementById('end-achievements');
+  const extraEl = document.getElementById('end-extra-info');
+  
+  icon.innerHTML = `<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ffb627" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#ffb627" fill-opacity="0.2"/></svg>`;
+  title.textContent = 'CAMPAGNE RÉUSSIE';
+  title.className = 'font-display text-4xl md:text-6xl mb-4 victory-text';
+  title.style.color = 'var(--accent)';
+  subtitle.textContent = 'Le Kraken Abyssal a été vaincu !';
+  
+  scoreDisplay.classList.remove('hidden');
+  document.getElementById('end-score').textContent = campaignScore.toLocaleString('fr-FR');
+  
+  statsGrid.classList.remove('hidden');
+  document.getElementById('end-shots').textContent = state.shots.player;
+  document.getElementById('end-hits').textContent = state.hits.player;
+  const acc = state.shots.player > 0 ? Math.round((state.hits.player / state.shots.player) * 100) : 0;
+  document.getElementById('end-acc').textContent = acc + '%';
+  document.getElementById('end-sunk').textContent = state.sunk.player;
+  
+  extraEl.innerHTML = `Navires survivants : <strong>${shipsAlive}</strong> · PA restants : <strong>${paLeft}</strong>`;
+  achEl.innerHTML = '';
+  state.newlyUnlocked = [];
+}
+function generateKraken() {
+  const ships = [];
+  const centerR = Math.floor(GRID_SIZE / 2) - 1;
+  const centerC = Math.floor(GRID_SIZE / 2) - 1;
+  
+  const bodyCells = [[centerR, centerC], [centerR, centerC+1], [centerR+1, centerC], [centerR+1, centerC+1]];
+  const body = { id: 'kraken_body', name: 'Corps du Kraken', size: 4, cells: bodyCells, sunk: false };
+  bodyCells.forEach(([r, c]) => state.boards.enemy[r][c].ship = body);
+  ships.push(body);
+  
+  // 4 Tentacules en marche aléatoire
+  for (let i = 0; i < 4; i++) {
+    const tentacle = { id: `tentacle_${i}`, name: `Tentacule ${i+1}`, size: 0, cells: [], sunk: false };
+    
+    // Point de départ : on prend une case du corps et on cherche une case libre autour
+    let r = bodyCells[i % 4][0], c = bodyCells[i % 4][1];
+    const startDirs = [[-1,-1], [-1,0], [-1,1], [0,-1], [0,1], [1,-1], [1,0], [1,1]].sort(() => Math.random() - 0.5);
+    let started = false;
+    for (const dir of startDirs) {
+      const nr = r + dir[0], nc = c + dir[1];
+      if (inBounds(nr, nc) && !state.boards.enemy[nr][nc].ship) {
+        r = nr; c = nc;
+        tentacle.cells.push([r, c]);
+        state.boards.enemy[r][c].ship = tentacle;
+        started = true;
+        break;
+      }
+    }
+    
+    // Extension de la marche aléatoire sur 6 cases
+    for (let j = 1; j < 6 && started; j++) {
+      const nextDirs = [[-1,0], [1,0], [0,-1], [0,1], [-1,-1], [-1,1], [1,-1], [1,1]].sort(() => Math.random() - 0.5);
+      let moved = false;
+      for (const dir of nextDirs) {
+        const nr = r + dir[0], nc = c + dir[1];
+        if (inBounds(nr, nc) && !state.boards.enemy[nr][nc].ship) {
+          r = nr; c = nc;
+          tentacle.cells.push([r, c]);
+          state.boards.enemy[r][c].ship = tentacle;
+          moved = true;
+          break;
+        }
+      }
+      if (!moved) break; // Bloqué
+    }
+    
+    if (tentacle.cells.length > 0) {
+      tentacle.size = tentacle.cells.length;
+      ships.push(tentacle);
+    }
+  }
+  return ships;
+}
 </script>
+<div id="campaign-reward-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4" style="background: rgba(0,0,0,0.85);">
+  <div class="bg-slate-900 border-2 rounded-2xl flex flex-col items-center text-center p-6" style="border-color: var(--accent); box-shadow: 0 0 40px var(--accent-glow); max-width: 95vw; width: 450px; max-height: 90vh; overflow-y: auto;">
+    <div class="text-xs uppercase tracking-widest font-bold mb-2" style="color: var(--accent);">Victoire !</div>
+    <h3 class="font-display text-xl text-white mb-1" id="campaign-title">Zone 1 terminée</h3>
+    <p class="text-slate-400 text-sm mb-4">Améliorez votre flotte</p>
+    <div id="campaign-choices" class="grid grid-cols-2 gap-3 w-full"></div>
+  </div>
+</div>
 </body>
 </html>
