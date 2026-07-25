@@ -239,7 +239,32 @@
   </div>
 </div><div id="tab-achievements" class="tab-content hidden"><div class="bg-slate-900/40 border border-amber-500/15 rounded-xl p-4 md:p-6 backdrop-blur-sm"><div class="flex items-center justify-between mb-4 flex-wrap gap-2"><h2 class="font-display text-2xl text-amber-400">Succès</h2><div class="text-sm text-slate-400"><span id="ach-progress" class="text-amber-400 font-bold">0</span> / <span id="ach-total">220</span> débloqués</div></div><div class="w-full h-2 bg-slate-800 rounded-full mb-4 overflow-hidden"><div id="ach-bar" class="h-full bg-gradient-to-r from-cyan-500 via-amber-500 to-purple-500 transition-all duration-500" style="width: 0%"></div></div><div class="flex gap-2 mb-4 flex-wrap"><button class="ach-filter tab-btn active" data-filter="all">Tous</button><button class="ach-filter tab-btn" data-filter="common">Communs</button><button class="ach-filter tab-btn" data-filter="rare">Rares</button><button class="ach-filter tab-btn" data-filter="epic">Épiques</button><button class="ach-filter tab-btn" data-filter="legend">Légendaires</button><button class="ach-filter tab-btn" data-filter="ultimate">Ultimes</button></div><div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="achievements-grid"></div></div></div></div></div>
 <div id="grades-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background: rgba(0,0,0,0.75);"><div class="bg-slate-900 border rounded-xl p-5 max-w-md w-full max-h-[80vh] overflow-y-auto" style="border-color: var(--border-strong);"><div class="flex items-center justify-between mb-4"><h3 class="font-display text-xl" style="color: var(--accent);">Grades de la flotte</h3><button id="grades-modal-close" class="text-slate-400 text-2xl leading-none px-2">&times;</button></div><div id="grades-modal-list" class="space-y-2"></div></div></div>
-<div id="promotion-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background: rgba(0,0,0,0.8);"><div class="bg-slate-900 border-2 rounded-2xl flex flex-col items-center justify-center text-center p-6" style="border-color: var(--accent); box-shadow: 0 0 40px var(--accent-glow); width: 300px; height: 300px;"><div class="text-xs uppercase tracking-widest font-bold mb-2" style="color: var(--accent);">🎉 Promotion !</div><p class="text-white font-semibold text-sm mb-4 leading-snug">Félicitations, commandant !<br>Vous avez été promu.</p><div class="text-6xl mb-2" id="promotion-icon"></div><div class="font-display text-xl font-bold" id="promotion-name" style="color: var(--accent);"></div><div class="text-xs text-slate-400 mt-1" id="promotion-grade-num"></div><button id="promotion-close-btn" class="btn btn-primary text-xs mt-5 py-2 px-5">Continuer</button></div></div>
+<div id="promotion-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background: rgba(0,0,0,0.8);">
+  <div class="bg-slate-900 border-2 rounded-2xl flex flex-col items-center justify-center text-center p-6" style="border-color: var(--accent); box-shadow: 0 0 40px var(--accent-glow); min-width: 300px; max-width: 90vw;">
+    <div class="text-xs uppercase tracking-widest font-bold mb-2" style="color: var(--accent);">🎉 Promotion !</div>
+    <p class="text-white font-semibold text-sm mb-4 leading-snug">Félicitations, commandant !<br>Vous avez été promu.</p>
+    <div class="text-6xl mb-2" id="promotion-icon"></div>
+    <div class="font-display text-xl font-bold" id="promotion-name" style="color: var(--accent);"></div>
+    <div class="text-xs text-slate-400 mt-1" id="promotion-grade-num"></div>
+    <div id="promotion-unlocks" class="text-amber-400 text-[11px] mt-3 leading-tight font-semibold"></div>
+    <button id="promotion-close-btn" class="btn btn-primary text-xs mt-5 py-2 px-5">Continuer</button>
+  </div>
+</div>
+
+<!-- NOUVELLE FENÊTRE POUR LES DÉFIS -->
+<div id="challenge-modal" class="hidden fixed inset-0 z-[55] flex items-center justify-center p-4" style="background: rgba(0,0,0,0.8);">
+  <div class="bg-slate-900 border-2 rounded-2xl flex flex-col items-center justify-center text-center p-6" style="border-color: var(--accent); box-shadow: 0 0 40px var(--accent-glow); min-width: 300px; max-width: 90vw;">
+    <div class="text-xs uppercase tracking-widest font-bold mb-2" style="color: var(--accent);">🎯 Défi Réussi !</div>
+    <div class="text-5xl mb-3" id="challenge-icon">🏆</div>
+    <div class="font-display text-lg text-white mb-2" id="challenge-title">Titre</div>
+    <div class="text-sm text-slate-400 mb-4" id="challenge-type">Défi du jour complété</div>
+    <div class="bg-slate-800/80 border border-amber-500/30 rounded-lg px-6 py-2 mb-4">
+      <div class="text-[10px] text-slate-400 uppercase tracking-widest">Expérience gagnée</div>
+      <div class="text-3xl font-bold text-amber-400" id="challenge-xp">+5000 XP</div>
+    </div>
+    <button id="challenge-close-btn" class="btn btn-primary text-xs mt-2 py-2 px-5">Continuer</button>
+  </div>
+</div>
 <div id="obstacles-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background: rgba(0,0,0,0.75);"><div class="bg-slate-900 border rounded-xl p-5 max-w-md w-full max-h-[80vh] overflow-y-auto text-left" style="border-color: var(--border-strong);"><div class="flex items-center justify-between mb-4"><h3 class="font-display text-xl" style="color: var(--accent);">🪨 Rochers &amp; Mines</h3><button id="obstacles-modal-close" class="text-slate-400 text-2xl leading-none px-2">&times;</button></div><div class="space-y-3 text-sm text-slate-300 leading-relaxed"><p><strong class="text-white">🪨 Rocher :</strong> un tir dessus ne fait rien à part le révéler (case grisée distincte). Il consomme quand même votre tir.</p><p><strong class="text-white">💣 Mine :</strong> un tir dessus déclenche une explosion sur les 8 cases autour — chacune est testée comme un tir normal.</p><p><strong class="text-white">🛡️ Case navire près d'un rocher :</strong> si un navire occupe une case adjacente à un rocher (une des 8 cases autour), le premier tir ne fait que la moitié des dégâts — il faut toucher cette case 2 fois pour la couler complètement.</p><p><strong class="text-white">📡 Sonar :</strong> détecte aussi les rochers et mines dans sa zone, mais le nombre affiché ne précise pas si ce sont des navires ou des obstacles.</p><p><strong class="text-white">🎯 Tir à plusieurs cases :</strong> s'il touche un rocher en chemin, il s'arrête net (les cases plus loin ne sont pas résolues). Si la case visée est directement un rocher, le tir entier est annulé.</p><p class="text-slate-400 text-xs pt-2 border-t border-slate-800">Nombre d'obstacles selon la taille de l'océan :<br>6×6 → 4 rochers, 2 mines · 10×10 → 8 rochers, 4 mines · 13×13 → 16 rochers, 8 mines · 18×18 → 20 rochers, 12 mines.</p></div></div></div>
 <div id="placement-screen" class="screen min-h-screen p-4 md:p-8 hidden"><div class="max-w-6xl mx-auto"><div class="flex flex-wrap items-center justify-between gap-4 mb-6"><div><h2 class="font-display text-2xl md:text-3xl text-white">Déploiement de la flotte</h2><p class="text-slate-400 text-sm">Clic droit ou appui long pour pivoter votre navire.</p></div><div class="flex gap-2 flex-wrap"><button id="rotate-btn" class="btn btn-secondary text-xs md:text-sm"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 4v5h5"/></svg>Pivoter</button><button id="random-place-btn" class="btn btn-secondary text-xs md:text-sm">Aléatoire</button><button id="clear-btn" class="btn btn-danger text-xs md:text-sm">Effacer</button></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div><h3 class="text-sm font-bold tracking-widest uppercase text-amber-400 mb-3">Navires à déployer</h3><div id="ships-list"></div><button id="confirm-placement-btn" class="btn btn-primary w-full mt-6 py-4 justify-center" disabled><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Confirmer le déploiement</button></div><div class="flex flex-col items-center"><div class="text-sm font-bold tracking-widest uppercase text-amber-400 mb-3 self-start">Votre grille</div><div id="placement-grid" class="grid-board"></div></div></div></div></div>
 
@@ -571,8 +596,63 @@ function renderRank() { const el = document.getElementById('rank-badge'); if (!e
 function renderGradesModalList() { const stats = getStats(); const pts = stats.careerScore || 0; const curNum = getGrade(pts).cur.num; const list = document.getElementById('grades-modal-list'); if (!list) return; list.innerHTML = GRADES.map(g => { const achieved = pts >= g.min; const isCurrent = curNum === g.num; return `<div class="flex items-center gap-3 p-2 rounded-lg" style="${isCurrent ? 'border:1px solid var(--accent);background:rgba(255,255,255,0.04);' : ''}"><div class="text-lg">${achieved ? '✅' : '🔒'}</div><div class="text-2xl">${g.icon}</div><div class="flex-1 text-left"><div class="font-bold text-sm ${achieved ? 'text-white' : 'text-slate-500'}">Grade ${g.num} — ${g.name}</div><div class="text-xs text-slate-400">${g.min.toLocaleString('fr-FR')} pts requis</div></div></div>`; }).join(''); }
 function openGradesModal() { renderGradesModalList(); const m = document.getElementById('grades-modal'); if (m) m.classList.remove('hidden'); }
 function closeGradesModal() { const m = document.getElementById('grades-modal'); if (m) m.classList.add('hidden'); }
-function showPromotionModal(grade) { const iconEl = document.getElementById('promotion-icon'); const nameEl = document.getElementById('promotion-name'); const numEl = document.getElementById('promotion-grade-num'); if (iconEl) iconEl.textContent = grade.icon; if (nameEl) nameEl.textContent = grade.name; if (numEl) numEl.textContent = `Grade ${grade.num}/10`; if (grade.num === 4) { if (numEl) numEl.innerHTML += `<br><span class="text-amber-400 text-[10px] mt-2 block leading-tight">Modes Océan & Obstacles débloqués !<br>20 nouveaux succès disponibles !</span>`; } const m = document.getElementById('promotion-modal'); if (m) m.classList.remove('hidden'); playSound('achievement'); }
+function showPromotionModal(grade) { 
+  const iconEl = document.getElementById('promotion-icon'); 
+  const nameEl = document.getElementById('promotion-name'); 
+  const numEl = document.getElementById('promotion-grade-num'); 
+  const unlockEl = document.getElementById('promotion-unlocks');
+  
+  if (iconEl) iconEl.textContent = grade.icon; 
+  if (nameEl) nameEl.textContent = grade.name; 
+  if (numEl) numEl.textContent = `Grade ${grade.num}/10`; 
+  
+  let unlockText = '';
+  if (grade.num === 3) unlockText = `🔓 Débloqué : Défis Journaliers & Hebdomadaires !`;
+  else if (grade.num === 4) unlockText = `🔓 Débloqué : Nouvelles tailles d'océan (6x6, 13x13, 18x18) & Obstacles !<br>🎖️ 20 nouveaux succès disponibles !`;
+  else if (grade.num === 7) unlockText = `🔓 Débloqué : Brouillard de Guerre & Téléportation !<br>🎨 3 Nouveaux thèmes de carte !<br>👻 Difficulté "Fantôme" !`;
+  else if (grade.num === 10) unlockText = `🔓 Débloqué : Mode Campagne (Boss Kraken) !`;
+  
+  if (unlockEl) unlockEl.innerHTML = unlockText;
+  
+  const m = document.getElementById('promotion-modal'); 
+  if (m) m.classList.remove('hidden'); 
+  playSound('achievement'); 
+}
 function closePromotionModal() { const m = document.getElementById('promotion-modal'); if (m) m.classList.add('hidden'); }
+function showChallengePopup() {
+  if (state.pendingChallengePopups.length === 0) {
+    document.getElementById('challenge-modal').classList.add('hidden');
+    // Une fois les défis fermés, on vérifie si une promotion attend
+    if (state.pendingPromotion) { 
+      const grade = state.pendingPromotion; 
+      state.pendingPromotion = null; 
+      setTimeout(() => showPromotionModal(grade), 200); 
+    }
+    return;
+  }
+  const ch = state.pendingChallengePopups.shift(); // Prend le premier défi de la liste
+  document.getElementById('challenge-icon').textContent = ch.icon || '🏆';
+  document.getElementById('challenge-title').textContent = ch.text;
+  document.getElementById('challenge-type').textContent = ch.type + ' complété !';
+  document.getElementById('challenge-xp').textContent = `+${ch.xp.toLocaleString('fr-FR')} XP`;
+  document.getElementById('challenge-modal').classList.remove('hidden');
+  playSound('achievement');
+}
+function closeChallengePopup() {
+  document.getElementById('challenge-modal').classList.add('hidden');
+  // S'il reste d'autres défis dans la liste, on affiche le suivant
+  if (state.pendingChallengePopups.length > 0) {
+    setTimeout(() => showChallengePopup(), 300);
+  } else {
+    // Si plus de défis, on vérifie la promotion
+    if (state.pendingPromotion) { 
+      const grade = state.pendingPromotion; 
+      state.pendingPromotion = null; 
+      setTimeout(() => showPromotionModal(grade), 300); 
+    }
+  }
+}
+document.getElementById('challenge-close-btn').addEventListener('click', closeChallengePopup);
 function openObstaclesHelpModal() { const m = document.getElementById('obstacles-modal'); if (m) m.classList.remove('hidden'); }
 function closeObstaclesHelpModal() { const m = document.getElementById('obstacles-modal'); if (m) m.classList.add('hidden'); }
 function renderAchCounter() { 
@@ -2431,11 +2511,24 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
               leviathanIntact: GRID_SIZE === 18 && state.ships.player.find(s => s.id === 'leviathan') && state.ships.player.find(s => s.id === 'leviathan').cells.every(c => !state.boards.player[c[0]][c[1]].hit)
             };
             // ... (le reste du code reste identique)
-            let completedNames = [];
-            getDailyChallenges().forEach(ch => { if (!isDailyDone(ch.id) && ch.check(state.tracking, ctx)) { markDailyDone(ch.id); completedNames.push(ch.text); } });
-            if (completedNames.length > 0) showToast(`🎯 Défi${completedNames.length > 1 ? 's' : ''} du jour complété${completedNames.length > 1 ? 's' : ''} : ${completedNames.join(' · ')} (+${completedNames.length * 5000} XP)`, 'success', 4500);
-            if (!isWeeklyDone()) { const wc = getWeeklyChallenge(); const freshStats = getStats(); const extra = Object.assign(getWeeklyStats(), { winStreak: freshStats.winStreak || 0 }); if (wc.check(state.tracking, ctx, extra)) { markWeeklyDone(); showToast(`🏆 Succès de la semaine complété : ${wc.text} (+30000 XP)`, 'achievement', 5000); } }
-            checkAchievementsDuringPlay();
+                        // --- GESTION DES DÉFIS AVEC FENÊTRE MODALE ---
+            state.pendingChallengePopups = [];
+            getDailyChallenges().forEach(ch => { 
+              if (!isDailyDone(ch.id) && ch.check(state.tracking, ctx)) { 
+                markDailyDone(ch.id); 
+                state.pendingChallengePopups.push({ icon: ch.icon, text: ch.text, type: 'Défi du jour', xp: 5000 });
+              } 
+            });
+            if (!isWeeklyDone()) { 
+              const wc = getWeeklyChallenge(); 
+              const freshStats = getStats(); 
+              const extra = Object.assign(getWeeklyStats(), { winStreak: freshStats.winStreak || 0 }); 
+              if (wc.check(state.tracking, ctx, extra)) { 
+                markWeeklyDone(); 
+                state.pendingChallengePopups.push({ icon: wc.icon, text: wc.text, type: 'Défi de la semaine', xp: 30000 });
+              } 
+            }
+		checkAchievementsDuringPlay();
           }
           const icon = document.getElementById('end-icon'); const title = document.getElementById('end-title'); const subtitle = document.getElementById('end-subtitle'); const scoreDisplay = document.getElementById('end-score-display'); const statsGrid = document.getElementById('end-stats-grid'); statsGrid.classList.remove('hidden'); 
           if (playerWon) { 
@@ -2453,18 +2546,40 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
           } 
           document.getElementById('end-shots').textContent = state.shots.player; document.getElementById('end-hits').textContent = state.hits.player; 
           const acc = state.shots.player > 0 ? Math.round((state.hits.player / state.shots.player) * 100) : 0; document.getElementById('end-acc').textContent = acc + '%'; document.getElementById('end-sunk').textContent = state.sunk.player; 
-          const extraEl = document.getElementById('end-extra-info'); if (extraEl) extraEl.innerHTML = state.lastExtraInfo || '';
+                    // --- AFFICHAGE DU DÉTAIL DU SCORE ---
+          let scoreDetailHtml = '';
+          if (state.lastScoreBreakdown && state.lastScoreBreakdown.length > 0) {
+            scoreDetailHtml = '<div class="bg-slate-800/50 rounded-lg p-3 mt-4 text-left text-xs space-y-1 border border-slate-700/50">';
+            scoreDetailHtml += '<div class="font-bold text-amber-400 mb-2 uppercase tracking-widest text-[10px]">Détail du Score</div>';
+            state.lastScoreBreakdown.forEach(item => {
+              scoreDetailHtml += `<div class="flex justify-between text-slate-300"><span>${item.label}</span><span class="font-semibold text-white">+${item.value.toLocaleString('fr-FR')}</span></div>`;
+            });
+            scoreDetailHtml += `<div class="border-t border-slate-600 mt-2 pt-2 flex justify-between font-bold"><span class="text-amber-400">TOTAL</span><span class="text-amber-400">${state.lastScore.toLocaleString('fr-FR')}</span></div>`;
+            scoreDetailHtml += '</div>';
+          }
+          const extraEl = document.getElementById('end-extra-info'); 
+          if (extraEl) extraEl.innerHTML = (state.lastExtraInfo || '') + scoreDetailHtml;
           const shareBtn = document.getElementById('share-score-btn'); if (shareBtn) shareBtn.classList.toggle('hidden', !(playerWon && state.mode === '1p'));
           const achEl = document.getElementById('end-achievements'); 
           if (state.newlyUnlocked.length > 0) { achEl.innerHTML = `<div class="text-sm text-amber-400 font-bold uppercase tracking-widest mb-3">Nouveaux succès (${state.newlyUnlocked.length})</div><div class="grid grid-cols-1 md:grid-cols-2 gap-2">${state.newlyUnlocked.map(id => { const a = ACHIEVEMENTS.find(x => x.id === id); if (!a) return ''; return `<div class="achievement-card unlocked"><div class="achievement-icon rarity-${a.rarity}">${a.icon}</div><div class="flex-1 min-w-0"><div class="font-bold text-sm text-white truncate">${a.name}</div><div class="text-xs text-slate-400 truncate">${a.desc}</div></div></div>`; }).join('')}</div>`; } 
           else { achEl.innerHTML = ''; } 
         } catch (e) { console.error("Erreur lors de l'affichage de l'écran de fin:", e); }
-        if (state.mode === 'online') resetOnlineMode(); 
-        if (state.pendingPromotion) { const grade = state.pendingPromotion; state.pendingPromotion = null; setTimeout(() => showPromotionModal(grade), 1000); }
+                if (state.mode === 'online') resetOnlineMode(); 
+        
+                // Si on a des défis réussis, on attend que le joueur clique pour fermer
+        if (state.pendingChallengePopups.length > 0) {
+          setTimeout(() => showChallengePopup(), 1200);
+        } else if (state.pendingPromotion) { 
+          const grade = state.pendingPromotion; 
+          state.pendingPromotion = null; 
+          setTimeout(() => showPromotionModal(grade), 1200); 
+        }
       }, 800); 
     }
 function calculateScore(playerWon) { 
-  if (!playerWon) return 0; 
+  if (!playerWon) { state.lastScoreBreakdown = []; return 0; }
+  
+  state.lastScoreBreakdown = []; // Stocke le détail pour l'afficher à la fin
   
   let mult = 1;
   if (state.mode === 'online') mult = 2; 
@@ -2478,14 +2593,51 @@ function calculateScore(playerWon) {
   const shipsLost = state.tracking.shipsLostByPlayer; 
   const fleetSize = SHIPS.length; 
   const shipsRemaining = fleetSize - shipsLost; 
+  
   let score = 800; 
-  score += (shipsRemaining / fleetSize) * 5 * 220; 
-  score += Math.round(acc * 600); 
-  score += state.paSpent * 20; 
-  score += Math.max(0, 30 - state.shots.player) * 20; 
-  if (state.tracking.playerHitsReceived === 0) score += 400; 
-  if (shipsRemaining === fleetSize) score = Math.round(score * 1.3); 
-  return Math.max(0, Math.round(score * mult)); 
+  state.lastScoreBreakdown.push({ label: 'Base de victoire', value: 800 });
+  
+  let survivalPts = Math.round((shipsRemaining / fleetSize) * 5 * 220);
+  score += survivalPts;
+  state.lastScoreBreakdown.push({ label: 'Navires survivants', value: survivalPts });
+  
+  let accPts = Math.round(acc * 600);
+  score += accPts;
+  state.lastScoreBreakdown.push({ label: 'Précision', value: accPts });
+  
+  let paPts = state.paSpent * 20;
+  score += paPts;
+  state.lastScoreBreakdown.push({ label: 'PA dépensés (Économie)', value: paPts });
+  
+  let speedPts = Math.max(0, 30 - state.shots.player) * 20;
+  score += speedPts;
+  state.lastScoreBreakdown.push({ label: 'Rapidité', value: speedPts });
+  
+  if (state.tracking.playerHitsReceived === 0) {
+    score += 400;
+    state.lastScoreBreakdown.push({ label: 'Bonus Intouchable', value: 400 });
+  }
+  
+  if (shipsRemaining === fleetSize) {
+    let beforeFlawless = score;
+    score = Math.round(score * 1.3);
+    state.lastScoreBreakdown.push({ label: 'Bonus Flawless (x1.3)', value: score - beforeFlawless });
+  }
+
+  const diffBonuses = { recrue: 0, tactique: 1000, stratege: 2000, amiral: 3000, fantome: 5000 };
+  let flatBonus = diffBonuses[state.difficulty] || 0;
+  if (state.gameOptions.fogOfWar) flatBonus += 2000;
+
+  const gridMults = { 6: 1, 10: 1.5, 13: 2, 18: 3 };
+  const gridMult = gridMults[GRID_SIZE] || 1;
+
+  let baseScoreWithMult = Math.round(score * mult * gridMult);
+  let finalScore = baseScoreWithMult + flatBonus;
+  
+  state.lastScoreBreakdown.push({ label: `Multiplicateur (Difficulté x${mult}, Océan x${gridMult})`, value: baseScoreWithMult - score });
+  if (flatBonus > 0) state.lastScoreBreakdown.push({ label: 'Bonus Fixes (Adversaire/Brouillard)', value: flatBonus });
+  
+  return Math.max(0, finalScore); 
 }
     const RANDOM_EVENTS = [
       { id: 'resupply', icon: '⛽', title: 'Ravitaillement surprise', run: () => { state.pa.player += 2; updatePA1P(); return '+2 PA offerts par la logistique de la flotte !'; } },
