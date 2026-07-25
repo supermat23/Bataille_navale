@@ -682,13 +682,23 @@ function dailyBothDoneToday() { const d = loadData(); return !!(d.dailyChallenge
 function markDailyDone(id) {
   const d = loadData(); const today = getDailyKey();
   if (!d.dailyChallenge || d.dailyChallenge.date !== today) d.dailyChallenge = { date: today, done: [] };
-  if (!d.dailyChallenge.done.includes(id)) d.dailyChallenge.done.push(id);
-  d.stats.dailyCompletions = (d.stats.dailyCompletions || 0) + 1;
-  d.stats.dailyCompletedIds = d.stats.dailyCompletedIds || []; if (!d.stats.dailyCompletedIds.includes(id)) d.stats.dailyCompletedIds.push(id);
-  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-  if (!d.dailyStreak) d.dailyStreak = { lastDate: null, count: 0 };
-  if (d.dailyStreak.lastDate !== today) { d.dailyStreak.count = (d.dailyStreak.lastDate === yesterday) ? (d.dailyStreak.count + 1) : 1; d.dailyStreak.lastDate = today; }
-  saveData(d);
+  if (!d.dailyChallenge.done.includes(id)) {
+    d.dailyChallenge.done.push(id);
+    d.stats.dailyCompletions = (d.stats.dailyCompletions || 0) + 1;
+    d.stats.dailyCompletedIds = d.stats.dailyCompletedIds || []; 
+    if (!d.stats.dailyCompletedIds.includes(id)) d.stats.dailyCompletedIds.push(id);
+    
+    // --- AJOUT DE L'EXPERIENCE ---
+    d.stats.careerScore = (d.stats.careerScore || 0) + 5000;
+    
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    if (!d.dailyStreak) d.dailyStreak = { lastDate: null, count: 0 };
+    if (d.dailyStreak.lastDate !== today) { 
+      d.dailyStreak.count = (d.dailyStreak.lastDate === yesterday) ? (d.dailyStreak.count + 1) : 1; 
+      d.dailyStreak.lastDate = today; 
+    }
+    saveData(d);
+  }
 }
 const WEEKLY_CHALLENGES = [
   // --- DÉFIS DE BASE (Tous Rangs) ---
@@ -735,9 +745,34 @@ function getWeeklyStats() {
   return { weeklyScoreSum, weeklyDiffsBeaten, weeklyGridSizes, weeklyLeviathansSunk, weeklyObstacleWins, weeklyWins18, weeklyFogWins, weeklyFantomeWins, weeklyThemesWon, weeklyTeleportsUsed }; 
 }
 function isWeeklyDone() { const d = loadData(); return !!(d.weeklyChallenge && d.weeklyChallenge.week === getISOWeekKey(new Date()) && d.weeklyChallenge.done); }
-function markWeeklyDone() { const d = loadData(); d.weeklyChallenge = { week: getISOWeekKey(new Date()), done: true }; d.stats.weeklyCompletions = (d.stats.weeklyCompletions || 0) + 1; saveData(d); }
+function markWeeklyDone() { 
+  const d = loadData(); 
+  if (!(d.weeklyChallenge && d.weeklyChallenge.week === getISOWeekKey(new Date()) && d.weeklyChallenge.done)) {
+    d.weeklyChallenge = { week: getISOWeekKey(new Date()), done: true }; 
+    d.stats.weeklyCompletions = (d.stats.weeklyCompletions || 0) + 1; 
+    
+    // --- AJOUT DE L'EXPERIENCE ---
+    d.stats.careerScore = (d.stats.careerScore || 0) + 30000;
+    
+    saveData(d); 
+  }
+}
 function renderDailyChallenge() {
   const el = document.getElementById('daily-challenge-panel'); 
+  const wEl = document.getElementById('weekly-challenge-panel');
+  
+  // Vérification du Rang 3
+  if (!isFeatureUnlocked(3)) {
+    if (el) {
+      el.innerHTML = `<div class="text-center text-slate-500 text-sm font-semibold py-2">🔒 Débloqué au Rang 3</div>`;
+    }
+    if (wEl) wEl.classList.add('hidden'); // On cache le panneau hebdo tant que c'est verrouillé
+    return;
+  }
+  
+  // Si débloqué, on réaffiche le panneau hebdo (au cas où)
+  if (wEl) wEl.classList.remove('hidden');
+
   if (el) { 
     const chs = getDailyChallenges(); 
     if (chs.length === 0) {
@@ -745,20 +780,19 @@ function renderDailyChallenge() {
     } else {
       const rows = chs.map(ch => { 
         const done = isDailyDone(ch.id); 
-        return `<div class="flex items-center gap-3 py-1"><div class="text-xl">${ch.icon}</div><div class="flex-1 text-left"><div class="text-sm font-semibold text-white">${ch.text}</div></div><div class="text-xs font-bold ${done ? 'text-emerald-400' : 'text-slate-500'}">${done ? '✓ Fait' : 'En attente'}</div></div>`; 
+        return `<div class="flex items-center gap-3 py-1"><div class="text-xl">${ch.icon}</div><div class="flex-1 text-left"><div class="text-sm font-semibold text-white">${ch.text}</div><div class="text-[10px] text-amber-400 mt-0.5">🎁 Récompense : 5000 XP</div></div><div class="text-xs font-bold ${done ? 'text-emerald-400' : 'text-slate-500'}">${done ? '✓ Fait' : 'En attente'}</div></div>`; 
       }).join('<div class="border-t border-slate-800/60 my-1"></div>'); 
       el.innerHTML = `<div class="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Défis du jour</div>${rows}`; 
     }
   }
   
-  const wEl = document.getElementById('weekly-challenge-panel'); 
   if (wEl) { 
     const wc = getWeeklyChallenge(); 
     if (!wc) {
       wEl.innerHTML = '';
     } else {
       const wDone = isWeeklyDone(); 
-      wEl.innerHTML = `<div class="flex items-center gap-3"><div class="text-xl">${wc.icon}</div><div class="flex-1 text-left"><div class="text-[10px] uppercase tracking-widest font-bold" style="color:var(--r-legend);">Succès de la semaine</div><div class="text-sm font-semibold text-white">${wc.text}</div></div><div class="text-xs font-bold ${wDone ? 'text-emerald-400' : 'text-slate-500'}">${wDone ? '✓ Fait' : 'En attente'}</div></div>`; 
+      wEl.innerHTML = `<div class="flex items-center gap-3"><div class="text-xl">${wc.icon}</div><div class="flex-1 text-left"><div class="text-[10px] uppercase tracking-widest font-bold" style="color:var(--r-legend);">Succès de la semaine</div><div class="text-sm font-semibold text-white">${wc.text}</div><div class="text-[10px] text-amber-400 mt-0.5">🎁 Récompense : 30000 XP</div></div><div class="text-xs font-bold ${wDone ? 'text-emerald-400' : 'text-slate-500'}">${wDone ? '✓ Fait' : 'En attente'}</div></div>`; 
     }
   }
 }
@@ -2290,7 +2324,7 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
         }
       }, 1000);
     }
-        function endGame1P(playerWon) { 
+  function endGame1P(playerWon) { 
       stopChrono(); state.freeSonarNext = false; state.skipNextBotTurn = false;
       state.phase = 'end'; 
       if (!state.campaign.active || !playerWon) showScreen('end-screen'); 
@@ -2397,10 +2431,10 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
               leviathanIntact: GRID_SIZE === 18 && state.ships.player.find(s => s.id === 'leviathan') && state.ships.player.find(s => s.id === 'leviathan').cells.every(c => !state.boards.player[c[0]][c[1]].hit)
             };
             // ... (le reste du code reste identique)
-let completedNames = [];
+            let completedNames = [];
             getDailyChallenges().forEach(ch => { if (!isDailyDone(ch.id) && ch.check(state.tracking, ctx)) { markDailyDone(ch.id); completedNames.push(ch.text); } });
-            if (completedNames.length > 0) showToast(`🎯 Défi${completedNames.length > 1 ? 's' : ''} du jour complété${completedNames.length > 1 ? 's' : ''} : ${completedNames.join(' · ')}`, 'success', 4500);
-            if (!isWeeklyDone()) { const wc = getWeeklyChallenge(); const freshStats = getStats(); const extra = Object.assign(getWeeklyStats(), { winStreak: freshStats.winStreak || 0 }); if (wc.check(state.tracking, ctx, extra)) { markWeeklyDone(); showToast(`🏆 Succès de la semaine complété : ${wc.text}`, 'achievement', 5000); } }
+            if (completedNames.length > 0) showToast(`🎯 Défi${completedNames.length > 1 ? 's' : ''} du jour complété${completedNames.length > 1 ? 's' : ''} : ${completedNames.join(' · ')} (+${completedNames.length * 5000} XP)`, 'success', 4500);
+            if (!isWeeklyDone()) { const wc = getWeeklyChallenge(); const freshStats = getStats(); const extra = Object.assign(getWeeklyStats(), { winStreak: freshStats.winStreak || 0 }); if (wc.check(state.tracking, ctx, extra)) { markWeeklyDone(); showToast(`🏆 Succès de la semaine complété : ${wc.text} (+30000 XP)`, 'achievement', 5000); } }
             checkAchievementsDuringPlay();
           }
           const icon = document.getElementById('end-icon'); const title = document.getElementById('end-title'); const subtitle = document.getElementById('end-subtitle'); const scoreDisplay = document.getElementById('end-score-display'); const statsGrid = document.getElementById('end-stats-grid'); statsGrid.classList.remove('hidden'); 
