@@ -1332,6 +1332,26 @@ function handleNetShot(data) {
   
   const primaryTarget = data.primaryTarget ? [data.primaryTarget.r, data.primaryTarget.c] : null;
   const pattern = data.pattern || null;
+    // --- NOUVEAU BLOC BOUCLIER (DÉFENSEUR EN LIGNE) ---
+  if (state.counterMeasure) {
+    state.counterMeasure = false;
+    const [pr, pc] = primaryTarget || cells[0];
+    if (inBounds(pr, pc)) {
+      const cellEl = document.querySelector(`#player-grid .cell[data-row="${pr}"][data-col="${pc}"]`);
+      if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); }
+    }
+    results.push({ r: pr, c: pc, status: 'shielded' });
+    sendNetData({ type: 'shot_result', results, sunkShips: [], weaponType: data.weaponType, usedAbility: data.usedAbility });
+    addLog('Tir dévié par contre-mesures !', 'miss', 'player');
+    showCountermeasurePopup();
+    
+    state.isPlayerTurn = true; state.selectedWeapon = 'standard';
+    SHIPS.forEach(s => { if (state.abilityCooldowns[s.id] > 0) state.abilityCooldowns[s.id]--; });
+    renderWeapons1P('weapons-list'); renderAbilities1P('abilities-list'); renderTacticalActions();
+    updateTurnIndicator();
+    startChrono();
+    return;
+  }
   let rockCancelled = false;
   let blockedDirs = new Set();
   let cells = data.cells.map(c => [c.r, c.c]);
@@ -1371,14 +1391,6 @@ function handleNetShot(data) {
         const dc = Math.sign(c - primaryTarget[1]);
         dirKey = `${dr},${dc}`;
         if (blockedDirs.has(dirKey)) return; // Arrêt de la propagation dans cette direction
-      }
-
-            if (state.counterMeasure) {
-        state.counterMeasure = false;
-        if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); }
-        results.push({ r, c, status: 'shielded' });
-        attackCancelled = true; // Annule tout le reste du tir
-        return;
       }
       if (cd.rock) {
         cd.rockRevealed = true; cd.miss = true;
@@ -1450,6 +1462,21 @@ function handleNetShotResult(data) {
     addLog(`Sonar — ${data.sonarCount} navire${data.sonarCount > 1 ? 's' : ''} détecté${data.sonarCount > 1 ? 's' : ''}.`, 'info', 'player');
     state.isPlayerTurn = false; updateTurnIndicator(); return;
   }
+    // --- NOUVEAU BLOC BOUCLIER (ATTAQUANT EN LIGNE) ---
+  if (data.results && data.results.some(res => res.status === 'shielded')) {
+    const shieldRes = data.results.find(res => res.status === 'shielded');
+    const r = parseInt(shieldRes.r), c = parseInt(shieldRes.c);
+    if (inBounds(r, c)) {
+      const cellEl = document.querySelector(`#enemy-grid .cell[data-row="${r}"][data-col="${c}"]`);
+      if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); }
+    }
+    addLog(`Tir dévié par contre-mesures !`, 'miss', 'player');
+    showCountermeasurePopup();
+    state.shots.player++; 
+    const stats = getStats(); updateStats({ totalShots: stats.totalShots + 1 });
+    state.isPlayerTurn = false; updateTurnIndicator();
+    return; // Arrête le traitement des autres cases du tir
+  }
   let hits = 0; let sunkShips = [];
       if (data.results && Array.isArray(data.results)) {
     data.results.forEach(res => {
@@ -1462,12 +1489,6 @@ function handleNetShotResult(data) {
       else if (res.status === 'rock') { cd.rockRevealed = true; cd.miss = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } addLog(`Tir bloqué par un rocher en ${getCoord([r,c])}!`, 'miss', 'player'); }
       else if (res.status === 'mine') { cd.mineTriggered = true; cd.miss = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); } addLog(`Mine déclenchée en ${getCoord([r,c])}!`, 'hit', 'player'); }
       else if (res.status === 'halfhit') { cd.halfHit = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } addLog(`Armure renforcée! Case ${getCoord([r,c])} touchée mais résiste.`, 'hit', 'player'); }
-            else if (res.status === 'shielded') {
-        // On ne met ni hit ni miss, la case reste vierge
-        if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
-        addLog(`Tir dévié par contre-mesures !`, 'miss', 'player'); 
-        showCountermeasurePopup(); 
-      }
       else if (res.status === 'sunk') { 
         cd.hit = true; 
         if (cd.ship) cd.ship.sunk = true; 
@@ -2290,6 +2311,19 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
     if (owner === 'player') renderGrid1P('enemy-grid', 'enemy', false); else { renderGrid1P('player-grid', 'player', true); showToast('📡 Radar adverse détecté sur votre flotte !', 'info', 2500); }
     return;
   }
+    // --- NOUVEAU BLOC BOUCLIER (MODE 1P) ---
+  if (owner === 'bot' && state.counterMeasure) {
+    state.counterMeasure = false;
+    const [pr, pc] = primaryTarget || cells[0];
+    if (inBounds(pr, pc)) {
+      const cellEl = document.querySelector(`#player-grid .cell[data-row="${pr}"][data-col="${pc}"]`);
+      if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); }
+    }
+    showToast('Tir dévié par contre-mesures !', 'success'); 
+    addLog('Tir dévié par contre-mesures.', 'miss', 'bot');
+    showCountermeasurePopup();
+    return; // Annule tout le reste du tir
+  }
   let hits = 0; let sunkShips = []; let rockCancelled = false;
   if (primaryTarget && inBounds(primaryTarget[0], primaryTarget[1])) {
     const [pr, pc] = primaryTarget; const pcd = board[pr][pc];
@@ -2355,15 +2389,6 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
         // Si ignoreRock est vrai, on ne return pas, le tir continue à travers !
       }
       
-            if (owner === 'bot' && state.counterMeasure) { 
-        state.counterMeasure = false; 
-        if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
-        showToast('Tir dévié par contre-mesures !', 'success'); addLog('Tir dévié par contre-mesures.', 'miss', 'bot'); 
-        showCountermeasurePopup();
-        attackCancelled = true; // Annule tout le reste du tir (pour les armes de zone)
-        return; 
-      }
-	  
       if (cd.mine && !cd.mineTriggered) {
         cd.mineTriggered = true; cd.miss = true;
         if (owner === 'player') state.tracking.minesTriggered++; 
@@ -3004,7 +3029,25 @@ function executeWeapon2P(cells, weaponType, actionSummary, primaryTarget = null,
     if (center) { const rect = center.getBoundingClientRect(); spawnSonar(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
     state.lastAction2P = `${actionSummary} ${sonarCount} navire(s) détecté(s)`; addLog(state.lastAction2P, 'info', ap, 'p2p-log-container'); 
   } else {
-    let blockedDirs = new Set();
+        // --- NOUVEAU BLOC BOUCLIER (MODE 2P LOCAL) ---
+    if (state[opp].counterMeasure) {
+      state[opp].counterMeasure = false;
+      const [pr, pc] = primaryTarget || cells[0];
+      if (inBounds(pr, pc)) {
+        const cellEl = document.querySelector(`#p2p-enemy-grid .cell[data-row="${pr}"][data-col="${pc}"]`);
+        if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); }
+      }
+      showToast('Tir dévié par contre-mesures !', 'success'); 
+      addLog('Tir dévié par contre-mesures.', 'miss', ap, 'p2p-log-container');
+      showCountermeasurePopup();
+      state.lastAction2P = `${actionSummary} CONTRÉ !`;
+      SHIPS.forEach(s => { if (state[ap].abilityCooldowns[s.id] > 0) { state[ap].abilityCooldowns[s.id]--; } });
+      renderCombat2P();
+      if (checkVictory2P()) return;
+      state.isPlayerTurn = false; setTimeout(() => { state.activePlayer = state.activePlayer === 'p1' ? 'p2' : 'p1'; state.isPlayerTurn = true; state.selectedWeapon = 'standard'; showPassScreen('combat'); }, 1500);
+      return; // Annule tout le reste du tir
+    }
+	let blockedDirs = new Set();
     let attackCancelled = false; // <-- AJOUTE CETTE LIGNE
     if (primaryTarget && pattern !== 'star' && pattern !== 'salvo') {
       cells = cells.slice().sort((a, b) => {
@@ -3025,15 +3068,6 @@ function executeWeapon2P(cells, weaponType, actionSummary, primaryTarget = null,
         const dc = Math.sign(c - primaryTarget[1]);
         dirKey = `${dr},${dc}`;
         if (blockedDirs.has(dirKey)) return;
-      }
-      
-      if (state[opp].counterMeasure) { 
-        state[opp].counterMeasure = false; 
-        if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
-        showToast('Tir dévié par contre-mesures !', 'success'); addLog('Tir dévié par contre-mesures.', 'miss', ap, 'p2p-log-container'); 
-        showCountermeasurePopup(); 
-        attackCancelled = true; // Annule tout le reste du tir
-        return; 
       }
       
       if (cd.rock) {
