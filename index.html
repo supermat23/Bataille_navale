@@ -3408,10 +3408,11 @@ applyTheme(state.theme); state.shipAbilitiesEnabled = savedPrefs.abilitiesEnable
     function botFantome() {
   const m = state.botMemory, board = state.boards.player;
 
-  // 1. Gestion des Capacités : Bouclier si un de ses navires est en danger
-  if (state.abilityCooldowns.patrol === 0) {
-    const shipInDanger = state.ships.player.find(s => !s.sunk && s.cells.filter(c => board[c[0]][c[1]].hit).length >= 2);
-    if (shipInDanger) {
+    // 1. Gestion des Capacités : Bouclier si un de ses navires est en danger
+  if (state.botAbilityCooldowns.patrol === 0) {
+    // CORRECTION : L'IA doit vérifier SES propres navires (enemy) sur SA grille (enemy)
+    const myShipInDanger = state.ships.enemy.find(s => !s.sunk && s.cells.filter(c => state.boards.enemy[c[0]][c[1]].hit).length >= 2);
+    if (myShipInDanger) {
       state.counterMeasureEnemy = true;
       state.botAbilityCooldowns.patrol = SHIP_ABILITIES.patrol.cooldown;
       state.tracking.botShieldUsed = true;
