@@ -364,7 +364,7 @@ const state = {
   shots: { player: 0, bot: 0 }, hits: { player: 0, bot: 0 }, sunk: { player: 0, bot: 0 },
   botMemory: createBotMemory(),
   isPlayerTurn: true, isAnimating: false,
-    abilitiesUsed: {}, abilityCooldowns: {}, activeAbility: null, counterMeasure: false, counterMeasureEnemy: false,
+    abilitiesUsed: {}, abilityCooldowns: {}, botAbilityCooldowns: {}, activeAbility: null, counterMeasure: false, counterMeasureEnemy: false,
   tracking: resetTracking(),
   campaign: { active: false, zone: 1, buffs: [] },
   lastScore: 0, newlyUnlocked: [], turnCount: 0, achFilter: 'all',
@@ -1891,10 +1891,10 @@ function startCombat1P() {
   state.paGained = 0; state.paSpent = 0;
   state.selectedWeapon = 'standard'; state.isPlayerTurn = state.mode === 'online' ? state.net.isHost : true; state.botMemory = createBotMemory();
   state.shots = { player: 0, bot: 0 }; state.hits = { player: 0, bot: 0 }; state.sunk = { player: 0, bot: 0 };
-  state.abilitiesUsed = {}; state.abilityCooldowns = {}; state.activeAbility = null; state.counterMeasure = false;
+    state.abilitiesUsed = {}; state.abilityCooldowns = {}; state.botAbilityCooldowns = {}; state.activeAbility = null; state.counterMeasure = false; state.counterMeasureEnemy = false;
   state.teleportUsed = false;
   state.tracking = resetTracking(); state.newlyUnlocked = []; state.turnCount = 0;
-  SHIPS.forEach(s => state.abilityCooldowns[s.id] = SHIP_ABILITIES[s.id].cooldown); 
+  SHIPS.forEach(s => { state.abilityCooldowns[s.id] = SHIP_ABILITIES[s.id].cooldown; state.botAbilityCooldowns[s.id] = SHIP_ABILITIES[s.id].cooldown; }); 
   
   // On NE génère PAS d'obstacles aléatoires si c'est une campagne (la map spéciale a déjà ses rochers)
   if (state.mode === '1p' && state.gameOptions.obstaclesEnabled && !state.campaign.active) { 
@@ -2241,8 +2241,12 @@ function activateAbility1P(shipId) {
   checkAchievementsDuringPlay();
   state.isPlayerTurn = false; state.isAnimating = true; state.turnCount++;
   renderAbilities1P('abilities-list'); renderWeapons1P('weapons-list'); updatePA1P();
-  if (checkVictory1P()) { state.isAnimating = false; return; }
+    if (checkVictory1P()) { state.isAnimating = false; return; }
   updateTurnIndicator();
+  // On décrémente le compteur de l'IA à la fin du tour du joueur
+  if (state.mode === '1p') {
+    SHIPS.forEach(s => { if (state.botAbilityCooldowns[s.id] > 0) state.botAbilityCooldowns[s.id]--; });
+  }
   setTimeout(() => botTurn(), 800);
 }
 
@@ -3409,7 +3413,7 @@ applyTheme(state.theme); state.shipAbilitiesEnabled = savedPrefs.abilitiesEnable
     const shipInDanger = state.ships.player.find(s => !s.sunk && s.cells.filter(c => board[c[0]][c[1]].hit).length >= 2);
     if (shipInDanger) {
       state.counterMeasureEnemy = true;
-      state.abilityCooldowns.patrol = SHIP_ABILITIES.patrol.cooldown;
+      state.botAbilityCooldowns.patrol = SHIP_ABILITIES.patrol.cooldown;
       state.tracking.botShieldUsed = true;
 addLog('L\'ennemi active des <strong>contre-mesures</strong> !', 'info', 'bot');
     }
@@ -3423,8 +3427,8 @@ addLog('L\'ennemi active des <strong>contre-mesures</strong> !', 'info', 'bot');
   }
 
   // 3. Révélation : S'il est vraiment bloqué (5 ratés), il localise un navire
-  if (m.missesSinceHit >= 5 && state.abilityCooldowns.submarine === 0) {
-    state.abilityCooldowns.submarine = SHIP_ABILITIES.submarine.cooldown;
+    if (m.missesSinceHit >= 5 && state.botAbilityCooldowns.submarine === 0) {
+    state.botAbilityCooldowns.submarine = SHIP_ABILITIES.submarine.cooldown;
     const aliveShips = state.ships.player.filter(s => !s.sunk);
     if (aliveShips.length > 0) {
       const pick = aliveShips[Math.floor(Math.random() * aliveShips.length)];
