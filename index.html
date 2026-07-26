@@ -1356,9 +1356,13 @@ function handleNetShot(data) {
     }
   }
 
-  if (!rockCancelled) {
-    cells.forEach(([r, c]) => {
-      if (!inBounds(r, c)) return; const cd = state.boards.player[r][c]; if (cd.hit || cd.miss) return; 
+    if (!rockCancelled) {
+    let blockedDirs = new Set();
+    let attackCancelled = false; // <-- AJOUTE CETTE LIGNE
+        cells.forEach(([r, c]) => {
+      if (attackCancelled) return; // <-- AJOUTE CETTE LIGNE
+      if (!inBounds(r, c)) return; 
+	  const cd = state.boards.player[r][c]; if (cd.hit || cd.miss) return; 
       const cellEl = document.querySelector(`#player-grid .cell[data-row="${r}"][data-col="${c}"]`);
       
       let dirKey = '0,0';
@@ -1369,10 +1373,11 @@ function handleNetShot(data) {
         if (blockedDirs.has(dirKey)) return; // Arrêt de la propagation dans cette direction
       }
 
-      if (state.counterMeasure && cd.ship && !cd.ship.sunk) {
+            if (state.counterMeasure) {
         state.counterMeasure = false;
         if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); }
         results.push({ r, c, status: 'shielded' });
+        attackCancelled = true; // Annule tout le reste du tir
         return;
       }
       if (cd.rock) {
@@ -1457,8 +1462,8 @@ function handleNetShotResult(data) {
       else if (res.status === 'rock') { cd.rockRevealed = true; cd.miss = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } addLog(`Tir bloqué par un rocher en ${getCoord([r,c])}!`, 'miss', 'player'); }
       else if (res.status === 'mine') { cd.mineTriggered = true; cd.miss = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2); } addLog(`Mine déclenchée en ${getCoord([r,c])}!`, 'hit', 'player'); }
       else if (res.status === 'halfhit') { cd.halfHit = true; if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } addLog(`Armure renforcée! Case ${getCoord([r,c])} touchée mais résiste.`, 'hit', 'player'); }
-      else if (res.status === 'shielded') { // <-- AJOUT DE CE BLOC
-        cd.miss = true; 
+            else if (res.status === 'shielded') {
+        // On ne met ni hit ni miss, la case reste vierge
         if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
         addLog(`Tir dévié par contre-mesures !`, 'miss', 'player'); 
         showCountermeasurePopup(); 
@@ -2294,8 +2299,9 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
       if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); }
     }
   }
-  if (!rockCancelled) {
+    if (!rockCancelled) {
     let blockedDirs = new Set();
+    let attackCancelled = false; // <-- AJOUTE CETTE LIGNE
     if (primaryTarget && pattern !== 'star' && pattern !== 'salvo') {
       cells = cells.slice().sort((a, b) => {
         const distA = Math.abs(a[0] - primaryTarget[0]) + Math.abs(a[1] - primaryTarget[1]);
@@ -2303,8 +2309,10 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
         return distA - distB;
       });
     }
-    cells.forEach(([r, c]) => {
-      if (!inBounds(r, c)) return; const cd = board[r][c]; if (cd.hit) return; if (cd.miss && !state.gameOptions.fogOfWar) return;
+        cells.forEach(([r, c]) => {
+      if (attackCancelled) return; // <-- AJOUTE CETTE LIGNE
+      if (!inBounds(r, c)) return; 
+	  const cd = board[r][c]; if (cd.hit) return; if (cd.miss && !state.gameOptions.fogOfWar) return;
       
       const cellEl = document.querySelector(owner === 'player' ? `#enemy-grid .cell[data-row="${r}"][data-col="${c}"]` : `#player-grid .cell[data-row="${r}"][data-col="${c}"]`);
       
@@ -2347,11 +2355,15 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
         // Si ignoreRock est vrai, on ne return pas, le tir continue à travers !
       }
       
-      if (owner === 'bot' && state.counterMeasure && cd.ship && !cd.ship.sunk) { 
+            if (owner === 'bot' && state.counterMeasure) { 
         state.counterMeasure = false; 
         if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
-        showToast('Tir dévié par contre-mesures !', 'success'); addLog('Tir dévié par contre-mesures.', 'miss', 'bot'); return; 
+        showToast('Tir dévié par contre-mesures !', 'success'); addLog('Tir dévié par contre-mesures.', 'miss', 'bot'); 
+        showCountermeasurePopup();
+        attackCancelled = true; // Annule tout le reste du tir (pour les armes de zone)
+        return; 
       }
+	  
       if (cd.mine && !cd.mineTriggered) {
         cd.mineTriggered = true; cd.miss = true;
         if (owner === 'player') state.tracking.minesTriggered++; 
@@ -2993,6 +3005,7 @@ function executeWeapon2P(cells, weaponType, actionSummary, primaryTarget = null,
     state.lastAction2P = `${actionSummary} ${sonarCount} navire(s) détecté(s)`; addLog(state.lastAction2P, 'info', ap, 'p2p-log-container'); 
   } else {
     let blockedDirs = new Set();
+    let attackCancelled = false; // <-- AJOUTE CETTE LIGNE
     if (primaryTarget && pattern !== 'star' && pattern !== 'salvo') {
       cells = cells.slice().sort((a, b) => {
         const distA = Math.abs(a[0] - primaryTarget[0]) + Math.abs(a[1] - primaryTarget[1]);
@@ -3000,8 +3013,10 @@ function executeWeapon2P(cells, weaponType, actionSummary, primaryTarget = null,
         return distA - distB;
       });
     }
-        cells.forEach(([r, c]) => {
-      if (!inBounds(r, c)) return; const cd = enemyBoard[r][c]; if (cd.hit) return; if (cd.miss && !state.gameOptions.fogOfWar) return; 
+            cells.forEach(([r, c]) => {
+      if (attackCancelled) return; // <-- AJOUTE CETTE LIGNE
+      if (!inBounds(r, c)) return; 
+	  const cd = enemyBoard[r][c]; if (cd.hit) return; if (cd.miss && !state.gameOptions.fogOfWar) return; 
       const cellEl = document.querySelector(`#p2p-enemy-grid .cell[data-row="${r}"][data-col="${c}"]`);
       
       let dirKey = '0,0';
@@ -3012,11 +3027,12 @@ function executeWeapon2P(cells, weaponType, actionSummary, primaryTarget = null,
         if (blockedDirs.has(dirKey)) return;
       }
       
-            if (state[opp].counterMeasure && cd.ship && !cd.ship.sunk) { 
+      if (state[opp].counterMeasure) { 
         state[opp].counterMeasure = false; 
         if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); } 
         showToast('Tir dévié par contre-mesures !', 'success'); addLog('Tir dévié par contre-mesures.', 'miss', ap, 'p2p-log-container'); 
-        showCountermeasurePopup(); // <-- AJOUT ICI
+        showCountermeasurePopup(); 
+        attackCancelled = true; // Annule tout le reste du tir
         return; 
       }
       
