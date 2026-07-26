@@ -1525,7 +1525,7 @@ function handleNetShotResult(data) {
     const enemyAlive = state.ships.enemy.filter(s => !s.sunk).length;
   state.isAnimating = false; // <-- CORRIGE LE BLOCAGE
   if (enemyAlive === 0) { endGame1P(true); } else { state.isPlayerTurn = false; updateTurnIndicator(); }
-
+}
 const originalActivateAbility1P = activateAbility1P;
 activateAbility1P = function(shipId) {
   if (state.mode === 'online') {
