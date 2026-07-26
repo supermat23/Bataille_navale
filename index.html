@@ -1343,7 +1343,7 @@ function handleNetShot(data) {
     results.push({ r: pr, c: pc, status: 'shielded' });
     sendNetData({ type: 'shot_result', results, sunkShips: [], weaponType: data.weaponType, usedAbility: data.usedAbility });
     addLog('Tir dévié par contre-mesures !', 'miss', 'bot');
-    showCountermeasurePopup();
+    // <-- RETIRER ICI : showCountermeasurePopup();
     
     state.isPlayerTurn = true; state.selectedWeapon = 'standard';
     SHIPS.forEach(s => { if (state.abilityCooldowns[s.id] > 0) state.abilityCooldowns[s.id]--; });
@@ -1478,6 +1478,7 @@ function handleNetShotResult(data) {
     SHIPS.forEach(s => { if (state.abilityCooldowns[s.id] > 0) state.abilityCooldowns[s.id]--; });
     state.isAnimating = false;
     state.isPlayerTurn = false; updateTurnIndicator();
+    showCountermeasurePopup(); // <-- AJOUT ICI : l'attaquant voit le pop-up
     return; 
   }
   let hits = 0; let sunkShips = [];
@@ -2323,10 +2324,9 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
       const cellEl = document.querySelector(`#player-grid .cell[data-row="${pr}"][data-col="${pc}"]`);
       if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); }
     }
-    showToast('🛡️ Tir contré !', 'success'); 
+    showToast('🛡️ Votre bouclier a contré le tir ennemi !', 'success'); 
     addLog('Tir dévié par contre-mesures.', 'miss', 'bot');
-    showCountermeasurePopup();
-    return; 
+    return; // Pas de pop-up pour le joueur (c'est l'IA qui attaque)
   }
   // Si le joueur tire sur le bouclier de l'IA
   if (owner === 'player' && state.counterMeasureEnemy) {
@@ -2338,6 +2338,7 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
     }
     showToast('🛡️ Votre tir a été contré par l\'ennemi !', 'danger'); 
     addLog('Tir dévié par les contre-mesures ennemies.', 'miss', 'player');
+    showCountermeasurePopup(); // <-- Pop-up affiché pour l'attaquant (le joueur)
     return; 
   }
   let hits = 0; let sunkShips = []; let rockCancelled = false;
