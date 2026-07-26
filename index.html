@@ -1286,7 +1286,13 @@ function handleNetData(data) {
     } 
   } catch(e) { console.error("Network Data Error:", e); } 
 }
-function checkOnlineCombatStart() { updateTurnIndicator(); }
+function checkOnlineCombatStart() { 
+  if (state.playerReady && state.enemyReady) { 
+    state.isPlayerTurn = state.net.isHost; 
+    startCombat1P(); 
+    updateTurnIndicator();
+  } 
+}
 
 const originalHandleEnemyClick1P = handleEnemyClick1P;
 handleEnemyClick1P = function(row, col) {
