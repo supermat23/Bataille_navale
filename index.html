@@ -1460,9 +1460,10 @@ function handleNetShotResult(data) {
     if (centerCell && inBounds(centerCell.r, centerCell.c)) state.boards.enemy[centerCell.r][centerCell.c].sonarCount = data.sonarCount;
     renderGrid1P('enemy-grid', 'enemy', false);
     addLog(`Sonar — ${data.sonarCount} navire${data.sonarCount > 1 ? 's' : ''} détecté${data.sonarCount > 1 ? 's' : ''}.`, 'info', 'player');
+        state.isAnimating = false; // <-- CORRIGE LE BLOCAGE
     state.isPlayerTurn = false; updateTurnIndicator(); return;
   }
-    // --- NOUVEAU BLOC BOUCLIER (ATTAQUANT EN LIGNE) ---
+     // --- NOUVEAU BLOC BOUCLIER (ATTAQUANT EN LIGNE) ---
   if (data.results && data.results.some(res => res.status === 'shielded')) {
     const shieldRes = data.results.find(res => res.status === 'shielded');
     const r = parseInt(shieldRes.r), c = parseInt(shieldRes.c);
@@ -1471,11 +1472,12 @@ function handleNetShotResult(data) {
       if (cellEl) { const rect = cellEl.getBoundingClientRect(); spawnRipple(rect.left + rect.width / 2, rect.top + rect.height / 2); }
     }
     addLog(`Tir dévié par contre-mesures !`, 'miss', 'player');
-    showCountermeasurePopup();
     state.shots.player++; 
     const stats = getStats(); updateStats({ totalShots: stats.totalShots + 1 });
+    SHIPS.forEach(s => { if (state.abilityCooldowns[s.id] > 0) state.abilityCooldowns[s.id]--; });
+    state.isAnimating = false; // <-- CORRIGE LE BLOCAGE
     state.isPlayerTurn = false; updateTurnIndicator();
-    return; // Arrête le traitement des autres cases du tir
+    return; 
   }
   let hits = 0; let sunkShips = [];
       if (data.results && Array.isArray(data.results)) {
@@ -1520,9 +1522,9 @@ function handleNetShotResult(data) {
   updateStatsUI1P(); updatePA1P(); renderWeapons1P('weapons-list'); renderAbilities1P('abilities-list');
   const stats = getStats(); updateStats({ totalShots: stats.totalShots + 1 });
   checkAchievementsDuringPlay();
-  const enemyAlive = state.ships.enemy.filter(s => !s.sunk).length;
+    const enemyAlive = state.ships.enemy.filter(s => !s.sunk).length;
+  state.isAnimating = false; // <-- CORRIGE LE BLOCAGE
   if (enemyAlive === 0) { endGame1P(true); } else { state.isPlayerTurn = false; updateTurnIndicator(); }
-}
 
 const originalActivateAbility1P = activateAbility1P;
 activateAbility1P = function(shipId) {
