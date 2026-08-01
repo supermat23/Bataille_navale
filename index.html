@@ -125,6 +125,9 @@
   .tab-btn { padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; transition: all 0.2s ease; background: transparent; color: var(--text-dim); border: 1px solid transparent; font-family: 'Rajdhani', sans-serif; }
   .tab-btn.active { color: var(--accent); border-color: var(--border-strong); background: rgba(255, 255, 255, 0.05); }
   .tab-btn:hover { color: var(--text); }
+  .ach-filter { padding: 6px 12px; border-radius: 9999px; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.2s ease; background: var(--surface-2); color: var(--text-dim); border: 1px solid var(--border); font-family: 'Rajdhani', sans-serif; white-space: nowrap; }
+  .ach-filter:hover { color: var(--text); border-color: var(--border-strong); }
+  .ach-filter.active { color: var(--accent); border-color: var(--border-strong); background: rgba(255, 255, 255, 0.05); box-shadow: 0 0 10px var(--accent-glow); }
   .ability-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease; position: relative; overflow: hidden; }
   .ability-card.available { cursor: pointer; } .ability-card.available:hover { border-color: var(--border-strong); background: var(--surface-3); }
   .ability-card.active { border-color: var(--accent); background: rgba(255, 255, 255, 0.1); box-shadow: 0 0 15px var(--accent-glow); }
@@ -206,7 +209,7 @@
     <a href="https://ko-fi.com/supermatv2" target="_blank" rel="noopener noreferrer" class="inline-block px-4 py-1 rounded-full border border-red-500/30 bg-red-500/10 text-red-400 text-xs font-bold tracking-widest uppercase hover:bg-red-500/20 transition-colors">♥️ Supporter</a>
     <button id="pwa-install-btn" class="hidden btn btn-secondary text-xs mx-auto items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Installer l'application</button>
   </div>
-  <h1 id="game-title" class="font-display text-4xl md:text-7xl title-pulse mb-3" style="color: var(--text); cursor: default;">BATAILLE <span style="color: var(--accent);">NAVALE</span></h1><p class="text-lg md:text-xl text-slate-400 font-light tracking-wider uppercase">Opération Tempête</p><div id="commander-name-display" class="mt-4 text-base font-semibold" style="color: var(--text);"></div><div id="rank-badge" class="mt-2"></div><div id="ach-counter-badge" class="mt-3 text-sm"></div><div id="best-today-badge" class="mt-3 text-sm"></div><div id="challenge-stats-badge" class="mt-2 text-sm"></div></div><div class="flex gap-1 sm:gap-2 justify-center mb-6 flex-nowrap"><button class="tab-btn active px-2 sm:px-5" data-tab="play">Jouer</button><button class="tab-btn px-2 sm:px-5" data-tab="scores">Scores</button><button class="tab-btn px-2 sm:px-5" data-tab="campaign-scores">Campagne</button><button class="tab-btn px-2 sm:px-5" data-tab="achievements">Succès</button></div><div id="tab-play" class="tab-content"><div class="mb-6 flex justify-center gap-2 flex-wrap"><button class="btn btn-primary mode-btn active" data-mode="1p">Solo</button><button class="btn btn-secondary mode-btn" data-mode="2p">2P Local</button><button class="btn btn-secondary mode-btn" data-mode="online">2P En Ligne</button></div><div id="1p-setup"><div class="max-w-2xl mx-auto mb-3 bg-slate-900/40 border border-amber-500/15 rounded-xl p-3 backdrop-blur-sm" id="daily-challenge-panel"></div><div class="max-w-2xl mx-auto mb-6 bg-slate-900/40 border rounded-xl p-3 backdrop-blur-sm" style="border-color:var(--r-legend);opacity:0.95;" id="weekly-challenge-panel"></div><div class="mb-6"><h2 class="text-center text-sm font-bold tracking-widest uppercase text-slate-400 mb-3">Nom du commandant</h2><div class="max-w-xs mx-auto"><input type="text" id="player-name-input" class="name-input text-center" placeholder="Votre nom..." maxlength="20" value=""></div></div><div class="mb-6"><h2 class="text-center text-sm font-bold tracking-widest uppercase text-slate-400 mb-4">Choisissez votre adversaire</h2><div class="grid grid-cols-5 gap-2 sm:gap-3" id="difficulty-grid"></div></div></div><div id="2p-setup" class="hidden mb-6"><div class="grid grid-cols-2 gap-4 max-w-md mx-auto"><div><label class="block text-xs text-cyan-400 font-bold uppercase mb-2">Joueur 1</label><input type="text" id="p1-name-input" class="name-input text-center" placeholder="Nom..." maxlength="20" value="Amiral Cyan"></div><div><label class="block text-xs text-pink-400 font-bold uppercase mb-2">Joueur 2</label><input type="text" id="p2-name-input" class="name-input text-center" placeholder="Nom..." maxlength="20" value="Capitaine Magenta"></div></div></div><div id="online-setup" class="hidden mb-6"><div id="online-menu" class="max-w-md mx-auto text-center"><p class="text-slate-400 mb-4 text-sm">Affrontez un ami à distance via une connexion directe entre vos deux appareils.</p><div class="flex gap-3 justify-center"><button id="online-host-btn" class="btn btn-primary">Héberger une partie</button><button id="online-join-btn" class="btn btn-secondary">Rejoindre une partie</button></div></div><div id="online-host-view" class="hidden max-w-md mx-auto text-center bg-slate-900/40 border border-amber-500/15 rounded-xl p-6 backdrop-blur-sm"><h3 class="font-display text-xl text-amber-400 mb-4">En attente de l'adversaire...</h3><div class="online-spinner mb-4"></div><p class="text-slate-400 text-sm mb-2">Code de partie :</p><div class="font-display text-4xl text-white tracking-widest mb-4" id="online-code-display">----</div><p class="text-slate-500 text-xs">Communiquez ce code à votre adversaire.</p><button id="online-cancel-host-btn" class="btn btn-danger text-xs mt-4">Annuler</button></div><div id="online-join-view" class="hidden max-w-md mx-auto text-center bg-slate-900/40 border border-amber-500/15 rounded-xl p-6 backdrop-blur-sm"><h3 class="font-display text-xl text-amber-400 mb-4">Rejoindre une partie</h3><p class="text-slate-400 text-sm mb-2">Entrez le code de partie :</p><input type="text" id="online-code-input" class="name-input text-center text-2xl tracking-widest font-bold uppercase" placeholder="XXXX" maxlength="4"><button id="online-connect-btn" class="btn btn-primary w-full mt-4">Se connecter</button><div id="online-connecting" class="hidden"><div class="online-spinner mt-4"></div><p class="text-slate-400 text-sm mt-2">Connexion en cours...</p></div><button id="online-cancel-join-btn" class="btn btn-danger text-xs mt-4">Annuler</button></div></div><div class="mb-6"><h2 class="text-center text-sm font-bold tracking-widest uppercase text-slate-400 mb-3">Arsenal — armes activées</h2><div class="grid grid-cols-4 gap-2" id="weapon-toggle-grid"></div></div><div class="mb-6"><div class="flex items-center justify-between mb-3 max-w-3xl mx-auto"><h2 class="text-sm font-bold tracking-widest uppercase text-slate-400">Capacités des navires</h2><label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="abilities-toggle" checked class="w-4 h-4 accent-amber-500"><span class="text-sm text-slate-300">Activées</span></label></div><div class="grid grid-cols-5 gap-2 max-w-3xl mx-auto" id="ability-info-grid"></div></div><div class="mb-6"><h2 class="text-center text-sm font-bold tracking-widest uppercase text-slate-400 mb-3">Options de partie</h2><div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto" id="game-options-grid"></div></div><div class="mb-6">
+  <h1 id="game-title" class="font-display text-4xl md:text-7xl title-pulse mb-3" style="color: var(--text); cursor: default;">BATAILLE <span style="color: var(--accent);">NAVALE</span></h1><p class="text-lg md:text-xl text-slate-400 font-light tracking-wider uppercase">Opération Tempête</p><div id="commander-name-display" class="mt-4 text-base font-semibold" style="color: var(--text);"></div><div id="rank-badge" class="mt-2"></div><div id="ach-counter-badge" class="mt-3 text-sm"></div><div id="best-today-badge" class="mt-3 text-sm"></div><div id="challenge-stats-badge" class="mt-2 text-sm"></div></div><div class="flex gap-1 sm:gap-2 justify-center mb-6 flex-nowrap"><button class="tab-btn active px-2 sm:px-5" data-tab="play">Jouer</button><button class="tab-btn px-2 sm:px-5" data-tab="scores">Scores</button><button class="tab-btn px-2 sm:px-5" data-tab="campaign-scores">Campagne</button><button class="tab-btn px-2 sm:px-5" data-tab="achievements">Succès</button><button class="tab-btn px-2 sm:px-5" data-tab="profiles">Commandants</button></div><div id="tab-play" class="tab-content"><div class="mb-6 flex justify-center gap-2 flex-wrap"><button class="btn btn-primary mode-btn active" data-mode="1p">Solo</button><button class="btn btn-secondary mode-btn" data-mode="2p">2P Local</button><button class="btn btn-secondary mode-btn" data-mode="online">2P En Ligne</button></div><div id="1p-setup"><div class="max-w-2xl mx-auto mb-3 bg-slate-900/40 border border-amber-500/15 rounded-xl p-3 backdrop-blur-sm" id="daily-challenge-panel"></div><div class="max-w-2xl mx-auto mb-6 bg-slate-900/40 border rounded-xl p-3 backdrop-blur-sm" style="border-color:var(--r-legend);opacity:0.95;" id="weekly-challenge-panel"></div><div class="mb-6"><h2 class="text-center text-sm font-bold tracking-widest uppercase text-slate-400 mb-4">Choisissez votre adversaire</h2><div class="grid grid-cols-5 gap-2 sm:gap-3" id="difficulty-grid"></div></div></div><div id="2p-setup" class="hidden mb-6"><div class="grid grid-cols-2 gap-4 max-w-md mx-auto"><div><label class="block text-xs text-cyan-400 font-bold uppercase mb-2">Joueur 1</label><input type="text" id="p1-name-input" class="name-input text-center" placeholder="Nom..." maxlength="20" value="Amiral Cyan"></div><div><label class="block text-xs text-pink-400 font-bold uppercase mb-2">Joueur 2</label><input type="text" id="p2-name-input" class="name-input text-center" placeholder="Nom..." maxlength="20" value="Capitaine Magenta"></div></div></div><div id="online-setup" class="hidden mb-6"><div id="online-menu" class="max-w-md mx-auto text-center"><p class="text-slate-400 mb-4 text-sm">Affrontez un ami à distance via une connexion directe entre vos deux appareils.</p><div class="flex gap-3 justify-center"><button id="online-host-btn" class="btn btn-primary">Héberger une partie</button><button id="online-join-btn" class="btn btn-secondary">Rejoindre une partie</button></div></div><div id="online-host-view" class="hidden max-w-md mx-auto text-center bg-slate-900/40 border border-amber-500/15 rounded-xl p-6 backdrop-blur-sm"><h3 class="font-display text-xl text-amber-400 mb-4">En attente de l'adversaire...</h3><div class="online-spinner mb-4"></div><p class="text-slate-400 text-sm mb-2">Code de partie :</p><div class="font-display text-4xl text-white tracking-widest mb-4" id="online-code-display">----</div><p class="text-slate-500 text-xs">Communiquez ce code à votre adversaire.</p><button id="online-cancel-host-btn" class="btn btn-danger text-xs mt-4">Annuler</button></div><div id="online-join-view" class="hidden max-w-md mx-auto text-center bg-slate-900/40 border border-amber-500/15 rounded-xl p-6 backdrop-blur-sm"><h3 class="font-display text-xl text-amber-400 mb-4">Rejoindre une partie</h3><p class="text-slate-400 text-sm mb-2">Entrez le code de partie :</p><input type="text" id="online-code-input" class="name-input text-center text-2xl tracking-widest font-bold uppercase" placeholder="XXXX" maxlength="4"><button id="online-connect-btn" class="btn btn-primary w-full mt-4">Se connecter</button><div id="online-connecting" class="hidden"><div class="online-spinner mt-4"></div><p class="text-slate-400 text-sm mt-2">Connexion en cours...</p></div><button id="online-cancel-join-btn" class="btn btn-danger text-xs mt-4">Annuler</button></div></div><div class="mb-6"><h2 class="text-center text-sm font-bold tracking-widest uppercase text-slate-400 mb-3">Arsenal — armes activées</h2><div class="grid grid-cols-4 gap-2" id="weapon-toggle-grid"></div></div><div class="mb-6"><div class="flex items-center justify-between mb-3 max-w-3xl mx-auto"><h2 class="text-sm font-bold tracking-widest uppercase text-slate-400">Capacités des navires</h2><label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="abilities-toggle" checked class="w-4 h-4 accent-amber-500"><span class="text-sm text-slate-300">Activées</span></label></div><div class="grid grid-cols-5 gap-2 max-w-3xl mx-auto" id="ability-info-grid"></div></div><div class="mb-6"><h2 class="text-center text-sm font-bold tracking-widest uppercase text-slate-400 mb-3">Options de partie</h2><div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto" id="game-options-grid"></div></div><div class="mb-6">
   <div class="flex items-center justify-between mb-3 max-w-3xl mx-auto">
     <h2 class="text-sm font-bold tracking-widest uppercase text-slate-400">Thèmes de Carte <span id="theme-lock-msg" class="text-[10px] text-amber-400 ml-2 hidden">Débloqué au Rang 7</span></h2>
   </div>
@@ -237,7 +240,18 @@
     <h2 class="font-display text-2xl text-amber-400 mb-4">Scores de Campagne</h2>
     <div id="campaign-scores-list"></div>
   </div>
-</div><div id="tab-achievements" class="tab-content hidden"><div class="bg-slate-900/40 border border-amber-500/15 rounded-xl p-4 md:p-6 backdrop-blur-sm"><div class="flex items-center justify-between mb-4 flex-wrap gap-2"><h2 class="font-display text-2xl text-amber-400">Succès</h2><div class="text-sm text-slate-400"><span id="ach-progress" class="text-amber-400 font-bold">0</span> / <span id="ach-total">220</span> débloqués</div></div><div class="w-full h-2 bg-slate-800 rounded-full mb-4 overflow-hidden"><div id="ach-bar" class="h-full bg-gradient-to-r from-cyan-500 via-amber-500 to-purple-500 transition-all duration-500" style="width: 0%"></div></div><div class="flex gap-2 mb-4 flex-wrap"><button class="ach-filter tab-btn active" data-filter="all">Tous</button><button class="ach-filter tab-btn" data-filter="common">Communs</button><button class="ach-filter tab-btn" data-filter="rare">Rares</button><button class="ach-filter tab-btn" data-filter="epic">Épiques</button><button class="ach-filter tab-btn" data-filter="legend">Légendaires</button><button class="ach-filter tab-btn" data-filter="ultimate">Ultimes</button></div><div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="achievements-grid"></div></div></div></div></div>
+</div>
+<div id="tab-profiles" class="tab-content hidden">
+  <div class="bg-slate-900/40 border border-amber-500/15 rounded-xl p-4 md:p-6 backdrop-blur-sm max-w-2xl mx-auto">
+    <h2 class="font-display text-2xl text-amber-400 mb-4">Commandants</h2>
+    <div class="flex gap-2 mb-6">
+      <input type="text" id="new-profile-input" class="name-input flex-1" placeholder="Nom du nouveau commandant..." maxlength="20">
+      <button id="create-profile-btn" class="btn btn-primary">+ Créer</button>
+    </div>
+    <div id="profiles-list" class="space-y-3"></div>
+  </div>
+</div>
+<div id="tab-achievements" class="tab-content hidden"><div class="bg-slate-900/40 border border-amber-500/15 rounded-xl p-4 md:p-6 backdrop-blur-sm"><div class="flex items-center justify-between mb-4 flex-wrap gap-2"><h2 class="font-display text-2xl text-amber-400">Succès</h2><div class="text-sm text-slate-400"><span id="ach-progress" class="text-amber-400 font-bold">0</span> / <span id="ach-total">220</span> débloqués</div></div><div class="w-full h-2 bg-slate-800 rounded-full mb-4 overflow-hidden"><div id="ach-bar" class="h-full bg-gradient-to-r from-cyan-500 via-amber-500 to-purple-500 transition-all duration-500" style="width: 0%"></div></div><div class="flex gap-2 mb-4 flex-wrap justify-center"><button class="ach-filter active" data-filter="all">Tous</button><button class="ach-filter" data-filter="common">Communs</button><button class="ach-filter" data-filter="rare">Rares</button><button class="ach-filter" data-filter="epic">Épiques</button><button class="ach-filter" data-filter="legend">Légend.</button><button class="ach-filter" data-filter="ultimate">Ultimes</button></div><div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="achievements-grid"></div></div></div></div></div>
 <div id="grades-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background: rgba(0,0,0,0.75);"><div class="bg-slate-900 border rounded-xl p-5 max-w-md w-full max-h-[80vh] overflow-y-auto" style="border-color: var(--border-strong);"><div class="flex items-center justify-between mb-4"><h3 class="font-display text-xl" style="color: var(--accent);">Grades de la flotte</h3><button id="grades-modal-close" class="text-slate-400 text-2xl leading-none px-2">&times;</button></div><div id="grades-modal-list" class="space-y-2"></div></div></div>
 <div id="promotion-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background: rgba(0,0,0,0.8);">
   <div class="bg-slate-900 border-2 rounded-2xl flex flex-col items-center justify-center text-center p-6" style="border-color: var(--accent); box-shadow: 0 0 40px var(--accent-glow); min-width: 300px; max-width: 90vw;">
@@ -401,53 +415,98 @@ function scatterObstacles(board) {
 }
 function createBotMemory() { return { mode: 'hunt', targets: [], currentDirection: null, lastShot: null }; }
 function resetTracking() { return { consecutiveHits: 0, maxConsecutiveHits: 0, firstShotHit: null, weaponsUsed: ['standard'], sonarUses: 0, shipAbilitiesUsed: [], shipsLostByPlayer: 0, playerHitsReceived: 0, maxShipsSunkInOneTurn: 0, specialKill: false, shipsHit: new Set(), carrierHits: 0, firstShipSunkId: null, lastShipSunkId: null, usedSpecialWeapon: false, usedAbility: false, maxMultiHit: 0, sonarMaxShips: 0, eventTypesTriggered: [], chronoTimeoutOccurred: false, teleportUsed: false, teleportWasClutch: false, teleportedShipId: null, botShieldUsed: false, minesTriggered: 0, sunkEnemyIds: [], halfHitsReceived: 0 }; }
-const STORAGE_KEY = 'bataille_navale_v23';
+const PROFILES_KEY = 'bataille_navale_profiles_v1';
+const ACTIVE_PROFILE_KEY = 'bataille_navale_active_profile_v1';
+const OLD_STORAGE_KEY = 'bataille_navale_v23'; // Pour la migration automatique
+
+function getProfiles() {
+    try { return JSON.parse(localStorage.getItem(PROFILES_KEY) || '[]'); } catch { return []; }
+}
+function saveProfiles(profiles) {
+    localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
+}
+function getActiveProfileId() {
+    return localStorage.getItem(ACTIVE_PROFILE_KEY);
+}
+function setActiveProfileId(id) {
+    localStorage.setItem(ACTIVE_PROFILE_KEY, id);
+}
+function getProfileStorageKey(id) {
+    return 'bataille_navale_profile_' + id;
+}
+function initProfiles() {
+    let profiles = getProfiles();
+    if (profiles.length === 0) {
+        // Migration de l'ancienne sauvegarde si elle existe
+        const oldDataStr = localStorage.getItem(OLD_STORAGE_KEY);
+        if (oldDataStr) {
+            try {
+                const oldData = JSON.parse(oldDataStr);
+                const name = oldData.lastName || "Commandant 1";
+                const id = 'prof_' + Date.now();
+                profiles.push({ id, name });
+                saveProfiles(profiles);
+                localStorage.setItem(getProfileStorageKey(id), oldDataStr);
+                setActiveProfileId(id);
+            } catch {}
+        }
+    }
+    // Si toujours aucun profil, on en crée un vide par défaut
+    if (profiles.length === 0) {
+        const id = 'prof_' + Date.now();
+        profiles.push({ id, name: "Commandant 1" });
+        saveProfiles(profiles);
+        setActiveProfileId(id);
+    }
+    // Si le profil actif n'existe pas, on prend le premier
+    if (!getActiveProfileId() || !profiles.find(p => p.id === getActiveProfileId())) {
+        setActiveProfileId(profiles[0].id);
+    }
+}
+
 function loadData() { 
-  try { 
-    const d = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); 
-    return { 
-      scores: d.scores || [], 
-      campaignScores: d.campaignScores || [], // <-- LIGNE AJOUTÉE POUR LES SCORES DE CAMPAGNE
-      achievements: d.achievements || [], 
-      stats: d.stats || { 
-        gamesPlayed: 0, gamesWon: 0, totalShots: 0, onlineGamesWon: 0, 
-        local2pGamesWon: 0, difficultiesBeaten: [], careerScore: 0,
-        dailyCompletions: 0, weeklyCompletions: 0, dailyCompletedIds: [], 
-        themesWon: [], eventsSeenIds: [] // <-- LIGNE AJOUTÉE POUR LES THÈMES ET ÉVÉNEMENTS
-      }, 
-      lastName: d.lastName || '', 
-      settings: Object.assign({ randomEvents: false, chrono: false, chronoDuration: 20, gridSize: 10, obstaclesEnabled: false, fogOfWar: false }, d.settings || {}), 
-      dailyChallenge: d.dailyChallenge || null, 
-      weeklyChallenge: d.weeklyChallenge || null, 
-      dailyStreak: d.dailyStreak || null, 
-      preferences: d.preferences || { difficulty: 'tactique', enabledWeapons: { standard: true, line: true, cross: true, diagonal: true, sonar: true }, abilitiesEnabled: true, theme: 'default' } 
-    }; 
-  } catch { 
-    return { 
-      scores: [], 
-      campaignScores: [], 
-      achievements: [], 
-      stats: { 
-        gamesPlayed: 0, gamesWon: 0, totalShots: 0, onlineGamesWon: 0, 
-        local2pGamesWon: 0, difficultiesBeaten: [], careerScore: 0,
-        dailyCompletions: 0, weeklyCompletions: 0, dailyCompletedIds: [], 
-        themesWon: [], eventsSeenIds: []
-      }, 
-      lastName: '', 
-      settings: { randomEvents: false, chrono: false, chronoDuration: 20, gridSize: 10, obstaclesEnabled: false, fogOfWar: false }, 
-      dailyChallenge: null, 
-      weeklyChallenge: null, 
-      dailyStreak: null, 
-      preferences: { difficulty: 'tactique', enabledWeapons: { standard: true, line: true, cross: true, diagonal: true, sonar: true }, abilitiesEnabled: true, theme: 'default' } 
-    }; 
-  } 
-}function saveData(data) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {} }
+    const id = getActiveProfileId();
+    const key = id ? getProfileStorageKey(id) : OLD_STORAGE_KEY;
+    try { 
+        const d = JSON.parse(localStorage.getItem(key) || '{}'); 
+        return { 
+            scores: d.scores || [], 
+            campaignScores: d.campaignScores || [], 
+            achievements: d.achievements || [], 
+            stats: d.stats || { 
+                gamesPlayed: 0, gamesWon: 0, totalShots: 0, onlineGamesWon: 0, 
+                local2pGamesWon: 0, difficultiesBeaten: [], careerScore: 0,
+                dailyCompletions: 0, weeklyCompletions: 0, dailyCompletedIds: [], 
+                themesWon: [], eventsSeenIds: []
+            }, 
+            lastName: d.lastName || '', 
+            settings: Object.assign({ randomEvents: false, chrono: false, chronoDuration: 20, gridSize: 10, obstaclesEnabled: false, fogOfWar: false }, d.settings || {}), 
+            dailyChallenge: d.dailyChallenge || null, 
+            weeklyChallenge: d.weeklyChallenge || null, 
+            dailyStreak: d.dailyStreak || null, 
+            preferences: d.preferences || { difficulty: 'tactique', enabledWeapons: { standard: true, line: true, cross: true, diagonal: true, sonar: true }, abilitiesEnabled: true, theme: 'default' } 
+        }; 
+    } catch { 
+        return { 
+            scores: [], campaignScores: [], achievements: [], 
+            stats: { gamesPlayed: 0, gamesWon: 0, totalShots: 0, onlineGamesWon: 0, local2pGamesWon: 0, difficultiesBeaten: [], careerScore: 0, dailyCompletions: 0, weeklyCompletions: 0, dailyCompletedIds: [], themesWon: [], eventsSeenIds: [] }, 
+            lastName: '', settings: { randomEvents: false, chrono: false, chronoDuration: 20, gridSize: 10, obstaclesEnabled: false, fogOfWar: false }, 
+            dailyChallenge: null, weeklyChallenge: null, dailyStreak: null, 
+            preferences: { difficulty: 'tactique', enabledWeapons: { standard: true, line: true, cross: true, diagonal: true, sonar: true }, abilitiesEnabled: true, theme: 'default' } 
+        }; 
+    } 
+}
+function saveData(data) { 
+    const id = getActiveProfileId();
+    const key = id ? getProfileStorageKey(id) : OLD_STORAGE_KEY;
+    try { localStorage.setItem(key, JSON.stringify(data)); } catch {} 
+}
 function addScore(entry) { 
-  const d = loadData(); 
-  d.scores.unshift(entry); 
-  d.scores = d.scores.slice(0, 50); 
-  d.stats.careerScore = (d.stats.careerScore || 0) + entry.score; 
-  saveData(d); 
+    const d = loadData(); 
+    d.scores.unshift(entry); 
+    d.scores = d.scores.slice(0, 50); 
+    d.stats.careerScore = (d.stats.careerScore || 0) + entry.score; 
+    saveData(d); 
 }
 function getScores() { return loadData().scores; }
 function getSettings() { return loadData().settings; }
@@ -459,7 +518,6 @@ function getUnlockedAchievements() { return loadData().achievements; }
 function unlockAchievement(id) { const d = loadData(); if (!d.achievements.includes(id)) { d.achievements.push(id); saveData(d); return true; } return false; }
 function getStats() { return loadData().stats; }
 function updateStats(updates) { const d = loadData(); d.stats = { ...d.stats, ...updates }; saveData(d); }
-
 function inBounds(r, c) { return r >= 0 && r < GRID_SIZE && c >= 0 && c < GRID_SIZE; }
 function canPlaceShip(board, row, col, shipDef, orientation) { 
   const shape = getShipShape(shipDef, orientation); 
@@ -552,8 +610,7 @@ function renderMenu() {
     grid.appendChild(card); 
   });
   // Les lignes suivantes avaient été supprimées par erreur :
-  renderWeaponToggles(); renderAbilityInfo(); renderAchievements(); renderScores(); renderCommanderName(); renderRank(); renderAchCounter(); renderBestToday(); renderChallengeStats(); renderDailyChallenge(); renderGameOptions(); renderThemes(); renderCampaignScores();  const nameInput = document.getElementById('player-name-input'); if (nameInput && document.activeElement !== nameInput) nameInput.value = state.playerName;
-  const abToggle = document.getElementById('abilities-toggle'); if (abToggle) abToggle.checked = state.shipAbilitiesEnabled;
+  renderWeaponToggles(); renderAbilityInfo(); renderAchievements(); renderScores(); renderCommanderName(); renderRank(); renderAchCounter(); renderBestToday(); renderChallengeStats(); renderDailyChallenge(); renderGameOptions(); renderThemes(); renderCampaignScores(); renderProfiles();  const abToggle = document.getElementById('abilities-toggle'); if (abToggle) abToggle.checked = state.shipAbilitiesEnabled;
   const p1Input = document.getElementById('p1-name-input'); if (p1Input) p1Input.value = state.p1Name;
   const p2Input = document.getElementById('p2-name-input'); if (p2Input) p2Input.value = state.p2Name;
     // Affiche le bouton campagne si Rang 10 débloqué, sinon affiche le bouton verrouillé
@@ -562,6 +619,27 @@ function renderMenu() {
   const rank10Unlocked = isFeatureUnlocked(10);
   if (campBtn) campBtn.classList.toggle('hidden', !rank10Unlocked);
   if (campLockedBtn) campLockedBtn.classList.toggle('hidden', rank10Unlocked);
+}
+function renderProfiles() {
+    const list = document.getElementById('profiles-list');
+    if (!list) return;
+    const profiles = getProfiles();
+    const activeId = getActiveProfileId();
+    
+    list.innerHTML = profiles.map(p => `
+        <div class="bg-slate-800/50 border ${p.id === activeId ? 'border-amber-500/50 bg-amber-500/5' : 'border-slate-700'} rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all">
+            <div class="flex items-center gap-3 flex-1 w-full">
+                <div class="text-2xl">🎖️</div>
+                <input type="text" id="rename-input-${p.id}" class="name-input flex-1" value="${p.name.replace(/"/g, '&quot;')}" maxlength="20">
+                ${p.id === activeId ? '<span class="text-xs text-emerald-400 font-bold bg-emerald-500/10 px-2 py-1 rounded">ACTIF</span>' : ''}
+            </div>
+            <div class="flex gap-2 flex-shrink-0">
+                <button class="btn btn-secondary text-xs py-1 px-3" data-rename-profile="${p.id}">✏️ Renommer</button>
+                ${p.id !== activeId ? `<button class="btn btn-primary text-xs py-1 px-3" data-switch-profile="${p.id}">Choisir</button>` : ''}
+                ${profiles.length > 1 ? `<button class="btn btn-danger text-xs py-1 px-3" data-delete-profile="${p.id}">Supprimer</button>` : ''}
+            </div>
+        </div>
+    `).join('');
 }
 function renderWeaponToggles() { const grid = document.getElementById('weapon-toggle-grid'); grid.innerHTML = ''; Object.entries(WEAPONS).forEach(([key, w]) => { if (key === 'standard') return; const enabled = state.enabledWeapons[key]; const el = document.createElement('div'); el.className = 'weapon-toggle ' + (enabled ? 'enabled' : 'disabled'); el.innerHTML = `<div class="weapon-icon mx-auto mb-1">${getWeaponIcon(w.icon)}</div><div class="text-sm font-semibold text-white">${w.name}</div><div class="text-xs text-slate-400">${w.cost} PA</div>`; el.addEventListener('click', () => { state.enabledWeapons[key] = !state.enabledWeapons[key]; saveCurrentPreferences(); renderWeaponToggles(); }); grid.appendChild(el); }); }
 function renderAbilityInfo() { 
@@ -1143,10 +1221,8 @@ function renderAchievements() { const grid = document.getElementById('achievemen
 document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('.tab-btn[data-tab]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden')); document.getElementById('tab-' + btn.dataset.tab).classList.remove('hidden'); state.menuTab = btn.dataset.tab; }));
 document.querySelectorAll('.ach-filter').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('.ach-filter').forEach(b => b.classList.remove('active')); btn.classList.add('active'); state.achFilter = btn.dataset.filter; renderAchievements(); }));
 document.querySelectorAll('.mode-btn').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('.mode-btn').forEach(b => { b.classList.remove('btn-primary'); b.classList.add('btn-secondary'); }); btn.classList.add('btn-primary'); btn.classList.remove('btn-secondary'); state.mode = btn.dataset.mode; document.getElementById('1p-setup').classList.toggle('hidden', state.mode !== '1p'); document.getElementById('2p-setup').classList.toggle('hidden', state.mode !== '2p'); document.getElementById('online-setup').classList.toggle('hidden', state.mode !== 'online'); document.getElementById('start-game-btn-container').classList.toggle('hidden', state.mode === 'online'); }));
-document.getElementById('player-name-input').addEventListener('input', e => { state.playerName = e.target.value; renderCommanderName(); });
 document.getElementById('p1-name-input').addEventListener('input', e => state.p1Name = e.target.value);
 document.getElementById('p2-name-input').addEventListener('input', e => state.p2Name = e.target.value);
-document.getElementById('player-name-input').addEventListener('change', e => saveData({ ...loadData(), lastName: state.playerName }));
 document.getElementById('abilities-toggle').addEventListener('change', e => { state.shipAbilitiesEnabled = e.target.checked; saveCurrentPreferences(); renderAbilityInfo(); });
 document.getElementById('start-btn').addEventListener('click', () => { initAudio(); saveData({ ...loadData(), lastName: state.playerName }); if (state.mode === '1p') startPlacement1P(); else if (state.mode === '2p') startPlacement2P(); });
 document.getElementById('start-campaign-btn').addEventListener('click', () => {
@@ -3383,9 +3459,86 @@ function checkEndAchievements(playerWon) {
     document.getElementById('promotion-close-btn').addEventListener('click', closePromotionModal);
     document.getElementById('obstacles-modal-close').addEventListener('click', closeObstaclesHelpModal);
     document.getElementById('obstacles-modal').addEventListener('click', e => { if (e.target.id === 'obstacles-modal') closeObstaclesHelpModal(); });
-    state.playerName = loadData().lastName; state.gameOptions = getSettings(); const savedPrefs = getPreferences(); state.difficulty = savedPrefs.difficulty || state.difficulty; state.enabledWeapons = savedPrefs.enabledWeapons || state.enabledWeapons; state.theme = savedPrefs.theme || 'default';
+    initProfiles();
+    const activeProf = getProfiles().find(p => p.id === getActiveProfileId());
+    state.playerName = activeProf ? activeProf.name : loadData().lastName; 
+    state.gameOptions = getSettings(); 
+    const savedPrefs = getPreferences(); 
+    state.difficulty = savedPrefs.difficulty || state.difficulty; 
+    state.enabledWeapons = savedPrefs.enabledWeapons || state.enabledWeapons; 
+    state.theme = savedPrefs.theme || 'default';
 applyTheme(state.theme); state.shipAbilitiesEnabled = savedPrefs.abilitiesEnabled !== undefined ? savedPrefs.abilitiesEnabled : state.shipAbilitiesEnabled; SHIPS = getShipsForSize(state.gameOptions.gridSize || 10); resetBodyTheme(); renderMenu();
+    // --- GESTION DES PROFILS ---
+    document.getElementById('create-profile-btn').addEventListener('click', () => {
+        const input = document.getElementById('new-profile-input');
+        const name = input.value.trim();
+        if (!name) { showToast('Veuillez entrer un nom.', 'danger'); return; }
+        const profiles = getProfiles();
+        const id = 'prof_' + Date.now();
+        profiles.push({ id, name });
+        saveProfiles(profiles);
+        setActiveProfileId(id);
+        input.value = '';
+        // On crée une sauvegarde vide pour le nouveau profil
+        saveData({ scores: [], achievements: [], stats: { gamesPlayed: 0, gamesWon: 0, totalShots: 0, careerScore: 0, difficultiesBeaten: [] } });
+        showToast('Profil créé ! Rechargement...', 'success', 1500);
+        setTimeout(() => window.location.reload(), 1500);
+    });
 
+    document.getElementById('profiles-list').addEventListener('click', (e) => {
+        const switchBtn = e.target.closest('[data-switch-profile]');
+        const deleteBtn = e.target.closest('[data-delete-profile]');
+        const renameBtn = e.target.closest('[data-rename-profile]');
+        
+        if (switchBtn) {
+            setActiveProfileId(switchBtn.dataset.switchProfile);
+            showToast('Profil changé ! Rechargement...', 'info', 1000);
+            setTimeout(() => window.location.reload(), 1000);
+        }
+        
+        if (renameBtn) {
+            const id = renameBtn.dataset.renameProfile;
+            const inputEl = document.getElementById('rename-input-' + id);
+            const newName = inputEl.value.trim();
+            if (!newName) { showToast('Le nom ne peut pas être vide.', 'danger'); return; }
+            
+            const profiles = getProfiles();
+            const prof = profiles.find(p => p.id === id);
+            if (prof) {
+                prof.name = newName;
+                saveProfiles(profiles);
+                
+                // Si on renomme le profil actif, on met à jour l'état du jeu et l'affichage immédiatement
+                if (id === getActiveProfileId()) {
+                    state.playerName = newName;
+                    const d = loadData();
+                    d.lastName = newName;
+                    saveData(d);
+                    renderCommanderName(); // Met à jour le nom en haut de la page
+                }
+                showToast('Commandant renommé avec succès !', 'success');
+                renderProfiles(); // Rafraîchit la liste
+            }
+        }
+        
+        if (deleteBtn) {
+            const id = deleteBtn.dataset.deleteProfile;
+            const profiles = getProfiles();
+            const prof = profiles.find(p => p.id === id);
+            if (confirm(`Voulez-vous vraiment supprimer le commandant "${prof.name}" ? Toute sa progression sera définitivement perdue.`)) {
+                const newProfiles = profiles.filter(p => p.id !== id);
+                saveProfiles(newProfiles);
+                localStorage.removeItem(getProfileStorageKey(id));
+                
+                // Si on supprime le profil actif, on bascule sur le premier disponible
+                if (getActiveProfileId() === id) {
+                    setActiveProfileId(newProfiles[0].id);
+                }
+                showToast('Profil supprimé.', 'danger', 1000);
+                setTimeout(() => window.location.reload(), 1000);
+            }
+        }
+    });
     // PWA Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
