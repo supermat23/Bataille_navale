@@ -776,7 +776,7 @@ const DAILY_CHALLENGES = [
 
   // --- NOUVEAUX DÉFIS JOUR (Rang 4) ---
   { id: 'd_r4_win18', text: 'Gagnez une partie sur l\'océan 18x18', icon: '🐋', minRank: 4, check: (t, ctx) => ctx.gridSize === 18 },
-  { id: 'd_r4_win6_flawless', text: 'Gagnez sur l\'océan 6x6 sans perdre le moindre navire', icon: '🛡️', minRank: 4, check: (t, ctx) => ctx.gridSize === 6 && t.shipsLostByPlayer === 0 },
+  { id: 'd_r4_no_half_hit', text: 'Gagnez sans qu\'aucun de vos navires ne subisse de "demi-tir"', icon: '🪨', minRank: 4, check: (t, ctx) => t.halfHitsReceived === 0 },
   { id: 'd_r4_speed18', text: 'Gagnez sur l\'océan 18x18 en moins de 60 tirs', icon: '⚡', minRank: 4, check: (t, ctx) => ctx.gridSize === 18 && ctx.shots < 60 },
   { id: 'd_r4_mines2', text: 'Déclenchez au moins 2 mines dans la même partie', icon: '💥', minRank: 4, check: (t, ctx) => t.minesTriggered >= 2 },
   { id: 'd_r4_no_mines_win', text: 'Gagnez une partie avec obstacles sans déclencher la moindre mine', icon: '🧭', minRank: 4, check: (t, ctx) => ctx.obstaclesEnabled === true && t.minesTriggered === 0 },
@@ -844,7 +844,7 @@ const WEEKLY_CHALLENGES = [
   { id: 'w_all_diff', text: 'Battre les 4 difficultés dans la même semaine', icon: '🎖️', check: (t, ctx, extra) => (extra.weeklyDiffsBeaten || []).length >= 4 },
 
   // --- NOUVEAUX DÉFIS SEMAINE (Rang 4) ---
-  { id: 'w_r4_all_oceans', text: 'Gagnez sur les 4 tailles d\'océan (6, 10, 13, 18) cette semaine', icon: '🌊', minRank: 4, check: (t, ctx, extra) => (extra.weeklyGridSizes || []).length >= 4 },
+  { id: 'w_r4_3_big_oceans', text: 'Gagnez sur les 3 grandes tailles d\'océan (10, 13, 18) cette semaine', icon: '🌊', minRank: 4, check: (t, ctx, extra) => (extra.weeklyGridSizes || []).filter(s => s !== 6).length >= 3 },
   { id: 'w_r4_sink_5_leviathans', text: 'Coulez 5 Léviathans cette semaine', icon: '⚔️', minRank: 4, check: (t, ctx, extra) => (extra.weeklyLeviathansSunk || 0) >= 5 },
   { id: 'w_r4_3_obstacles_wins', text: 'Gagnez 3 parties avec les obstacles activés cette semaine', icon: '💣', minRank: 4, check: (t, ctx, extra) => (extra.weeklyObstacleWins || 0) >= 3 },
   { id: 'w_r4_3_wins_18', text: 'Remportez 3 victoires sur l\'océan 18x18 cette semaine', icon: '🗺️', minRank: 4, check: (t, ctx, extra) => (extra.weeklyWins18 || 0) >= 3 },
@@ -900,11 +900,20 @@ function renderDailyChallenge() {
     if (el) {
       el.innerHTML = `<div class="text-center text-slate-500 text-sm font-semibold py-2">🔒 Débloqué au Rang 3</div>`;
     }
-    if (wEl) wEl.classList.add('hidden'); // On cache le panneau hebdo tant que c'est verrouillé
+    if (wEl) wEl.classList.add('hidden'); 
     return;
   }
   
-  // Si débloqué, on réaffiche le panneau hebdo (au cas où)
+  // --- NOUVEAU : Vérification de la taille 6x6 ---
+  if (state.gameOptions.gridSize === 6) {
+    if (el) {
+      el.innerHTML = `<div class="text-center text-amber-500/80 text-sm font-semibold py-2">⚠️ Défis inactifs sur l'océan 6x6</div>`;
+    }
+    if (wEl) wEl.classList.add('hidden'); // On cache le panneau hebdo
+    return;
+  }
+
+  // Si débloqué et pas en 6x6, on réaffiche le panneau hebdo (au cas où)
   if (wEl) wEl.classList.remove('hidden');
 
   if (el) { 
@@ -1025,7 +1034,17 @@ function renderGameOptions() {
       const active = (state.gameOptions.gridSize || 10) === sz; 
       b.className = 'btn ' + (active ? 'btn-primary' : 'btn-secondary') + ' text-[10px] py-1 px-2'; 
       b.textContent = sz; 
-      b.addEventListener('click', e => { e.stopPropagation(); state.gameOptions.gridSize = sz; saveSettings(state.gameOptions); SHIPS = getShipsForSize(sz); renderAbilityInfo(); renderGameOptions(); }); 
+      b.addEventListener('click', e => { 
+        e.stopPropagation(); 
+        state.gameOptions.gridSize = sz; 
+        saveSettings(state.gameOptions); 
+        SHIPS = getShipsForSize(sz); 
+        renderAbilityInfo(); 
+        renderGameOptions(); 
+        // --- AJOUT : On rafraîchit instantanément le panneau des défis ---
+        renderDailyChallenge(); 
+        renderChallengeStats(); 
+      }); 
       sizeWrap.appendChild(b); 
     });
     const obsEl = document.createElement('div'); 
@@ -2636,21 +2655,24 @@ function executeWeapon1P(board, cells, owner, weaponType, source = 'standard', p
             };
             // ... (le reste du code reste identique)
                         // --- GESTION DES DÉFIS AVEC FENÊTRE MODALE ---
-            state.pendingChallengePopups = [];
-            getDailyChallenges().forEach(ch => { 
-              if (!isDailyDone(ch.id) && ch.check(state.tracking, ctx)) { 
-                markDailyDone(ch.id); 
-                state.pendingChallengePopups.push({ icon: ch.icon, text: ch.text, type: 'Défi du jour', xp: 5000 });
-              } 
-            });
-            if (!isWeeklyDone()) { 
-              const wc = getWeeklyChallenge(); 
-              const freshStats = getStats(); 
-              const extra = Object.assign(getWeeklyStats(), { winStreak: freshStats.winStreak || 0 }); 
-              if (wc.check(state.tracking, ctx, extra)) { 
-                markWeeklyDone(); 
-                state.pendingChallengePopups.push({ icon: wc.icon, text: wc.text, type: 'Défi de la semaine', xp: 30000 });
-              } 
+            // Sur l'océan 6x6, les défis ne sont pas validés (trop faciles)
+            if (GRID_SIZE !== 6) {
+              state.pendingChallengePopups = [];
+              getDailyChallenges().forEach(ch => { 
+                if (!isDailyDone(ch.id) && ch.check(state.tracking, ctx)) { 
+                  markDailyDone(ch.id); 
+                  state.pendingChallengePopups.push({ icon: ch.icon, text: ch.text, type: 'Défi du jour', xp: 5000 });
+                } 
+              });
+              if (!isWeeklyDone()) { 
+                const wc = getWeeklyChallenge(); 
+                const freshStats = getStats(); 
+                const extra = Object.assign(getWeeklyStats(), { winStreak: freshStats.winStreak || 0 }); 
+                if (wc.check(state.tracking, ctx, extra)) { 
+                  markWeeklyDone(); 
+                  state.pendingChallengePopups.push({ icon: wc.icon, text: wc.text, type: 'Défi de la semaine', xp: 30000 });
+                } 
+              }
             }
 		checkAchievementsDuringPlay();
           }
