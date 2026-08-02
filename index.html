@@ -301,7 +301,24 @@
 <div id="tactical-actions-2p" class="mt-2"></div><div class="mt-4"><div class="flex items-center justify-between mb-2"><h3 class="text-sm font-bold tracking-widest uppercase" style="color: var(--accent);">Capacités</h3></div><div id="p2p-abilities-list" class="grid grid-cols-5 gap-1"></div></div></div><div><h3 class="text-sm font-bold tracking-widest uppercase mb-2" style="color: var(--accent);">Journal</h3><div id="p2p-log-container" class="space-y-1 max-h-32 overflow-y-auto pr-1"></div></div></div><div class="text-center mt-6"><button id="p2p-surrender-btn" class="btn btn-danger text-xs">Abandonner</button></div></div></div>
 
 <div id="end-screen" class="screen min-h-screen flex items-center justify-center p-4 hidden"><div class="max-w-3xl w-full text-center"><div id="end-icon" class="mx-auto mb-6 w-24 h-24 flex items-center justify-center"></div><h2 id="end-title" class="font-display text-4xl md:text-6xl mb-4"></h2><p id="end-subtitle" class="text-lg text-slate-400 mb-4"></p><div id="end-score-display" class="mb-6 hidden"><div class="text-sm text-slate-400 uppercase tracking-widest">Score</div><div class="font-display text-5xl text-amber-400" id="end-score">0</div></div><div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6" id="end-stats-grid"><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Tirs</div><div class="text-2xl font-bold text-white" id="end-shots">0</div></div><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Touchés</div><div class="text-2xl font-bold" style="color: var(--hit);" id="end-hits">0</div></div><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Précision</div><div class="text-2xl font-bold text-amber-400" id="end-acc">0%</div></div><div class="stat-block"><div class="text-xs text-slate-400 uppercase">Coulés</div><div class="text-2xl font-bold" style="color: var(--success);" id="end-sunk">0</div></div></div><div id="end-achievements" class="mb-6"></div><div id="end-extra-info" class="mb-4 text-sm text-slate-400"></div><div class="flex flex-wrap gap-3 justify-center"><button id="replay-btn" class="btn btn-primary"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 4v5h5"/></svg>Rejouer</button><button id="share-score-btn" class="btn btn-secondary hidden"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Partager</button><button id="menu-btn" class="btn btn-secondary"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>Menu</button></div></div></div>
-
+<!-- FENÊTRE DE BIENVENUE -->
+<div id="welcome-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4" style="background: rgba(0,0,0,0.9);">
+  <div class="bg-slate-900 border-2 rounded-2xl flex flex-col items-center text-center p-8" style="border-color: var(--accent); box-shadow: 0 0 50px var(--accent-glow); max-width: 400px; width: 100%;">
+    <div class="text-6xl mb-4">⚓</div>
+    <h3 class="font-display text-2xl text-white mb-3">Bienvenue à bord !</h3>
+    <p class="text-slate-400 text-sm mb-6">Entrez votre nom de commandant pour commencer votre mission.<br><span class="text-amber-400/80 text-xs mt-2 block">💡 Astuce : Vous pourrez ajouter d'autres profils dans l'onglet "Commandants".</span></p>
+    <input type="text" id="welcome-name-input" class="name-input text-center mb-6 text-lg" placeholder="Votre nom..." maxlength="20">
+    <button id="welcome-start-btn" class="btn btn-primary w-full text-lg py-3">Commencer la mission</button>
+  </div>
+</div>
+<div id="campaign-reward-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4" style="background: rgba(0,0,0,0.85);">
+  <div class="bg-slate-900 border-2 rounded-2xl flex flex-col items-center text-center p-6" style="border-color: var(--accent); box-shadow: 0 0 40px var(--accent-glow); max-width: 95vw; width: 450px; max-height: 90vh; overflow-y: auto;">
+    <div class="text-xs uppercase tracking-widest font-bold mb-2" style="color: var(--accent);">Victoire !</div>
+    <h3 class="font-display text-xl text-white mb-1" id="campaign-title">Zone 1 terminée</h3>
+    <p class="text-slate-400 text-sm mb-4">Améliorez votre flotte</p>
+    <div id="campaign-choices" class="grid grid-cols-2 gap-3 w-full"></div>
+  </div>
+</div>
 <script>
 let GRID_SIZE = 10;
 const SHIPS_CLASSIC = [{ id: 'carrier', name: 'Porte-avions', size: 5, symbol: 'P' }, { id: 'battleship', name: 'Croiseur', size: 4, symbol: 'C' }, { id: 'destroyer', name: 'Contre-torp.', size: 3, symbol: 'D' }, { id: 'submarine', name: 'Sous-marin', size: 3, symbol: 'S' }, { id: 'patrol', name: 'Torpilleur', size: 2, symbol: 'T' }];
@@ -3468,6 +3485,14 @@ function checkEndAchievements(playerWon) {
     state.enabledWeapons = savedPrefs.enabledWeapons || state.enabledWeapons; 
     state.theme = savedPrefs.theme || 'default';
 applyTheme(state.theme); state.shipAbilitiesEnabled = savedPrefs.abilitiesEnabled !== undefined ? savedPrefs.abilitiesEnabled : state.shipAbilitiesEnabled; SHIPS = getShipsForSize(state.gameOptions.gridSize || 10); resetBodyTheme(); renderMenu();
+
+    // --- AFFICHAGE DE LA FENÊTRE DE BIENVENUE ---
+    // S'il s'agit du profil par défaut et qu'aucune partie n'a été jouée
+    const currentData = loadData();
+    if (activeProf && activeProf.name === "Commandant 1" && currentData.stats.gamesPlayed === 0) {
+        document.getElementById('welcome-modal').classList.remove('hidden');
+        setTimeout(() => document.getElementById('welcome-name-input').focus(), 100);
+    }
     // --- GESTION DES PROFILS ---
     document.getElementById('create-profile-btn').addEventListener('click', () => {
         const input = document.getElementById('new-profile-input');
@@ -3538,6 +3563,38 @@ applyTheme(state.theme); state.shipAbilitiesEnabled = savedPrefs.abilitiesEnable
                 setTimeout(() => window.location.reload(), 1000);
             }
         }
+    });
+	    // --- GESTION DE LA FENÊTRE DE BIENVENUE ---
+    function closeWelcomeModal() {
+        const name = document.getElementById('welcome-name-input').value.trim();
+        if (!name) { 
+            showToast('Veuillez entrer un nom pour continuer.', 'danger'); 
+            return; 
+        }
+        
+        state.playerName = name;
+        let profiles = getProfiles();
+        const activeId = getActiveProfileId();
+        const prof = profiles.find(p => p.id === activeId);
+        if (prof) {
+            prof.name = name;
+            saveProfiles(profiles);
+        }
+        const d = loadData();
+        d.lastName = name;
+        saveData(d);
+        
+        document.getElementById('welcome-modal').classList.add('hidden');
+        renderCommanderName(); // Met à jour le nom en haut de l'écran
+        renderProfiles(); // Met à jour la liste dans l'onglet
+        initAudio();
+    }
+
+    document.getElementById('welcome-start-btn').addEventListener('click', closeWelcomeModal);
+    
+    // Permettre de valider en appuyant sur la touche "Entrée"
+    document.getElementById('welcome-name-input').addEventListener('keypress', e => {
+        if (e.key === 'Enter') closeWelcomeModal();
     });
     // PWA Service Worker
     if ('serviceWorker' in navigator) {
@@ -4033,20 +4090,20 @@ function generateKraken() {
     // Point de départ : on prend une case du corps et on cherche une case libre autour
     let r = bodyCells[i % 4][0], c = bodyCells[i % 4][1];
     const startDirs = [[-1,-1], [-1,0], [-1,1], [0,-1], [0,1], [1,-1], [1,0], [1,1]].sort(() => Math.random() - 0.5);
-    let started = false;
-    for (const dir of startDirs) {
-      const nr = r + dir[0], nc = c + dir[1];
-      if (inBounds(nr, nc) && !state.boards.enemy[nr][nc].ship) {
-        r = nr; c = nc;
-        tentacle.cells.push([r, c]);
-        state.boards.enemy[r][c].ship = tentacle;
-        started = true;
-        break;
-      }
-    }
-    
-    // Extension de la marche aléatoire sur 6 cases
-    for (let j = 1; j < 6 && started; j++) {
+                let started = false;
+            for (const dir of startDirs) {
+              const nr = r + dir[0], nc = c + dir[1];
+              if (inBounds(nr, nc) && !state.boards.enemy[nr][nc].ship) {
+                r = nr; c = nc;
+                tentacle.cells.push([r, c]);
+                state.boards.enemy[r][c].ship = tentacle;
+                started = true;
+                break;
+              }
+            }
+            
+            // Extension de la marche aléatoire sur 6 cases
+            for (let j = 1; j < 6 && started; j++) {
       const nextDirs = [[-1,0], [1,0], [0,-1], [0,1], [-1,-1], [-1,1], [1,-1], [1,1]].sort(() => Math.random() - 0.5);
       let moved = false;
       for (const dir of nextDirs) {
@@ -4070,13 +4127,5 @@ function generateKraken() {
   return ships;
 }
 </script>
-<div id="campaign-reward-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4" style="background: rgba(0,0,0,0.85);">
-  <div class="bg-slate-900 border-2 rounded-2xl flex flex-col items-center text-center p-6" style="border-color: var(--accent); box-shadow: 0 0 40px var(--accent-glow); max-width: 95vw; width: 450px; max-height: 90vh; overflow-y: auto;">
-    <div class="text-xs uppercase tracking-widest font-bold mb-2" style="color: var(--accent);">Victoire !</div>
-    <h3 class="font-display text-xl text-white mb-1" id="campaign-title">Zone 1 terminée</h3>
-    <p class="text-slate-400 text-sm mb-4">Améliorez votre flotte</p>
-    <div id="campaign-choices" class="grid grid-cols-2 gap-3 w-full"></div>
-  </div>
-</div>
 </body>
 </html>
