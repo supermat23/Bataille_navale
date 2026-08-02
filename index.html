@@ -837,9 +837,7 @@ const DAILY_CHALLENGES = [
   { id: 'minimalist', text: 'Gagnez sans dépenser le moindre PA', icon: '💰', check: (t, ctx) => ctx.paSpent === 0 },
   { id: 'big_spender', text: 'Gagnez en dépensant au moins 20 PA', icon: '💸', check: (t, ctx) => ctx.paSpent >= 20 },
   { id: 'no_ability_no_sonar', text: 'Gagnez sans sonar ni capacité', icon: '🚫', check: (t, ctx) => t.sonarUses === 0 && !t.usedAbility },
-  { id: 'friday_win', text: 'Gagnez un vendredi', icon: '🐈\u200d⬛', check: (t, ctx) => new Date().getDay() === 5 },
-  { id: 'sunday_win', text: 'Gagnez un dimanche', icon: '☀️', check: (t, ctx) => new Date().getDay() === 0 },
-  { id: 'night_win', text: 'Gagnez entre 22h et minuit', icon: '🦉', check: (t, ctx) => new Date().getHours() >= 22 },
+  // --- (Retrait des défis basés sur le jour de la semaine ou l'heure) ---
   { id: 'single_ship_standing', text: 'Gagnez avec un seul navire encore en vie', icon: '😱', check: (t, ctx) => t.shipsLostByPlayer === 4 },
   { id: 'palindrome_shots', text: 'Terminez avec un nombre de tirs palindrome (11, 22...)', icon: '🔢', check: (t, ctx) => isPalindrome(ctx.shots) },
   { id: 'exact_17', text: 'Gagnez en exactement 17 tirs', icon: '🎯', check: (t, ctx) => ctx.shots === 17 },
@@ -860,14 +858,13 @@ const DAILY_CHALLENGES = [
   { id: 'flawless_defense', text: 'Gagnez sans perdre de navire ni subir la moindre touche', icon: '🛡️', check: (t, ctx) => t.shipsLostByPlayer === 0 && t.playerHitsReceived === 0 },
   { id: 'tactique_win', text: 'Battez le Tactique', icon: '⚔️', check: (t, ctx) => ctx.difficulty === 'tactique' },
   { id: 'stratege_win', text: 'Battez le Stratège', icon: '⚔️', check: (t, ctx) => ctx.difficulty === 'stratege' },
-  { id: 'saturday_win', text: 'Gagnez un samedi', icon: '🎉', check: (t, ctx) => new Date().getDay() === 6 },
-  { id: 'morning_win', text: 'Gagnez entre 7h et 9h du matin', icon: '🌄', check: (t, ctx) => { const h = new Date().getHours(); return h >= 7 && h < 9; } },
-  { id: 'evening_win', text: 'Gagnez entre 18h et 20h', icon: '🌆', check: (t, ctx) => { const h = new Date().getHours(); return h >= 18 && h < 20; } },
   { id: 'lucky_13', text: 'Gagnez en exactement 13 tirs', icon: '🍀', check: (t, ctx) => ctx.shots === 13 },
   { id: 'round_number', text: 'Terminez avec un nombre de tirs multiple de 10 (10, 20, 30...)', icon: '🔟', check: (t, ctx) => ctx.shots > 0 && ctx.shots % 10 === 0 },
   { id: 'perfect_short', text: 'Gagnez avec 100% de précision en moins de 20 tirs', icon: '💎', check: (t, ctx) => ctx.acc === 1 && ctx.shots < 20 },
-  { id: 'free_sonar_used', text: 'Profitez d\'un sonar gratuit offert par un événement', icon: '📡', check: (t, ctx) => t.eventTypesTriggered.includes('free_sonar') },
-  { id: 'storm_survivor', text: 'Bénéficiez d\'un tour où l\'ennemi rate son attaque', icon: '🌊', check: (t, ctx) => t.eventTypesTriggered.includes('skip_bot') },
+  
+  // --- DÉFIS AVEC ÉVÉNEMENTS (Uniquement si l'option est activée) ---
+  { id: 'free_sonar_used', text: 'Profitez d\'un sonar gratuit offert par un événement', icon: '📡', requiresEvents: true, check: (t, ctx) => t.eventTypesTriggered.includes('free_sonar') },
+  { id: 'storm_survivor', text: 'Bénéficiez d\'un tour où l\'ennemi rate son attaque', icon: '🌊', requiresEvents: true, check: (t, ctx) => t.eventTypesTriggered.includes('skip_bot') },
 
   // --- NOUVEAUX DÉFIS JOUR (Rang 4) ---
   { id: 'd_r4_win18', text: 'Gagnez une partie sur l\'océan 18x18', icon: '🐋', minRank: 4, check: (t, ctx) => ctx.gridSize === 18 },
@@ -891,14 +888,35 @@ const DAILY_CHALLENGES = [
   { id: 'd_r7_theme_night', text: 'Gagnez une partie avec le thème Nuit', icon: '🌙', minRank: 7, check: (t, ctx) => ctx.theme === 'night' },
   { id: 'd_r7_fog_no_sonar', text: 'Gagnez en Brouillard sans utiliser le Sonar', icon: '🧠', minRank: 7, check: (t, ctx) => ctx.fogOfWar === true && t.sonarUses === 0 },
   { id: 'd_r7_teleport_clutch', text: 'Téléportez un navire qui n\'avait plus qu\'1 PV', icon: '⏳', minRank: 7, check: (t, ctx) => t.teleportWasClutch === true },
-  { id: 'd_r7_fantome_fog', text: 'Battez le Fantôme en mode Brouillard de Guerre', icon: '🕷️', minRank: 7, check: (t, ctx) => ctx.difficulty === 'fantome' && ctx.fogOfWar === true }
+  { id: 'd_r7_fantome_fog', text: 'Battez le Fantôme en mode Brouillard de Guerre', icon: '🕷️', minRank: 7, check: (t, ctx) => ctx.difficulty === 'fantome' && ctx.fogOfWar === true },
+
+  // --- DÉFIS LOUFOQUES DU JOUR ---
+  { id: 'd_louf_42_pa', text: 'Dépensez EXACTEMENT 42 PA (la réponse à l\'univers)', icon: '🛸', check: (t, ctx) => ctx.paSpent === 42 },
+  { id: 'd_louf_lucky_7', text: 'Gagnez avec un nombre de tirs se terminant par 7 (7, 17, 27...)', icon: '🎰', check: (t, ctx) => ctx.shots % 10 === 7 },
+  { id: 'd_louf_pa_hoarder', text: 'Terminez la bataille avec au moins 20 PA en réserve (Le Radin)', icon: '🤑', check: (t, ctx) => ctx.paLeft >= 20 },
+  { id: 'd_louf_nice', text: 'Gagnez avec une précision EXACTE de 69% (Nice)', icon: '😏', check: (t, ctx) => ctx.acc === 0.69 },
+  { id: 'd_louf_pyromaniac', text: 'Déclenchez 3 mines ou plus pendant la partie (Pyromane)', icon: '🧨', check: (t, ctx) => t.minesTriggered >= 3 },
+  { id: 'd_louf_paranoid', text: 'Utilisez le sonar 4 fois ou plus (Paranoïaque)', icon: '👀', check: (t, ctx) => t.sonarUses >= 4 },
+  { id: 'd_louf_tank', text: 'Survivez à au moins 3 tirs de "demi-dégât" sur vos navires (Blinde)', icon: '🚜', check: (t, ctx) => t.halfHitsReceived >= 3 },
+  { id: 'd_louf_bruiser', text: 'Gagnez en dépensant 20 PA ou plus, mais avec 50% de précision ou moins (Bourrin)', icon: '🦍', check: (t, ctx) => ctx.paSpent >= 20 && ctx.acc <= 0.5 },
+  { id: 'd_louf_magician', text: 'Gagnez en utilisant la Téléportation ET le Brouillard de Guerre (Illusionniste)', icon: '🎩', minRank: 7, check: (t, ctx) => ctx.fogOfWar === true && t.teleportUsed === true },
+  { id: 'd_louf_double_carnage', text: 'Coulez 2 navires ennemis exactement au même tour (Apocalypse)', icon: '🌋', check: (t, ctx) => t.maxShipsSunkInOneTurn >= 2 },
+  { id: 'd_louf_ninja', text: 'Gagnez avec 0 PA dépensé ET en moins de 30 tirs (Silencieux)', icon: '🥷', check: (t, ctx) => ctx.paSpent === 0 && ctx.shots < 30 },
+  { id: 'd_louf_eagle_eye', text: 'Gagnez avec 90% de précision ou plus sans utiliser le sonar (Œil de Lynx)', icon: '🦅', check: (t, ctx) => ctx.acc >= 0.9 && t.sonarUses === 0 },
+  { id: 'd_louf_blackjack', text: 'Gagnez en EXACTEMENT 21 tirs (Le Blackjack)', icon: '🃏', check: (t, ctx) => ctx.shots === 21 },
+  { id: 'd_louf_blind_clutz', text: 'Gagnez en Brouillard de Guerre avec MOINS de 50% de précision (Patte Folle)', icon: '🙈', minRank: 7, check: (t, ctx) => ctx.fogOfWar === true && ctx.acc < 0.5 },
+  { id: 'd_louf_odd_shots', text: 'Gagnez avec un nombre de tirs impair (1, 3, 5, 7...)', icon: '🔢', check: (t, ctx) => ctx.shots % 2 !== 0 }
 ];
 function getDailyKey() { return new Date().toISOString().slice(0, 10); }
 function getDailyChallenges() { 
   const d = new Date(); 
   const start = new Date(d.getFullYear(), 0, 0); 
   const doy = Math.floor((d - start) / 86400000); 
-  const eligible = DAILY_CHALLENGES.filter(c => !c.minRank || isFeatureUnlocked(c.minRank));
+  const eligible = DAILY_CHALLENGES.filter(c => {
+    if (c.minRank && !isFeatureUnlocked(c.minRank)) return false;
+    if (c.requiresEvents && !state.gameOptions.randomEvents) return false;
+    return true;
+  });
   const n = eligible.length; 
   if (n === 0) return []; 
   const i1 = doy % n; 
@@ -948,7 +966,14 @@ const WEEKLY_CHALLENGES = [
   { id: 'w_r7_3_fog_wins', text: 'Gagnez 3 parties en Brouillard de Guerre cette semaine', icon: '🌫️', minRank: 7, check: (t, ctx, extra) => (extra.weeklyFogWins || 0) >= 3 },
   { id: 'w_r7_beat_fantome_2', text: 'Battez le Fantôme 2 fois cette semaine', icon: '👻', minRank: 7, check: (t, ctx, extra) => (extra.weeklyFantomeWins || 0) >= 2 },
   { id: 'w_r7_all_themes', text: 'Gagnez avec les 3 thèmes spéciaux (Volcan, Arctique, Nuit) cette semaine', icon: '🌈', minRank: 7, check: (t, ctx, extra) => (extra.weeklyThemesWon || []).length >= 3 },
-  { id: 'w_r7_3_teleports', text: 'Utilisez la Téléportation avec succès 3 fois cette semaine', icon: '🚀', minRank: 7, check: (t, ctx, extra) => (extra.weeklyTeleportsUsed || 0) >= 3 }
+  { id: 'w_r7_3_teleports', text: 'Utilisez la Téléportation avec succès 3 fois cette semaine', icon: '🚀', minRank: 7, check: (t, ctx, extra) => (extra.weeklyTeleportsUsed || 0) >= 3 },
+
+  // --- DÉFIS LOUFOQUES DE LA SEMAINE ---
+  { id: 'w_louf_time_traveler', text: 'Activez la Téléportation 5 fois dans la semaine (Le Voyageur Temporel)', icon: '⏳', minRank: 7, check: (t, ctx, extra) => (extra.weeklyTeleportsUsed || 0) >= 5 },
+  { id: 'w_louf_magnate', text: 'Cumulez plus de 50 000 points de score en une semaine (Le Magnat)', icon: '💰', check: (t, ctx, extra) => (extra.weeklyScoreSum || 0) >= 50000 },
+  { id: 'w_louf_globetrotter', text: 'Gagnez sur 3 tailles d\'océan différentes cette semaine (Le Globetrotter)', icon: '🌍', minRank: 4, check: (t, ctx, extra) => (extra.weeklyGridSizes || []).length >= 3 },
+  { id: 'w_louf_ghostbuster', text: 'Battez le Fantôme 3 fois cette semaine (S.O.S Fantômes)', icon: '👻', minRank: 7, check: (t, ctx, extra) => (extra.weeklyFantomeWins || 0) >= 3 },
+  { id: 'w_louf_streak_7', text: 'Enchaînez 7 victoires consécutives sans perdre (La Vague de Fond)', icon: '🌊', check: (t, ctx, extra) => (extra.winStreak || 0) >= 7 }
 ];
 function getISOWeekKey(d) { const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); const dayNum = date.getUTCDay() || 7; date.setUTCDate(date.getUTCDate() + 4 - dayNum); const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1)); const weekNo = Math.ceil((((date - yearStart) / 86400000) + 1) / 7); return `${date.getUTCFullYear()}-W${weekNo}`; }
 function getWeeklyChallenge() { 
